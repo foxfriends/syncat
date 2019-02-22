@@ -1,30 +1,104 @@
-use tree_sitter::Language;
+use tree_sitter::{Language, Parser};
+use std::fs;
+use crate::stylesheet::Stylesheet;
+use crate::dirs::config;
+use crate::error::Error;
 
 include!(concat!(env!("OUT_DIR"), "/languages.rs"));
 
-pub fn parse<I: AsRef<str>>(name: I) -> Option<Language> {
+#[derive(Copy, Clone)]
+pub enum Lang {
+    C,
+    Cpp,
+    Rust,
+    Ruby,
+    EmbeddedTemplate,
+    TypeScript,
+    JavaScript,
+    Bash,
+    Python,
+    Go,
+    Php,
+    OCaml,
+    Html,
+    Css,
+}
+
+impl Lang {
+    pub fn parser(&self) -> Language {
+        use Lang::*;
+        unsafe {
+            match *self {
+                C                => tree_sitter_c(),
+                Cpp              => tree_sitter_cpp(),
+                Rust             => tree_sitter_rust(),
+                Ruby             => tree_sitter_ruby(),
+                EmbeddedTemplate => tree_sitter_embedded_template(),
+                TypeScript       => tree_sitter_typescript(),
+                JavaScript       => tree_sitter_javascript(),
+                Bash             => tree_sitter_bash(),
+                Python           => tree_sitter_python(),
+                Go               => tree_sitter_go(),
+                Php              => tree_sitter_php(),
+                OCaml            => tree_sitter_ocaml(),
+                Html             => tree_sitter_html(),
+                Css              => tree_sitter_css(),
+            }
+        }
+    }
+
+    fn ext(&self) -> &'static str {
+        use Lang::*;
+        match *self {
+            C                => "c",
+            Cpp              => "cpp",
+            Rust             => "rs",
+            Ruby             => "rb",
+            EmbeddedTemplate => "template",
+            TypeScript       => "ts",
+            JavaScript       => "js",
+            Bash             => "sh",
+            Python           => "py",
+            Go               => "go",
+            Php              => "php",
+            OCaml            => "ml",
+            Html             => "html",
+            Css              => "css",
+        }
+    }
+
+    pub fn style(&self) -> Result<Stylesheet, Box<dyn std::error::Error>> {
+        let mut parser = Parser::new();
+        parser.set_language(unsafe { tree_sitter_css() });
+        let style_file = config().join(self.ext()).join(".css");
+        let style_def = fs::read_to_string(&style_file).map_err(Box::new)?;
+        let tree = parser.parse(style_def, None).ok_or(Box::new(Error(format!("Could not parse stylesheet at file {:?}", &style_file))))?;
+        Stylesheet::parse(tree)
+    }
+}
+
+pub fn parse<I: AsRef<str>>(name: I) -> Option<Lang> {
+    use Lang::*;
     let name = name.as_ref();
-    unsafe {
-        if name.trim() == "C" {
-            // this one case sensitive one...
-            return Some(tree_sitter_cpp())
-        }
-        match name.trim().to_lowercase().as_str() {
-            "rs" | "rust" => Some(tree_sitter_rust()),
-            "rb" | "ruby" => Some(tree_sitter_ruby()),
-            "erb" | "ejs" => Some(tree_sitter_embedded_template()),
-            "js" | "javascript" => Some(tree_sitter_javascript()),
-            "ts" | "typescript" => Some(tree_sitter_typescript()),
-            "sh" | "bash" => Some(tree_sitter_bash()),
-            "py" | "python" | "python3" => Some(tree_sitter_python()),
-            "go" => Some(tree_sitter_go()),
-            "php" => Some(tree_sitter_php()),
-            "ml" | "mli" | "ocaml" => Some(tree_sitter_ocaml()),
-            "c" | "h" => Some(tree_sitter_c()),
-            "cpp" | "cc" | "hpp" | "hh" | "c++" => Some(tree_sitter_cpp()),
-            "html" => Some(tree_sitter_html()),
-            "css" => Some(tree_sitter_css()),
-            _ => None
-        }
+    if name.trim() == "C" {
+        // this one case sensitive one...
+        return Some(Cpp);
+    }
+    match name.trim().to_lowercase().as_str() {
+        "rs" | "rust"                       => Some(Rust),
+        "rb" | "ruby"                       => Some(Ruby),
+        "erb" | "ejs"                       => Some(EmbeddedTemplate),
+        "js" | "javascript"                 => Some(JavaScript),
+        "ts" | "typescript"                 => Some(TypeScript),
+        "sh" | "bash"                       => Some(Bash),
+        "py" | "python" | "python3"         => Some(Python),
+        "go"                                => Some(Go),
+        "php"                               => Some(Php),
+        "ml" | "mli" | "ocaml"              => Some(OCaml),
+        "c" | "h"                           => Some(C),
+        "cpp" | "cc" | "hpp" | "hh" | "c++" => Some(Cpp),
+        "html" | "htm"                      => Some(Html),
+        "css"                               => Some(Css),
+        _                                   => None
     }
 }

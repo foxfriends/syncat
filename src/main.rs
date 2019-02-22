@@ -4,8 +4,11 @@ use std::fs;
 use structopt::StructOpt;
 use tree_sitter::Parser;
 
-mod language;
 mod colorize;
+mod language;
+mod dirs;
+mod error;
+mod stylesheet;
 
 use self::colorize::colorize;
 
@@ -29,15 +32,15 @@ fn main() {
         .map(|path| (path.extension().and_then(|s| s.to_str()).map(|s| s.to_string()), fs::read_to_string(path)))
         .map(|(lang, contents)| -> Result<String, Box<dyn std::error::Error>> {
             let contents: String = contents?;
-            lang.as_ref()
-                .or(syntax.as_ref())
-                .and_then(language::parse)
-                .and_then(|language| {
+            syntax.as_ref()
+                .or(lang.as_ref())
+                .and_then(|lang| language::parse(lang))
+                .and_then(|lang| {
                     let mut parser = Parser::new();
-                    parser.set_language(language).unwrap();
-                    parser.parse(&contents, None)
+                    parser.set_language(lang.parser()).ok()?;
+                    Some((parser.parse(&contents, None)?, lang))
                 })
-                .map(|tree| colorize(&contents, tree))
+                .map(|(tree, lang)| colorize(&contents, tree, &lang.style()?))
                 .unwrap_or_else(move || Ok(contents))
         })
         .for_each(|result| {
