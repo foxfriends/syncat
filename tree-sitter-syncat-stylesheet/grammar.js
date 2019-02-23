@@ -6,18 +6,33 @@ module.exports = grammar({
   rules: {
     source_file: $ => repeat($.rule),
 
-    rule: $ => seq(repeat($.node_kind), '{', repeat($.style), '}'),
+    rule: $ => seq(seq(repeat($.node_kind), optional($.token)), '{', repeat($.style), '}'),
 
     style: $ => seq($.style_name, ':', $.style_value, ';'),
 
-    node_kind: $ => choice(
-      /[^{}\s]+/,
-      /'(?:[^'\\]|\\.)+'/,
-      /"(?:[^"\\]|\\.)+"/,
+    node_kind: $ => /[A-Za-z0-9-_]+/,
+
+    token: $ => /"(?:[^"\\]|\\.)+"/,
+
+    style_name: $ => choice(
+      'colour', 'color',
+      'background-colour', 'background-color',
+      'italic',
+      'bold',
+      'underline',
+      'strikethrough',
+      'hidden',
+      'blink',
+      'dim',
+      'reverse',
     ),
 
-    style_name: $ => /[a-zA-Z-_][a-zA-Z0-9-_]*/,
-    style_value: $ => /[^;\s]+/,
+    style_value: $ => choice(
+      'true', 'false', 
+      'red', 'blue', 'green', 'purple', 'yellow', 'black', 'white', 'cyan',
+      /#[a-fA-F0-9]{6}/,
+      /2[0-4][0-9]|25[0-5]|1?[0-9]{1,2}/,
+    ),
 
     comment: $ => token(choice(
       seq('//', /.*/),

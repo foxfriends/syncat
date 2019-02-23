@@ -12,27 +12,27 @@ string escape {
 
 // this is a comment
 comment {
-  color: gray;
-  text-style: italic;
+  color: red;
+  italic: true;
 }
 
-'{' {
-  color: purple;
+"{" {
+  color: #F38ca1;
 }
 
-'}' {
-  color: purple;
+"}" {
+  color: 213;
 }
 
-string interpolation '${' {
+string interpolation "${" {
   /**
    * This is a long comment
    */
-  color: red;
+  color: 90;
 }
 
-string interpolation '}' {
-  color: red;
+string interpolation "}" {
+  color: 199;
 }
 
 ---
@@ -46,12 +46,12 @@ string interpolation '}' {
   (rule (node_kind)
     (style (style_name) (style_value))
     (style (style_name) (style_value)))
-  (rule (node_kind) 
+  (rule (token) 
     (style (style_name) (style_value)))
-  (rule (node_kind) 
+  (rule (token) 
     (style (style_name) (style_value)))
-  (rule (node_kind) (node_kind) (node_kind)
+  (rule (node_kind) (node_kind) (token)
     (comment)
     (style (style_name) (style_value)))
-  (rule (node_kind) (node_kind) (node_kind)
+  (rule (node_kind) (node_kind) (token)
     (style (style_name) (style_value))))
