@@ -1,0 +1,18 @@
+node_kind {
+  color: purple;
+}
+
+style_name {
+  color: blue;
+}
+
+style_value {
+  color: yellow;
+  dim: true;
+}
+
+comment {
+  color: white;
+  dim: true;
+  italic: true;
+}
