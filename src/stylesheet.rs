@@ -148,7 +148,7 @@ impl Stylesheet {
         let mut scoped = stylesheet;
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
-                "node_kind" => {
+                "node_kind" | "token" => {
                     let name = &source[child.start_byte()..child.end_byte()];
                     scoped = scoped.scopes.entry(name.to_string()).or_default();
                 }
