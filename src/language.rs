@@ -105,7 +105,7 @@ impl Lang {
         parser.set_language(Lang::Syncat.parser()).unwrap();
         let style_file = config().join("style/active").join(self.ext()).with_extension("syncat");
         if !style_file.exists() {
-            return Err(Box::new(Error(format!("Stylesheet file {:?} does not exist", style_file))));
+            return Ok(Stylesheet::default());
         }
         let style_def = fs::read_to_string(&style_file).map_err(Box::new)?;
         let tree = parser.parse(&style_def, None).ok_or(Box::new(Error(format!("Could not parse stylesheet at file {:?}", &style_file))))?;
