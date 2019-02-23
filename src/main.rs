@@ -10,13 +10,15 @@ mod dirs;
 mod error;
 mod stylesheet;
 
-use self::colorize::colorize;
 use self::language::Lang;
 
 /// Syntax aware cat utility.
 #[derive(StructOpt, Debug)]
 #[structopt(name = "syncat")]
 struct Opts {
+    /// Prints a parsed s-expression, for debugging and theme creation
+    #[structopt(long="dev")]
+    dev: bool,
     /// The syntax to use to parse the files
     #[structopt(short="s", long="syntax")]
     syntax: Option<String>,
@@ -26,7 +28,7 @@ struct Opts {
 }
 
 fn main() {
-    let Opts { syntax, files } = Opts::from_args();
+    let Opts { dev, syntax, files } = Opts::from_args();
 
     files
         .into_iter()
@@ -41,7 +43,13 @@ fn main() {
                     parser.set_language(lang.parser()).ok()?;
                     Some((parser.parse(&contents, None)?, lang))
                 })
-                .map(|(tree, lang)| colorize(&contents, tree, &lang.style()?))
+                .map(|(tree, lang)| {
+                    if dev {
+                        colorize::tree(&contents, tree, &lang.style()?)
+                    } else { 
+                        colorize::source(&contents, tree, &lang.style()?)
+                    }
+                })
                 .unwrap_or_else(move || Ok(contents))
         })
         .for_each(|result| {

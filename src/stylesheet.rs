@@ -54,10 +54,10 @@ pub struct Stylesheet {
 }
 
 impl Stylesheet {
-    pub fn resolve(&self, scope: &[&str], token: &str) -> StyleBuilder {
+    pub fn resolve(&self, scope: &[&str], token: Option<&str>) -> StyleBuilder {
         let mut style = self.style;
 
-        if let Some(substyle) = self.scopes.get(&format!("\"{}\"", token)) {
+        if let Some(substyle) = token.and_then(|token| self.scopes.get(&format!("\"{}\"", token))) {
             style.merge_with(substyle.style);
         }
 
