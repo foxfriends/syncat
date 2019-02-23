@@ -1,5 +1,5 @@
 {
-  "name": "Syncat_stylesheet",
+  "name": "syncat_stylesheet",
   "rules": {
     "source_file": {
       "type": "REPEAT",

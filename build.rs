@@ -26,7 +26,7 @@ fn main() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let package_json = Path::new(&manifest_dir).join("package.json");
     let node_modules = Path::new(&manifest_dir).join("node_modules");
-    let stylesheet_syntax = Path::new(&manifest_dir).join("tree-sitter-syncat-stylesheet");
+    let stylesheet_syntax = Path::new(&manifest_dir).join("tree-sitter-syncat-stylesheet/src");
 
     // Run `npm install` to ensure all dependencies are available
     let result = Command::new("npm").arg("install").status().expect("Failed to run `npm install`. Do you have npm installed?");

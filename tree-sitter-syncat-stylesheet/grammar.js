@@ -1,5 +1,5 @@
 module.exports = grammar({
-  name: 'Syncat_stylesheet',
+  name: 'syncat_stylesheet',
 
   extras: $ => [/\s/, $.comment],
 

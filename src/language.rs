@@ -22,6 +22,7 @@ pub enum Lang {
     OCaml,
     Html,
     Css,
+    Syncat,
 }
 
 impl std::str::FromStr for Lang {
@@ -48,6 +49,7 @@ impl std::str::FromStr for Lang {
             "cpp" | "cc" | "hpp" | "hh" | "c++" => Ok(Cpp),
             "html" | "htm"                      => Ok(Html),
             "css"                               => Ok(Css),
+            "syncat"                            => Ok(Syncat),
             _                                   => Err(Box::new(Error(format!("Unknown language {}", name)))),
         }
     }
@@ -72,6 +74,7 @@ impl Lang {
                 OCaml            => tree_sitter_ocaml(),
                 Html             => tree_sitter_html(),
                 Css              => tree_sitter_css(),
+                Syncat           => tree_sitter_syncat_stylesheet(),
             }
         }
     }
@@ -93,12 +96,13 @@ impl Lang {
             OCaml            => "ml",
             Html             => "html",
             Css              => "css",
+            Syncat           => "syncat",
         }
     }
 
     pub fn style(&self) -> Result<Stylesheet, Box<dyn std::error::Error>> {
         let mut parser = Parser::new();
-        parser.set_language(unsafe { tree_sitter_css() });
+        parser.set_language(Lang::Syncat.parser()).unwrap();
         let style_file = config().join(self.ext()).join(".css");
         let style_def = fs::read_to_string(&style_file).map_err(Box::new)?;
         let tree = parser.parse(style_def, None).ok_or(Box::new(Error(format!("Could not parse stylesheet at file {:?}", &style_file))))?;
