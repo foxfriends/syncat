@@ -1,0 +1,14 @@
+======================
+Simple kind with style
+======================
+
+root {
+  color: red;
+}
+
+---
+
+(source_file
+  (rule (node_kind) 
+    (style (style_name) (style_value))))
+

@@ -1,0 +1,11 @@
+==========================
+kind with weird characters
+==========================
+
+root '{' expr '+' { }
+
+---
+
+(source_file
+  (rule (node_kind) (node_kind) (node_kind) (node_kind)))
+

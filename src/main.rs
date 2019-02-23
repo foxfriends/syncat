@@ -11,6 +11,7 @@ mod error;
 mod stylesheet;
 
 use self::colorize::colorize;
+use self::language::Lang;
 
 /// Syntax aware cat utility.
 #[derive(StructOpt, Debug)]
@@ -34,7 +35,7 @@ fn main() {
             let contents: String = contents?;
             syntax.as_ref()
                 .or(lang.as_ref())
-                .and_then(|lang| language::parse(lang))
+                .and_then(|lang| lang.parse::<Lang>().ok())
                 .and_then(|lang| {
                     let mut parser = Parser::new();
                     parser.set_language(lang.parser()).ok()?;

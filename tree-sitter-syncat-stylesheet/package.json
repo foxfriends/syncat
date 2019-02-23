@@ -1,0 +1,18 @@
+{
+  "name": "tree-sitter-syncat-stylesheet",
+  "version": "1.0.0",
+  "description": "Parser for Syncat stylesheets",
+  "main": "index.js",
+  "scripts": {
+    "start": "tree-sitter generate",
+    "test": "tree-sitter test"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tree-sitter-cli": "^0.14.4"
+  },
+  "dependencies": {
+    "nan": "^2.12.1"
+  }
+}

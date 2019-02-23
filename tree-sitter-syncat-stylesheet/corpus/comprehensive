@@ -1,0 +1,57 @@
+==================
+Comprehensive test
+==================
+
+root {
+  color: white;
+}
+
+string escape {
+  color: cyan;
+}
+
+// this is a comment
+comment {
+  color: gray;
+  text-style: italic;
+}
+
+'{' {
+  color: purple;
+}
+
+'}' {
+  color: purple;
+}
+
+string interpolation '${' {
+  /**
+   * This is a long comment
+   */
+  color: red;
+}
+
+string interpolation '}' {
+  color: red;
+}
+
+---
+
+(source_file
+  (rule (node_kind) 
+    (style (style_name) (style_value)))
+  (rule (node_kind) (node_kind)
+    (style (style_name) (style_value)))
+  (comment)
+  (rule (node_kind)
+    (style (style_name) (style_value))
+    (style (style_name) (style_value)))
+  (rule (node_kind) 
+    (style (style_name) (style_value)))
+  (rule (node_kind) 
+    (style (style_name) (style_value)))
+  (rule (node_kind) (node_kind) (node_kind)
+    (comment)
+    (style (style_name) (style_value)))
+  (rule (node_kind) (node_kind) (node_kind)
+    (style (style_name) (style_value))))

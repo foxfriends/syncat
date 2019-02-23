@@ -24,6 +24,35 @@ pub enum Lang {
     Css,
 }
 
+impl std::str::FromStr for Lang {
+    type Err = Box<dyn std::error::Error>;
+
+    fn from_str(name: &str) -> Result<Lang, Self::Err> {
+        use Lang::*;
+        if name.trim() == "C" {
+            // this one case sensitive one...
+            return Ok(Cpp);
+        }
+        match name.trim().to_lowercase().as_str() {
+            "rs" | "rust"                       => Ok(Rust),
+            "rb" | "ruby"                       => Ok(Ruby),
+            "erb" | "ejs"                       => Ok(EmbeddedTemplate),
+            "js" | "javascript"                 => Ok(JavaScript),
+            "ts" | "typescript"                 => Ok(TypeScript),
+            "sh" | "bash"                       => Ok(Bash),
+            "py" | "python" | "python3"         => Ok(Python),
+            "go"                                => Ok(Go),
+            "php"                               => Ok(Php),
+            "ml" | "mli" | "ocaml"              => Ok(OCaml),
+            "c" | "h"                           => Ok(C),
+            "cpp" | "cc" | "hpp" | "hh" | "c++" => Ok(Cpp),
+            "html" | "htm"                      => Ok(Html),
+            "css"                               => Ok(Css),
+            _                                   => Err(Box::new(Error(format!("Unknown language {}", name)))),
+        }
+    }
+}
+
 impl Lang {
     pub fn parser(&self) -> Language {
         use Lang::*;
@@ -74,31 +103,5 @@ impl Lang {
         let style_def = fs::read_to_string(&style_file).map_err(Box::new)?;
         let tree = parser.parse(style_def, None).ok_or(Box::new(Error(format!("Could not parse stylesheet at file {:?}", &style_file))))?;
         Stylesheet::parse(tree)
-    }
-}
-
-pub fn parse<I: AsRef<str>>(name: I) -> Option<Lang> {
-    use Lang::*;
-    let name = name.as_ref();
-    if name.trim() == "C" {
-        // this one case sensitive one...
-        return Some(Cpp);
-    }
-    match name.trim().to_lowercase().as_str() {
-        "rs" | "rust"                       => Some(Rust),
-        "rb" | "ruby"                       => Some(Ruby),
-        "erb" | "ejs"                       => Some(EmbeddedTemplate),
-        "js" | "javascript"                 => Some(JavaScript),
-        "ts" | "typescript"                 => Some(TypeScript),
-        "sh" | "bash"                       => Some(Bash),
-        "py" | "python" | "python3"         => Some(Python),
-        "go"                                => Some(Go),
-        "php"                               => Some(Php),
-        "ml" | "mli" | "ocaml"              => Some(OCaml),
-        "c" | "h"                           => Some(C),
-        "cpp" | "cc" | "hpp" | "hh" | "c++" => Some(Cpp),
-        "html" | "htm"                      => Some(Html),
-        "css"                               => Some(Css),
-        _                                   => None
     }
 }

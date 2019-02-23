@@ -1,0 +1,10 @@
+======================
+Complex kind, no style
+======================
+
+root child final { }
+
+---
+
+(source_file
+  (rule (node_kind) (node_kind) (node_kind)))

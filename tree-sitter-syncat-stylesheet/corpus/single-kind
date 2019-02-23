@@ -1,0 +1,10 @@
+=====================
+Single kind, no style
+=====================
+
+my_kind { }
+
+---
+
+(source_file
+  (rule (node_kind)))

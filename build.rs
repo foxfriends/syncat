@@ -13,6 +13,7 @@ use regex::Regex;
 #[serde(rename_all="camelCase")]
 struct Package {
     dev_dependencies: BTreeMap<String, String>,
+    dependencies: BTreeMap<String, String>,
 }
 
 fn main() {
@@ -35,7 +36,7 @@ fn main() {
     let data = fs::read_to_string(Path::new(&manifest_dir).join("package.json")).expect("The package.json cannot be read");
     let package: Package = serde_json::from_str(&data).expect("The package.json is invalid.");
     let mut output_list = File::create(&languages_path).unwrap();
-    for (package_name, _version) in package.dev_dependencies.into_iter() {
+    for (package_name, _version) in package.dependencies.into_iter() {
         if let Some(captures) = grammar_pattern.captures(&package_name) {
             let language = captures.get(1).unwrap().as_str();
             writeln!(output_list, "extern \"C\" {{ fn tree_sitter_{}() -> Language; }}", language.replace("-", "_")).unwrap();
