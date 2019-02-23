@@ -7,12 +7,10 @@ use std::process::Command;
 use std::env;
 
 use serde::Deserialize;
-use regex::Regex;
 
 #[derive(Deserialize)]
 #[serde(rename_all="camelCase")]
 struct Package {
-    dev_dependencies: BTreeMap<String, String>,
     dependencies: BTreeMap<String, String>,
 }
 
@@ -20,33 +18,42 @@ fn main() {
     println!("cargo:rerun-if-changed=package.json");
     println!("cargo:rerun-if-changed=package-lock.json");
     println!("cargo:rerun-if-changed=node_modules");
+    println!("cargo:rerun-if-changed=tree-sitter-syncat-stylesheet");
 
     let out_dir = env::var("OUT_DIR").unwrap();
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-
     let languages_path = Path::new(&out_dir).join("languages.rs");
-    let node_modules = Path::new(&manifest_dir).join("node_modules");
 
+    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let package_json = Path::new(&manifest_dir).join("package.json");
+    let node_modules = Path::new(&manifest_dir).join("node_modules");
+    let stylesheet_syntax = Path::new(&manifest_dir).join("tree-sitter-syncat-stylesheet");
+
+    // Run `npm install` to ensure all dependencies are available
     let result = Command::new("npm").arg("install").status().expect("Failed to run `npm install`. Do you have npm installed?");
     if !result.success() {
         panic!("Failed to run npm install");
     }
 
-    let grammar_pattern = Regex::new(r"tree-sitter-(.*)").unwrap();
-    let data = fs::read_to_string(Path::new(&manifest_dir).join("package.json")).expect("The package.json cannot be read");
-    let package: Package = serde_json::from_str(&data).expect("The package.json is invalid.");
-    let mut output_list = File::create(&languages_path).unwrap();
-    for (package_name, _version) in package.dependencies.into_iter() {
-        if let Some(captures) = grammar_pattern.captures(&package_name) {
-            let language = captures.get(1).unwrap().as_str();
-            writeln!(output_list, "extern \"C\" {{ fn tree_sitter_{}() -> Language; }}", language.replace("-", "_")).unwrap();
+    let data = fs::read_to_string(&package_json).expect("The package.json cannot be read");
+    let package = serde_json::from_str::<Package>(&data).expect("The package.json is invalid.");
 
-            let node_module = Path::new(&node_modules).join(&format!("tree-sitter-{}/src", language));
-            for file in fs::read_dir(&node_module).expect("Node modules are not installed") {
+    let mut output_list = File::create(&languages_path).unwrap();
+    package
+        .dependencies
+        .into_iter()
+        .map(|(package_name, _)| package_name)
+        .map(|package_name| (Path::new(&node_modules).join(&format!("{}/src", package_name)), package_name))
+        .chain(vec![(stylesheet_syntax, "tree-sitter-syncat-stylesheet".to_string())])
+        .for_each(move |(path, package)| {
+            writeln!(output_list, "extern \"C\" {{ fn {}() -> Language; }}", package.replace("-", "_")).unwrap();
+
+            for file in fs::read_dir(&path).expect(&format!("Package {} is not found at {:?}", package, path)) {
+                // each file is meant to be built individually and linked
                 let mut build = cc::Build::new();
                 match file {
                     Ok(file) => {
                         if file.path().file_name() == Some(&OsString::from("binding.cc")) {
+                            // we don't want the C++ binding
                             continue;
                         }
                         if file.path().extension() == Some(&OsString::from("c")) {
@@ -55,12 +62,11 @@ fn main() {
                             build.cpp(true).file(file.path());
                         }
                         build
-                            .include(&node_module)
-                            .compile(&format!("{}-{}", language, file.path().file_stem().unwrap().to_str().unwrap()));
+                            .include(&path)
+                            .compile(&format!("{}-{}", package, file.path().file_stem().unwrap().to_str().unwrap()));
                     }
-                    Err(..) => continue,
+                    Err(..) => {}
                 }
             }
-        }
-    }
+        })
 }
