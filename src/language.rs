@@ -103,7 +103,7 @@ impl Lang {
     pub fn style(&self) -> Result<Stylesheet, Box<dyn std::error::Error>> {
         let mut parser = Parser::new();
         parser.set_language(Lang::Syncat.parser()).unwrap();
-        let style_file = config().join(self.ext()).with_extension("syncat");
+        let style_file = config().join("style/active").join(self.ext()).with_extension("syncat");
         if !style_file.exists() {
             return Err(Box::new(Error(format!("Stylesheet file {:?} does not exist", style_file))));
         }

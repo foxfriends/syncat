@@ -3,10 +3,72 @@ use tree_sitter::{Tree, Node};
 use ansi_term::{Style, Colour};
 use crate::error::Error;
 
+#[derive(Copy, Clone, Default, Debug)]
+pub struct StyleBuilder {
+    foreground:       Option<Colour>,
+    background:       Option<Colour>,
+    is_italic:        Option<bool>,
+    is_bold:          Option<bool>,
+    is_dimmed:        Option<bool>,
+    is_underline:     Option<bool>,
+    is_strikethrough: Option<bool>,
+    is_blink:         Option<bool>,
+    is_hidden:        Option<bool>,
+    is_reverse:       Option<bool>,
+}
+
+impl StyleBuilder {
+    pub fn build(self) -> Style {
+        Style { 
+            foreground:       self.foreground,
+            background:       self.background,
+            is_italic:        self.is_italic.unwrap_or_default(),
+            is_bold:          self.is_bold.unwrap_or_default(),
+            is_dimmed:        self.is_dimmed.unwrap_or_default(),
+            is_underline:     self.is_underline.unwrap_or_default(),
+            is_strikethrough: self.is_strikethrough.unwrap_or_default(),
+            is_blink:         self.is_blink.unwrap_or_default(),
+            is_hidden:        self.is_hidden.unwrap_or_default(),
+            is_reverse:       self.is_reverse.unwrap_or_default(),
+        }
+    }
+
+    fn merge_with(&mut self, other: StyleBuilder) {
+        self.foreground       = other.foreground.or(self.foreground);
+        self.background       = other.background.or(self.background);
+        self.is_italic        = other.is_italic.or(self.is_italic);
+        self.is_bold          = other.is_bold.or(self.is_bold);
+        self.is_dimmed        = other.is_dimmed.or(self.is_dimmed);
+        self.is_underline     = other.is_underline.or(self.is_underline);
+        self.is_strikethrough = other.is_strikethrough.or(self.is_strikethrough);
+        self.is_blink         = other.is_blink.or(self.is_blink);
+        self.is_hidden        = other.is_hidden.or(self.is_hidden);
+        self.is_reverse       = other.is_reverse.or(self.is_reverse);
+    }
+}
+
 #[derive(Default, Debug)]
 pub struct Stylesheet {
-    style: Style,
+    style: StyleBuilder,
     scopes: BTreeMap<String, Stylesheet>,
+}
+
+impl Stylesheet {
+    pub fn resolve(&self, scope: &[&str], token: &str) -> StyleBuilder {
+        let mut style = self.style;
+
+        if let Some(substyle) = self.scopes.get(&format!("\"{}\"", token)) {
+            style.merge_with(substyle.style);
+        }
+
+        for i in (0..scope.len()).rev() {
+            if let Some(substyle) = self.scopes.get(scope[i]) {
+                style.merge_with(substyle.resolve(&scope[i..], token));
+            }
+        }
+
+        style
+    }
 }
 
 impl Stylesheet {
@@ -52,29 +114,29 @@ impl Stylesheet {
             ("color", color) | ("colour", color) => { stylesheet.style.foreground = Some(Stylesheet::parse_color(color)?); }
             ("background-color", color) | ("background-colour", color) => { stylesheet.style.background = Some(Stylesheet::parse_color(color)?); }
 
-            ("italic", "true") => { stylesheet.style.is_italic = true; }
-            ("italic", "false") => { stylesheet.style.is_italic = false; }
+            ("italic", "true") => { stylesheet.style.is_italic = Some(true); }
+            ("italic", "false") => { stylesheet.style.is_italic = Some(false); }
 
-            ("underline", "true") => { stylesheet.style.is_underline = true; }
-            ("underline", "false") => { stylesheet.style.is_underline = false; }
+            ("underline", "true") => { stylesheet.style.is_underline = Some(true); }
+            ("underline", "false") => { stylesheet.style.is_underline = Some(false); }
 
-            ("strikethrough", "true") => { stylesheet.style.is_strikethrough = true; }
-            ("strikethrough", "false") => { stylesheet.style.is_strikethrough = false; }
+            ("strikethrough", "true") => { stylesheet.style.is_strikethrough = Some(true); }
+            ("strikethrough", "false") => { stylesheet.style.is_strikethrough = Some(false); }
 
-            ("bold", "true") => { stylesheet.style.is_bold = true; }
-            ("bold", "false") => { stylesheet.style.is_bold = false; }
+            ("bold", "true") => { stylesheet.style.is_bold = Some(true); }
+            ("bold", "false") => { stylesheet.style.is_bold = Some(false); }
 
-            ("dim", "true") => { stylesheet.style.is_dimmed = true; }
-            ("dim", "false") => { stylesheet.style.is_dimmed = false; }
+            ("dim", "true") => { stylesheet.style.is_dimmed = Some(true); }
+            ("dim", "false") => { stylesheet.style.is_dimmed = Some(false); }
 
-            ("blink", "true") => { stylesheet.style.is_blink = true; }
-            ("blink", "false") => { stylesheet.style.is_blink = false; }
-    
-            ("reverse", "true") => { stylesheet.style.is_reverse = true; }
-            ("reverse", "false") => { stylesheet.style.is_dimmed = false; }
+            ("blink", "true") => { stylesheet.style.is_blink = Some(true); }
+            ("blink", "false") => { stylesheet.style.is_blink = Some(false); }
 
-            ("hidden", "true") => { stylesheet.style.is_hidden = true; }
-            ("hidden", "false") => { stylesheet.style.is_hidden = false; }
+            ("reverse", "true") => { stylesheet.style.is_reverse = Some(true); }
+            ("reverse", "false") => { stylesheet.style.is_dimmed = Some(false); }
+
+            ("hidden", "true") => { stylesheet.style.is_hidden = Some(true); }
+            ("hidden", "false") => { stylesheet.style.is_hidden = Some(false); }
 
             _ => {}
         }
@@ -114,11 +176,10 @@ impl Stylesheet {
     pub fn parse(source: &str, tree: Tree) -> Result<Stylesheet, Box<dyn std::error::Error>> {
         let root = tree.root_node();
         let mut stylesheet = Stylesheet {
-            style: Style::default(),
+            style: StyleBuilder::default(),
             scopes: BTreeMap::default(),
         };
         Stylesheet::parse_node(source, &mut stylesheet, root)?;
-        eprintln!("{:?}", stylesheet);
         Ok(stylesheet)
     }
 }

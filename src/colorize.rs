@@ -2,19 +2,43 @@ use tree_sitter::{Tree, Node};
 
 use crate::stylesheet::Stylesheet;
 
-fn colorize_node(source: &str, node: Node, style: &Stylesheet) -> Result<String, Box<dyn std::error::Error>> {
-    print!("({} [{}]", node.kind(), node.kind_id());
-    for child in node.children() {
-        print!(" ");
-        colorize_node(source, child, style)?;
-    }
-    print!(")");
+fn colorize_node<'a>(
+    source: &'a str,
+    node: Node,
+    stylesheet: &Stylesheet,
+    pos: &mut usize,
+    scope: &mut Vec<&'a str>,
+    output: &mut String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // put any leading whitespace into the result text
+    output.push_str(&source[*pos..node.start_byte()]);
+    *pos = node.start_byte();
 
-    Ok(String::from(""))
+    if node.child_count() == 0 {
+        // print a child node
+        let token = &source[node.start_byte()..node.end_byte()];
+        scope.push(node.kind());
+        let style = stylesheet.resolve(scope, token).build();
+        scope.pop();
+        output.push_str(&format!("{}", style.paint(token)));
+        *pos = node.end_byte();
+    } else {
+        // recurse for a middle node
+        scope.push(node.kind());
+        for child in node.children() {
+            colorize_node(source, child, stylesheet, pos, scope, output)?;
+        }
+        scope.pop();
+    }
+    Ok(())
 }
 
-pub fn colorize<I: AsRef<str>>(source: I, tree: Tree, style: &Stylesheet) -> Result<String, Box<dyn std::error::Error>> {
+pub fn colorize<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, Box<dyn std::error::Error>> {
     let source = source.as_ref();
     let node = tree.root_node();
-    colorize_node(source, node, style)
+    let mut output = String::new();
+    let mut pos = 0;
+    colorize_node(source, node, stylesheet, &mut pos, &mut vec![], &mut output)?;
+    output.push_str(&source[pos..]);
+    Ok(output)
 }
