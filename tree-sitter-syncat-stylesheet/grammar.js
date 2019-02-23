@@ -6,7 +6,14 @@ module.exports = grammar({
   rules: {
     source_file: $ => repeat($.rule),
 
-    rule: $ => seq(seq(repeat($.node_kind), optional($.token)), '{', repeat($.style), '}'),
+    rule: $ => seq($._selectors, '{', repeat($.style), '}'),
+
+    _selectors: $ => choice(seq($._selectors, ",", $.selector), $.selector),
+
+    selector: $ => choice(
+      $.token,
+      seq(repeat1($.node_kind), optional($.token)),
+    ),
 
     style: $ => seq($.style_name, ':', $.style_value, ';'),
 

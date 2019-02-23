@@ -1,0 +1,12 @@
+==================
+Multiple selectors
+==================
+
+hello world, second selector { }
+
+---
+
+(source_file
+  (rule 
+    (selector (node_kind) (node_kind))
+    (selector (node_kind) (node_kind))))

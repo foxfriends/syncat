@@ -9,6 +9,6 @@ root {
 ---
 
 (source_file
-  (rule (node_kind) 
+  (rule (selector (node_kind))
     (style (style_name) (style_value))))
 

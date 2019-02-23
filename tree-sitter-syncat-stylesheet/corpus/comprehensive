@@ -16,12 +16,8 @@ comment {
   italic: true;
 }
 
-"{" {
+"{", "}" {
   color: #F38ca1;
-}
-
-"}" {
-  color: 213;
 }
 
 string interpolation "${" {
@@ -38,20 +34,20 @@ string interpolation "}" {
 ---
 
 (source_file
-  (rule (node_kind) 
+  (rule (selector (node_kind))
     (style (style_name) (style_value)))
-  (rule (node_kind) (node_kind)
+  (rule (selector (node_kind) (node_kind))
     (style (style_name) (style_value)))
   (comment)
-  (rule (node_kind)
+  (rule (selector (node_kind))
     (style (style_name) (style_value))
     (style (style_name) (style_value)))
-  (rule (token) 
+  (rule 
+    (selector (token))
+    (selector (token))
     (style (style_name) (style_value)))
-  (rule (token) 
-    (style (style_name) (style_value)))
-  (rule (node_kind) (node_kind) (token)
+  (rule (selector (node_kind) (node_kind) (token))
     (comment)
     (style (style_name) (style_value)))
-  (rule (node_kind) (node_kind) (token)
+  (rule (selector (node_kind) (node_kind) (token))
     (style (style_name) (style_value))))

@@ -13,5 +13,5 @@ world */
 
 (source_file
   (comment)
-  (rule (node_kind))
+  (rule (selector (node_kind)))
   (comment))

@@ -7,4 +7,4 @@ my_kind { }
 ---
 
 (source_file
-  (rule (node_kind)))
+  (rule (selector (node_kind))))
