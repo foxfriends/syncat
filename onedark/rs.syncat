@@ -3,7 +3,7 @@
 let, const, static, mutable_specifier, ref, move, dyn,
 fn, struct, enum, trait, impl, type,
 pub, mod, crate, use,
-if, else, match, loop, for, while, return {
+if, else, match, loop, for, while, return, in {
   color: purple;
 }
 
