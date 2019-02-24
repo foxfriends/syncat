@@ -4,7 +4,9 @@ Comments
 
 // hello world
 
-test {}
+test {
+  // hello world
+}
 
 /* hello
 world */
@@ -13,5 +15,7 @@ world */
 
 (source_file
   (comment)
-  (rule (selector (node_kind)))
+  (rule
+    (selector (node_kind))
+    (styles (comment)))
   (comment))

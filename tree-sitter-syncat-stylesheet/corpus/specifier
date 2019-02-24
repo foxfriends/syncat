@@ -11,4 +11,5 @@ function_item > identifier {
 (source_file
   (rule
     (selector (direct_child (node_kind)) (node_kind))
-    (style (style_name) (style_value))))
+    (styles
+      (style (style_name) (style_value)))))

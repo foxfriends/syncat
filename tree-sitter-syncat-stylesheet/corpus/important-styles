@@ -1,0 +1,15 @@
+================
+Important styles
+================
+
+root test {|
+  color: blue;
+|}
+
+---
+
+(source_file
+  (rule
+    (selector (node_kind) (node_kind))
+    (important_styles
+      (style (style_name) (style_value)))))

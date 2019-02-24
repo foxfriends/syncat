@@ -7,4 +7,6 @@ my_kind { }
 ---
 
 (source_file
-  (rule (selector (node_kind))))
+  (rule 
+    (selector (node_kind))
+    (styles)))

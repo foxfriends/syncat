@@ -7,4 +7,6 @@ root child final { }
 ---
 
 (source_file
-  (rule (selector (node_kind) (node_kind) (node_kind))))
+  (rule 
+    (selector (node_kind) (node_kind) (node_kind)) 
+    (styles)))

@@ -120,7 +120,8 @@ impl Stylesheet {
         }
     }
 
-    fn parse_style(source: &str, stylebuilder: &mut StyleBuilder, node: Node) -> Result<(), Box<dyn std::error::Error>> {
+    fn parse_style(source: &str, stylebuilder: &mut StyleBuilder, node: Node, important: bool) -> Result<(), Box<dyn std::error::Error>> {
+        use crate::style::setting;
         let mut style = None;
         let mut value = None;
         for child in node.children().filter(Node::is_named) {
@@ -136,32 +137,32 @@ impl Stylesheet {
         }
 
         match (style.unwrap().to_lowercase().as_str(), value.unwrap().to_lowercase().as_str()) {
-            ("color", color) | ("colour", color) => { stylebuilder.foreground = Some(Stylesheet::parse_color(color)?); }
-            ("background-color", color) | ("background-colour", color) => { stylebuilder.background = Some(Stylesheet::parse_color(color)?); }
+            ("color", color) | ("colour", color) => { stylebuilder.foreground = setting(important, Stylesheet::parse_color(color)?); }
+            ("background-color", color) | ("background-colour", color) => { stylebuilder.background = setting(important, Stylesheet::parse_color(color)?); }
 
-            ("italic", "true") => { stylebuilder.is_italic = Some(true); }
-            ("italic", "false") => { stylebuilder.is_italic = Some(false); }
+            ("italic", "true") => { stylebuilder.is_italic = setting(important, true); }
+            ("italic", "false") => { stylebuilder.is_italic = setting(important, false); }
 
-            ("underline", "true") => { stylebuilder.is_underline = Some(true); }
-            ("underline", "false") => { stylebuilder.is_underline = Some(false); }
+            ("underline", "true") => { stylebuilder.is_underline = setting(important, true); }
+            ("underline", "false") => { stylebuilder.is_underline = setting(important, false); }
 
-            ("strikethrough", "true") => { stylebuilder.is_strikethrough = Some(true); }
-            ("strikethrough", "false") => { stylebuilder.is_strikethrough = Some(false); }
+            ("strikethrough", "true") => { stylebuilder.is_strikethrough = setting(important, true); }
+            ("strikethrough", "false") => { stylebuilder.is_strikethrough = setting(important, false); }
 
-            ("bold", "true") => { stylebuilder.is_bold = Some(true); }
-            ("bold", "false") => { stylebuilder.is_bold = Some(false); }
+            ("bold", "true") => { stylebuilder.is_bold = setting(important, true); }
+            ("bold", "false") => { stylebuilder.is_bold = setting(important, false); }
 
-            ("dim", "true") => { stylebuilder.is_dimmed = Some(true); }
-            ("dim", "false") => { stylebuilder.is_dimmed = Some(false); }
+            ("dim", "true") => { stylebuilder.is_dimmed = setting(important, true); }
+            ("dim", "false") => { stylebuilder.is_dimmed = setting(important, false); }
 
-            ("blink", "true") => { stylebuilder.is_blink = Some(true); }
-            ("blink", "false") => { stylebuilder.is_blink = Some(false); }
+            ("blink", "true") => { stylebuilder.is_blink = setting(important, true); }
+            ("blink", "false") => { stylebuilder.is_blink = setting(important, false); }
 
-            ("reverse", "true") => { stylebuilder.is_reverse = Some(true); }
-            ("reverse", "false") => { stylebuilder.is_dimmed = Some(false); }
+            ("reverse", "true") => { stylebuilder.is_reverse = setting(important, true); }
+            ("reverse", "false") => { stylebuilder.is_dimmed = setting(important, false); }
 
-            ("hidden", "true") => { stylebuilder.is_hidden = Some(true); }
-            ("hidden", "false") => { stylebuilder.is_hidden = Some(false); }
+            ("hidden", "true") => { stylebuilder.is_hidden = setting(important, true); }
+            ("hidden", "false") => { stylebuilder.is_hidden = setting(important, false); }
 
             _ => {}
         }
@@ -195,13 +196,24 @@ impl Stylesheet {
         Ok(())
     }
 
+    fn parse_styles(source: &str, stylebuilder: &mut StyleBuilder, node: Node, important: bool) -> Result<(), Box<dyn std::error::Error>> {
+        for child in node.children().filter(Node::is_named) {
+            match child.kind() {
+                "style" => Stylesheet::parse_style(source, stylebuilder, child, important)?,
+                kind => return Err(Box::new(Error(format!("Invalid state {} while parsing styles", kind)))),
+            }
+        }
+        Ok(())
+    }
+
     fn parse_rule(&mut self, source: &str, node: Node) -> Result<(), Box<dyn std::error::Error>> {
         let mut selectors = vec![];
         let mut stylebuilder = StyleBuilder::default();
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
                 "selector" => selectors.push(child),
-                "style" => Stylesheet::parse_style(source, &mut stylebuilder, child)?,
+                "important_styles" => Stylesheet::parse_styles(source, &mut stylebuilder, child, true)?,
+                "styles" => Stylesheet::parse_styles(source, &mut stylebuilder, child, false)?,
                 kind => return Err(Box::new(Error(format!("Invalid state {} while parsing rule", kind)))),
             }
         }

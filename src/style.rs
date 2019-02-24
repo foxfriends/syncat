@@ -1,24 +1,69 @@
 pub use ansi_term::{Style, Colour};
 
+#[derive(Copy, Clone, Debug)]
+pub enum Setting<T> {
+    Unset,
+    Set(T),
+    Important(T),
+}
+
+impl<T> Default for Setting<T> {
+    fn default() -> Self {
+        Setting::Unset
+    }
+}
+
+impl<T> Setting<T> {
+    fn or(self, other: Setting<T>) -> Self {
+        use Setting::*;
+        match (self, other) {
+            (Important(value), ..) => Important(value),
+            (.., Important(value)) => Important(value),
+            (Set(value), ..) => Set(value),
+            (Unset, other) => other,
+        }
+    }
+
+    fn optional(self) -> Option<T> {
+        use Setting::*;
+        match self {
+            Unset => None,
+            Set(value) => Some(value),
+            Important(value) => Some(value),
+        }
+    }
+}
+
+impl<T: Default> Setting<T> {
+    fn unwrap_or_default(self) -> T {
+        use Setting::*;
+        match self {
+            Unset => T::default(),
+            Set(value) => value,
+            Important(value) => value,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Default, Debug)]
 pub struct StyleBuilder {
-    pub foreground:       Option<Colour>,
-    pub background:       Option<Colour>,
-    pub is_italic:        Option<bool>,
-    pub is_bold:          Option<bool>,
-    pub is_dimmed:        Option<bool>,
-    pub is_underline:     Option<bool>,
-    pub is_strikethrough: Option<bool>,
-    pub is_blink:         Option<bool>,
-    pub is_hidden:        Option<bool>,
-    pub is_reverse:       Option<bool>,
+    pub foreground:       Setting<Colour>,
+    pub background:       Setting<Colour>,
+    pub is_italic:        Setting<bool>,
+    pub is_bold:          Setting<bool>,
+    pub is_dimmed:        Setting<bool>,
+    pub is_underline:     Setting<bool>,
+    pub is_strikethrough: Setting<bool>,
+    pub is_blink:         Setting<bool>,
+    pub is_hidden:        Setting<bool>,
+    pub is_reverse:       Setting<bool>,
 }
 
 impl StyleBuilder {
     pub fn build(self) -> Style {
         Style {
-            foreground:       self.foreground,
-            background:       self.background,
+            foreground:       self.foreground.optional(),
+            background:       self.background.optional(),
             is_italic:        self.is_italic.unwrap_or_default(),
             is_bold:          self.is_bold.unwrap_or_default(),
             is_dimmed:        self.is_dimmed.unwrap_or_default(),
@@ -45,3 +90,10 @@ impl StyleBuilder {
     }
 }
 
+pub fn setting<T>(important: bool, value: T) -> Setting<T> {
+    if important {
+        Setting::Important(value)
+    } else {
+        Setting::Set(value)
+    }
+}

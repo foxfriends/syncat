@@ -9,5 +9,7 @@ block "{" {
 ---
 
 (source_file
-  (rule (selector (node_kind) (token))
-    (style (style_name) (style_value))))
+  (rule 
+    (selector (node_kind) (token))
+    (styles
+      (style (style_name) (style_value)))))

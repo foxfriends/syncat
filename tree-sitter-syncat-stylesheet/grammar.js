@@ -6,7 +6,7 @@ module.exports = grammar({
   rules: {
     source_file: $ => repeat($.rule),
 
-    rule: $ => seq($._selectors, '{', repeat($.style), '}'),
+    rule: $ => seq($._selectors, $._style_block),
 
     _selectors: $ => choice(seq($._selectors, ",", $.selector), $.selector),
 
@@ -30,6 +30,14 @@ module.exports = grammar({
     direct_child: $ => seq($.node_kind, '>'),
     node_kind: $ => /[A-Za-z0-9-_]+/,
     token: $ => /"(?:[^"\\]|\\.)+"/,
+
+    _style_block: $ => choice(
+      $.important_styles,
+      $.styles,
+    ),
+
+    styles: $ => seq('{', repeat($.style), '}'),
+    important_styles: $ => seq('{|', repeat($.style), '|}'),
 
     style: $ => seq($.style_name, ':', $.style_value, ';'),
 
