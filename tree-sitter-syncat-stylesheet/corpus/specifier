@@ -1,0 +1,14 @@
+=========
+Specifier
+=========
+
+function_item > identifier {
+  color: blue;
+}
+
+---
+
+(source_file
+  (rule
+    (selector (node_kind) (direct_child (node_kind)))
+    (style (style_name) (style_value))))

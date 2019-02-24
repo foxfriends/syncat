@@ -8,6 +8,7 @@ mod colorize;
 mod language;
 mod dirs;
 mod error;
+mod style;
 mod stylesheet;
 
 use self::language::Lang;

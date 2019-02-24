@@ -1,69 +1,39 @@
 use std::collections::BTreeMap;
 use tree_sitter::{Tree, Node};
-use ansi_term::{Style, Colour};
 use crate::error::Error;
+use crate::style::{Colour, StyleBuilder};
 
-#[derive(Copy, Clone, Default, Debug)]
-pub struct StyleBuilder {
-    foreground:       Option<Colour>,
-    background:       Option<Colour>,
-    is_italic:        Option<bool>,
-    is_bold:          Option<bool>,
-    is_dimmed:        Option<bool>,
-    is_underline:     Option<bool>,
-    is_strikethrough: Option<bool>,
-    is_blink:         Option<bool>,
-    is_hidden:        Option<bool>,
-    is_reverse:       Option<bool>,
-}
-
-impl StyleBuilder {
-    pub fn build(self) -> Style {
-        Style { 
-            foreground:       self.foreground,
-            background:       self.background,
-            is_italic:        self.is_italic.unwrap_or_default(),
-            is_bold:          self.is_bold.unwrap_or_default(),
-            is_dimmed:        self.is_dimmed.unwrap_or_default(),
-            is_underline:     self.is_underline.unwrap_or_default(),
-            is_strikethrough: self.is_strikethrough.unwrap_or_default(),
-            is_blink:         self.is_blink.unwrap_or_default(),
-            is_hidden:        self.is_hidden.unwrap_or_default(),
-            is_reverse:       self.is_reverse.unwrap_or_default(),
-        }
-    }
-
-    fn merge_with(&mut self, other: StyleBuilder) {
-        self.foreground       = other.foreground.or(self.foreground);
-        self.background       = other.background.or(self.background);
-        self.is_italic        = other.is_italic.or(self.is_italic);
-        self.is_bold          = other.is_bold.or(self.is_bold);
-        self.is_dimmed        = other.is_dimmed.or(self.is_dimmed);
-        self.is_underline     = other.is_underline.or(self.is_underline);
-        self.is_strikethrough = other.is_strikethrough.or(self.is_strikethrough);
-        self.is_blink         = other.is_blink.or(self.is_blink);
-        self.is_hidden        = other.is_hidden.or(self.is_hidden);
-        self.is_reverse       = other.is_reverse.or(self.is_reverse);
-    }
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
+enum SelectorSegment {
+    Node(String),
+    DirectChild(String),
+    Token(String),
 }
 
 #[derive(Default, Debug)]
 pub struct Stylesheet {
     style: StyleBuilder,
-    scopes: BTreeMap<String, Stylesheet>,
+    scopes: BTreeMap<SelectorSegment, Stylesheet>,
 }
 
 impl Stylesheet {
     pub fn resolve(&self, scope: &[&str], token: Option<&str>) -> StyleBuilder {
         let mut style = self.style;
 
-        if let Some(substyle) = token.and_then(|token| self.scopes.get(&format!("\"{}\"", token))) {
+        if let Some(substyle) = token.and_then(|token| self.scopes.get(&SelectorSegment::Token(format!("\"{}\"", token)))) {
             style.merge_with(substyle.style);
         }
 
         for i in (0..scope.len()).rev() {
-            if let Some(substyle) = self.scopes.get(scope[i]) {
+            if let Some(substyle) = self.scopes.get(&SelectorSegment::Node(scope[i].to_string())) {
                 style.merge_with(substyle.resolve(&scope[i..], token));
+
+                let direct_child = scope
+                    .get(i + 1)
+                    .and_then(|value| substyle.scopes.get(&SelectorSegment::DirectChild(value.to_string())));
+                if let Some(subsubstyle) = direct_child {
+                    style.merge_with(subsubstyle.resolve(&scope[i+1..], token));
+                }
             }
         }
 
@@ -95,7 +65,7 @@ impl Stylesheet {
         }
     }
 
-    fn parse_style(source: &str, stylesheet: &mut Stylesheet, node: Node) -> Result<(), Box<dyn std::error::Error>> {
+    fn parse_style(source: &str, stylebuilder: &mut StyleBuilder, node: Node) -> Result<(), Box<dyn std::error::Error>> {
         let mut style = None;
         let mut value = None;
         for child in node.children().filter(Node::is_named) {
@@ -111,32 +81,32 @@ impl Stylesheet {
         }
 
         match (style.unwrap().to_lowercase().as_str(), value.unwrap().to_lowercase().as_str()) {
-            ("color", color) | ("colour", color) => { stylesheet.style.foreground = Some(Stylesheet::parse_color(color)?); }
-            ("background-color", color) | ("background-colour", color) => { stylesheet.style.background = Some(Stylesheet::parse_color(color)?); }
+            ("color", color) | ("colour", color) => { stylebuilder.foreground = Some(Stylesheet::parse_color(color)?); }
+            ("background-color", color) | ("background-colour", color) => { stylebuilder.background = Some(Stylesheet::parse_color(color)?); }
 
-            ("italic", "true") => { stylesheet.style.is_italic = Some(true); }
-            ("italic", "false") => { stylesheet.style.is_italic = Some(false); }
+            ("italic", "true") => { stylebuilder.is_italic = Some(true); }
+            ("italic", "false") => { stylebuilder.is_italic = Some(false); }
 
-            ("underline", "true") => { stylesheet.style.is_underline = Some(true); }
-            ("underline", "false") => { stylesheet.style.is_underline = Some(false); }
+            ("underline", "true") => { stylebuilder.is_underline = Some(true); }
+            ("underline", "false") => { stylebuilder.is_underline = Some(false); }
 
-            ("strikethrough", "true") => { stylesheet.style.is_strikethrough = Some(true); }
-            ("strikethrough", "false") => { stylesheet.style.is_strikethrough = Some(false); }
+            ("strikethrough", "true") => { stylebuilder.is_strikethrough = Some(true); }
+            ("strikethrough", "false") => { stylebuilder.is_strikethrough = Some(false); }
 
-            ("bold", "true") => { stylesheet.style.is_bold = Some(true); }
-            ("bold", "false") => { stylesheet.style.is_bold = Some(false); }
+            ("bold", "true") => { stylebuilder.is_bold = Some(true); }
+            ("bold", "false") => { stylebuilder.is_bold = Some(false); }
 
-            ("dim", "true") => { stylesheet.style.is_dimmed = Some(true); }
-            ("dim", "false") => { stylesheet.style.is_dimmed = Some(false); }
+            ("dim", "true") => { stylebuilder.is_dimmed = Some(true); }
+            ("dim", "false") => { stylebuilder.is_dimmed = Some(false); }
 
-            ("blink", "true") => { stylesheet.style.is_blink = Some(true); }
-            ("blink", "false") => { stylesheet.style.is_blink = Some(false); }
+            ("blink", "true") => { stylebuilder.is_blink = Some(true); }
+            ("blink", "false") => { stylebuilder.is_blink = Some(false); }
 
-            ("reverse", "true") => { stylesheet.style.is_reverse = Some(true); }
-            ("reverse", "false") => { stylesheet.style.is_dimmed = Some(false); }
+            ("reverse", "true") => { stylebuilder.is_reverse = Some(true); }
+            ("reverse", "false") => { stylebuilder.is_dimmed = Some(false); }
 
-            ("hidden", "true") => { stylesheet.style.is_hidden = Some(true); }
-            ("hidden", "false") => { stylesheet.style.is_hidden = Some(false); }
+            ("hidden", "true") => { stylebuilder.is_hidden = Some(true); }
+            ("hidden", "false") => { stylebuilder.is_hidden = Some(false); }
 
             _ => {}
         }
@@ -144,42 +114,70 @@ impl Stylesheet {
         Ok(())
     }
 
-    fn parse_rule(source: &str, stylesheet: &mut Stylesheet, node: Node) -> Result<(), Box<dyn std::error::Error>> {
-        let mut scoped = stylesheet;
+    fn parse_selector(source: &str, node: Node) -> Result<Vec<SelectorSegment>, Box<dyn std::error::Error>> {
+        let mut scope = vec![];
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
-                "node_kind" | "token" => {
+                "node_kind" => {
                     let name = &source[child.start_byte()..child.end_byte()];
-                    scoped = scoped.scopes.entry(name.to_string()).or_default();
+                    scope.push(SelectorSegment::Node(name.to_string()));
                 }
-                "style" => Stylesheet::parse_style(source, scoped, child)?,
+                "token" => {
+                    let name = &source[child.start_byte()..child.end_byte()];
+                    scope.push(SelectorSegment::Token(name.to_string()));
+                }
+                "direct_child" => {
+                    let named_child = child.named_child(0).ok_or(Box::new(Error(format!("Missing child when parsing direct_child"))))?;
+                    let name = &source[named_child.start_byte()..named_child.end_byte()];
+                    scope.push(SelectorSegment::DirectChild(name.to_string()));
+                }
+                kind => return Err(Box::new(Error(format!("Invalid state {} while parsing selector", kind)))),
+            }
+        }
+        Ok(scope)
+    }
+
+    fn parse_rule(&mut self, source: &str, node: Node) -> Result<(), Box<dyn std::error::Error>> {
+        let mut selectors = vec![];
+        let mut stylebuilder = StyleBuilder::default();
+        for child in node.children().filter(Node::is_named) {
+            match child.kind() {
+                "selector" => selectors.push(Stylesheet::parse_selector(source, child)?),
+                "style" => Stylesheet::parse_style(source, &mut stylebuilder, child)?,
                 kind => return Err(Box::new(Error(format!("Invalid state {} while parsing rule", kind)))),
             }
+        }
+        for selector in &selectors {
+            let mut scoped: &mut Stylesheet = self;
+            for segment in selector {
+                scoped = scoped.scopes.entry(segment.clone()).or_default();
+            }
+            scoped.style.merge_with(stylebuilder);
         }
         Ok(())
     }
 
-    fn parse_node(source: &str, stylesheet: &mut Stylesheet, node: Node) -> Result<(), Box<dyn std::error::Error>> {
+    fn parse_node(&mut self, source: &str, node: Node) -> Result<(), Box<dyn std::error::Error>> {
         match node.kind() {
             "source_file" => {
                 for child in node.children().filter(Node::is_named) {
-                    Stylesheet::parse_node(source, stylesheet, child)?;
+                    self.parse_node(source, child)?;
                 }
             },
-            "rule" => Stylesheet::parse_rule(source, stylesheet, node)?,
+            "rule" => self.parse_rule(source, node)?,
             "comment" => {},
             kind => return Err(Box::new(Error(format!("Invalid state {} while parsing node", kind)))),
         }
         Ok(())
     }
 
-    pub fn parse(source: &str, tree: Tree) -> Result<Stylesheet, Box<dyn std::error::Error>> {
+    pub fn parse(source: &str, tree: Tree) -> Result<Self, Box<dyn std::error::Error>> {
         let root = tree.root_node();
         let mut stylesheet = Stylesheet {
             style: StyleBuilder::default(),
             scopes: BTreeMap::default(),
         };
-        Stylesheet::parse_node(source, &mut stylesheet, root)?;
+        stylesheet.parse_node(source, root)?;
         Ok(stylesheet)
     }
 }

@@ -10,8 +10,9 @@ fn colorize_node<'a>(
     scope: &mut Vec<&'a str>,
     output: &mut String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // put any leading whitespace into the result text
-    output.push_str(&source[*pos..node.start_byte()]);
+    // put any leading characters into the result text
+    let outer_style = stylesheet.resolve(scope, None).build();
+    output.push_str(&format!("{}", outer_style.paint(&source[*pos..node.start_byte()])));
     *pos = node.start_byte();
 
     if node.child_count() == 0 {
@@ -57,7 +58,7 @@ fn colorize_node_sexp<'a>(
         scope.push(node.kind());
         let style = stylesheet.resolve(scope, Some(token)).build();
         scope.pop();
-        output.push_str(&format!("({})", style.paint(token)));
+        output.push_str(&format!("({} \"{}\")", style.paint(node.kind()), style.paint(token)));
         *pos = node.end_byte();
     } else {
         // recurse for a middle node

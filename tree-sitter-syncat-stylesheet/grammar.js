@@ -12,8 +12,20 @@ module.exports = grammar({
 
     selector: $ => choice(
       $.token,
-      seq(repeat1($.node_kind), optional($.token)),
+      seq($._kind_list, optional($.token)),
     ),
+
+    _kind_list: $ => choice(
+      $.node_kind,
+      seq($._kind_list, $._specified_node),
+    ),
+
+    _specified_node: $ => choice(
+      $.node_kind,
+      $.direct_child,
+    ),
+
+    direct_child: $ => seq(">", $.node_kind),
 
     style: $ => seq($.style_name, ':', $.style_value, ';'),
 
