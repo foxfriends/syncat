@@ -1,17 +1,35 @@
+// Keywords
+
 let, const, static, mutable_specifier, ref, move, dyn,
 fn, struct, enum, trait, impl, type,
 pub, mod, crate, use,
-if, else, match, loop, for, while, return,
-closure_parameters > "|",
-use_wildcard "*",
-try_expression > "?",
-function_item > "->",
-type_arguments > "<",
-type_arguments > ">",
-range_expression > "..",
-remaining_field_pattern > ".." {
+if, else, match, loop, for, while, return {
   color: purple;
 }
+
+closure_parameters > "|" {
+  color: purple;
+}
+
+remaining_field_pattern > "..",
+match_arm > "=>",
+match_pattern > "|" {
+  color: purple;
+}
+
+// Imports
+
+use_wildcard "*" {
+  color: purple;
+}
+
+use_wildcard identifier,
+scoped_use_list identifier,
+scoped_identifier identifier {
+  color: blue;
+}
+
+// Operators
 
 self_parameter > "&",
 reference_type > "&",
@@ -24,24 +42,32 @@ binary_expression > "-",
 binary_expression > "*",
 binary_expression > "/",
 binary_expression > "%",
+binary_expression > ">",
+binary_expression > "<",
+binary_expression > "<=",
+binary_expression > ">=",
+binary_expression > "==",
+binary_expression > "!=",
 binary_expression > "<<",
 binary_expression > ">>",
 binary_expression > "&&",
-binary_expression > "&",
 binary_expression > "||",
-binary_expression > "|" {
+binary_expression > "&",
+binary_expression > "|",
+binary_expression > "^",
+range_expression > "..",
+try_expression > "?" {
   color: purple;
 }
 
-match_arm > "=>",
-match_pattern > "|" {
-  color: purple;
-}
+// Types
 
 type_identifier,
 primitive_type {
   color: yellow;
 }
+
+// Values
 
 lifetime {
   color: cyan;
@@ -51,10 +77,6 @@ boolean_literal, integer_literal, float_literal {|
   color: 11;
 |}
 
-enum_variant > identifier {
-  color: 11;
-}
-
 string_literal,
 char_literal,
 string_literal {|
@@ -62,25 +84,23 @@ string_literal {|
   dim: false;
 |}
 
-use_wildcard identifier,
-scoped_use_list identifier,
-scoped_identifier identifier {
-  color: blue;
+enum_variant > identifier {
+  color: 11;
 }
 
-attribute_item {
-  color: yellow;
-  dim: true;
-}
+// Function declaration
 
 function_item > identifier {
   color: blue;
 }
 
-macro_invocation > identifier,
-macro_invocation > "!" {
-  color: cyan;
+function_item > "->",
+type_arguments > "<",
+type_arguments > ">" {
+  color: purple;
 }
+
+// Function call
 
 call_expression > identifier,
 call_expression > field_expression > field_identifier,
@@ -88,11 +108,27 @@ call_expression > generic_function > field_expression > field_identifier {
   color: blue;
 }
 
+// Macro invocation
+
+macro_invocation > identifier,
+macro_invocation > "!" {
+  color: cyan;
+}
+
+attribute_item {
+  color: yellow;
+  dim: true;
+}
+
+// Comments
+
 line_comment, block_comment {
   color: 15;
   dim: true;
   italic: true;
 }
+
+// Specific word overrides
 
 identifier "Ok", identifier "Err", identifier "Some", identifier "None" {|
   color: cyan;

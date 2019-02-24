@@ -20,7 +20,6 @@ token {
 }
 
 comment {
-  color: white;
-  dim: true;
+  color: 15;
   italic: true;
 }
