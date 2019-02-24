@@ -1,5 +1,5 @@
 node_kind {
-  color: purple;
+  color: red;
 }
 
 style_name {
@@ -9,6 +9,14 @@ style_name {
 style_value {
   color: yellow;
   dim: true;
+}
+
+token {
+  color: green;
+}
+
+">" {
+  color: purple;
 }
 
 comment {

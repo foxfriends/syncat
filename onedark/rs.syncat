@@ -1,0 +1,110 @@
+let, const, static, mutable_specifier, ref, move, dyn,
+fn, struct, enum, trait, impl, type,
+pub, mod, crate, use,
+if, else, match, loop, for, while, return,
+closure_parameters > "|",
+use_wildcard "*",
+try_expression > "?",
+function_item > "->",
+type_arguments > "<",
+type_arguments > ">",
+range_expression > "..",
+remaining_field_pattern > ".." {
+  color: purple;
+}
+
+self_parameter > "&",
+reference_type > "&",
+reference_expression > "&",
+unary_expression > "*",
+unary_expression > "!",
+unary_expression > "~",
+binary_expression > "+",
+binary_expression > "-",
+binary_expression > "*",
+binary_expression > "/",
+binary_expression > "%",
+binary_expression > "<<",
+binary_expression > ">>",
+binary_expression > "&&",
+binary_expression > "&",
+binary_expression > "||",
+binary_expression > "|" {
+  color: purple;
+}
+
+match_arm > "=>",
+match_pattern > "|" {
+  color: purple;
+}
+
+type_identifier,
+primitive_type {
+  color: yellow;
+}
+
+lifetime {
+  color: cyan;
+}
+
+boolean_literal, integer_literal, float_literal {|
+  color: 11;
+|}
+
+enum_variant > identifier {
+  color: 11;
+}
+
+string_literal,
+char_literal,
+string_literal {|
+  color: green;
+  dim: false;
+|}
+
+use_wildcard identifier,
+scoped_use_list identifier,
+scoped_identifier identifier {
+  color: blue;
+}
+
+attribute_item {
+  color: yellow;
+  dim: true;
+}
+
+function_item > identifier {
+  color: blue;
+}
+
+macro_invocation > identifier,
+macro_invocation > "!" {
+  color: cyan;
+}
+
+call_expression > identifier,
+call_expression > field_expression > field_identifier,
+call_expression > generic_function > field_expression > field_identifier {
+  color: blue;
+}
+
+line_comment, block_comment {
+  color: 15;
+  dim: true;
+  italic: true;
+}
+
+identifier "Ok", identifier "Err", identifier "Some", identifier "None" {|
+  color: cyan;
+|}
+
+identifier "Self",
+type_identifier "Self",
+"_" {|
+  color: purple;
+|}
+
+self {|
+  color: red;
+|}
+
