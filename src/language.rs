@@ -10,6 +10,7 @@ include!(concat!(env!("OUT_DIR"), "/languages.rs"));
 pub enum Lang {
     C,
     Cpp,
+    CSharp,
     Rust,
     Ruby,
     EmbeddedTemplate,
@@ -23,6 +24,10 @@ pub enum Lang {
     OCaml,
     Html,
     Css,
+    Java,
+    Scala,
+    Agda,
+    Regex,
     Syncat,
 }
 
@@ -36,8 +41,10 @@ impl std::str::FromStr for Lang {
             return Ok(Cpp);
         }
         match name.trim().to_lowercase().as_str() {
+            "agda"                              => Ok(Agda),
             "rs" | "rust"                       => Ok(Rust),
             "rb" | "ruby"                       => Ok(Ruby),
+            "cs" | "csharp" | "c#"              => Ok(CSharp),
             "erb" | "ejs"                       => Ok(EmbeddedTemplate),
             "js" | "javascript"                 => Ok(JavaScript),
             "json"                              => Ok(Json),
@@ -50,7 +57,10 @@ impl std::str::FromStr for Lang {
             "c" | "h"                           => Ok(C),
             "cpp" | "cc" | "hpp" | "hh" | "c++" => Ok(Cpp),
             "html" | "htm"                      => Ok(Html),
+            "java"                              => Ok(Java),
+            "scala"                             => Ok(Scala),
             "css"                               => Ok(Css),
+            "regex"                             => Ok(Regex),
             "syncat"                            => Ok(Syncat),
             _                                   => Err(Box::new(Error(format!("Unknown language {}", name)))),
         }
@@ -62,8 +72,10 @@ impl Lang {
         use Lang::*;
         unsafe {
             match *self {
+                Agda             => tree_sitter_agda(),
                 C                => tree_sitter_c(),
                 Cpp              => tree_sitter_cpp(),
+                CSharp           => tree_sitter_c_sharp(),
                 Rust             => tree_sitter_rust(),
                 Ruby             => tree_sitter_ruby(),
                 EmbeddedTemplate => tree_sitter_embedded_template(),
@@ -77,6 +89,9 @@ impl Lang {
                 OCaml            => tree_sitter_ocaml(),
                 Html             => tree_sitter_html(),
                 Css              => tree_sitter_css(),
+                Java             => tree_sitter_java(),
+                Scala            => tree_sitter_scala(),
+                Regex            => tree_sitter_regex(),
                 Syncat           => tree_sitter_syncat_stylesheet(),
             }
         }
@@ -85,8 +100,10 @@ impl Lang {
     fn ext(&self) -> &'static str {
         use Lang::*;
         match *self {
+            Agda             => "agda",
             C                => "c",
             Cpp              => "cpp",
+            CSharp           => "cs",
             Rust             => "rs",
             Ruby             => "rb",
             EmbeddedTemplate => "template",
@@ -100,6 +117,9 @@ impl Lang {
             OCaml            => "ml",
             Html             => "html",
             Css              => "css",
+            Java             => "java",
+            Scala            => "scala",
+            Regex            => "regex",
             Syncat           => "syncat",
         }
     }
