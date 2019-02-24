@@ -33,7 +33,13 @@ fn main() {
 
     files
         .into_iter()
-        .map(|path| (path.extension().and_then(|s| s.to_str()).map(|s| s.to_string()), fs::read_to_string(path)))
+        .map(|path| (
+            path.extension()
+                .and_then(|s| s.to_str())
+                .map(|s| s.to_string()), 
+            fs::read_to_string(&path)
+                .map_err(|error| error::Error(format!("{:?}: {}", path, error))),
+        ))
         .map(|(lang, contents)| -> Result<String, Box<dyn std::error::Error>> {
             let contents: String = contents?;
             syntax.as_ref()
@@ -56,7 +62,7 @@ fn main() {
         .for_each(|result| {
             match result {
                 Ok(text) => print!("{}", text),
-                Err(error) => eprintln!("Error: {:?}", error),
+                Err(error) => eprint!("syncat: {}", error),
             }
         });
 }
