@@ -1,0 +1,15 @@
+string {
+  color: green;
+}
+
+number {
+  color: 11;
+}
+
+true, false {
+  color: 11;
+}
+
+null {
+  color: purple;
+}
