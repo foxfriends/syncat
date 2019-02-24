@@ -30,7 +30,7 @@ impl StyleBuilder {
         }
     }
 
-    pub fn merge_with(&mut self, other: StyleBuilder) {
+    pub fn merge_with(mut self, other: StyleBuilder) -> Self {
         self.foreground       = other.foreground.or(self.foreground);
         self.background       = other.background.or(self.background);
         self.is_italic        = other.is_italic.or(self.is_italic);
@@ -41,6 +41,7 @@ impl StyleBuilder {
         self.is_blink         = other.is_blink.or(self.is_blink);
         self.is_hidden        = other.is_hidden.or(self.is_hidden);
         self.is_reverse       = other.is_reverse.or(self.is_reverse);
+        self
     }
 }
 

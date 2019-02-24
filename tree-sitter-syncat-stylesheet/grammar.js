@@ -11,27 +11,27 @@ module.exports = grammar({
     _selectors: $ => choice(seq($._selectors, ",", $.selector), $.selector),
 
     selector: $ => choice(
-      $.token,
-      seq($._kind_list, optional($.token)),
+      $._terminal_selector,
+      seq($._selector_scope, $._terminal_selector),
     ),
 
-    _kind_list: $ => choice(
-      $.node_kind,
-      seq($._kind_list, $._specified_node),
+    _terminal_selector: $ => choice($.node_kind, $.token),
+
+    _selector_scope: $ => choice(
+      seq($._selector_scope, $._selector_node),
+      $._selector_node,
     ),
 
-    _specified_node: $ => choice(
-      $.node_kind,
+    _selector_node: $ => choice(
       $.direct_child,
+      $.node_kind,
     ),
 
-    direct_child: $ => seq(">", $.node_kind),
+    direct_child: $ => seq($.node_kind, '>'),
+    node_kind: $ => /[A-Za-z0-9-_]+/,
+    token: $ => /"(?:[^"\\]|\\.)+"/,
 
     style: $ => seq($.style_name, ':', $.style_value, ';'),
-
-    node_kind: $ => /[A-Za-z0-9-_]+/,
-
-    token: $ => /"(?:[^"\\]|\\.)+"/,
 
     style_name: $ => choice(
       'colour', 'color',
@@ -46,12 +46,11 @@ module.exports = grammar({
       'reverse',
     ),
 
-    style_value: $ => choice(
-      'true', 'false', 
-      'red', 'blue', 'green', 'purple', 'yellow', 'black', 'white', 'cyan',
-      /#[a-fA-F0-9]{6}/,
-      /2[0-4][0-9]|25[0-5]|1?[0-9]{1,2}/,
-    ),
+    style_value: $ => choice($._boolean_value, $._color_literal, $._color_index, $._rgb_color),
+    _boolean_value: $ => choice('true', 'false'),
+    _color_literal: $ => choice('red', 'blue', 'green', 'purple', 'yellow', 'black', 'white', 'cyan'),
+    _color_index: $ => /#[a-fA-F0-9]{6}/,
+    _rgb_color: $ => /2[0-4][0-9]|25[0-5]|1?[0-9]{1,2}/,
 
     comment: $ => token(choice(
       seq('//', /.*/),

@@ -8,6 +8,7 @@ use std::env;
 
 use serde::Deserialize;
 
+/// The nodejs package.json file
 #[derive(Deserialize)]
 #[serde(rename_all="camelCase")]
 struct Package {

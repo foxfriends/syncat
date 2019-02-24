@@ -20,15 +20,12 @@ comment {
   color: #F38ca1;
 }
 
-string interpolation "${" {
+string interpolation > "${",
+string interpolation > "}" {
   /**
    * This is a long comment
    */
   color: 90;
-}
-
-string interpolation "}" {
-  color: 199;
 }
 
 ---
@@ -46,8 +43,8 @@ string interpolation "}" {
     (selector (token))
     (selector (token))
     (style (style_name) (style_value)))
-  (rule (selector (node_kind) (node_kind) (token))
+  (rule 
+    (selector (node_kind) (direct_child (node_kind)) (token))
+    (selector (node_kind) (direct_child (node_kind)) (token))
     (comment)
-    (style (style_name) (style_value)))
-  (rule (selector (node_kind) (node_kind) (token))
     (style (style_name) (style_value))))

@@ -5,39 +5,94 @@ use crate::style::{Colour, StyleBuilder};
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 enum SelectorSegment {
-    Node(String),
-    DirectChild(String),
+    Kind(String),
     Token(String),
+}
+
+#[derive(Debug)]
+enum StylesheetScope {
+    Child(Stylesheet),
+    DirectChild(Stylesheet),
+}
+
+impl StylesheetScope {
+    fn get(&self) -> &Stylesheet {
+        use StylesheetScope::*;
+        match self {
+            Child(inner) => inner,
+            DirectChild(inner) => inner,
+        }
+    }
+
+    fn get_mut(&mut self) -> &mut Stylesheet {
+        use StylesheetScope::*;
+        match self {
+            Child(inner) => inner,
+            DirectChild(inner) => inner,
+        }
+    }
+
+    fn resolve(&self, scopes: &[&str], token: Option<&str>) -> StyleBuilder {
+        use StylesheetScope::*;
+        match self {
+            Child(stylesheet) => stylesheet.resolve(scopes, token),
+            DirectChild(stylesheet) => {
+                let mut style = stylesheet.style;
+
+                if scopes.len() == 1 {
+                    let token_style = token
+                        .map(|token| SelectorSegment::Token(token.to_string()))
+                        .and_then(|scope| stylesheet.scopes.get(&scope))
+                        .map(|scoped| scoped.get().style);
+
+                    if let Some(token_style) = token_style {
+                        style = style.merge_with(token_style);
+                    }
+                }
+
+                let substyle = scopes.first()
+                    .map(|scope| SelectorSegment::Kind(scope.to_string()))
+                    .or(token.map(|token| SelectorSegment::Token(token.to_string())))
+                    .and_then(|scope| stylesheet.scopes.get(&scope))
+                    .map(|subsheet| subsheet.resolve(&scopes[1..], token));
+                if let Some(substyle) = substyle {
+                    style.merge_with(substyle)
+                } else {
+                    style
+                }
+            }
+        }
+    }
 }
 
 #[derive(Default, Debug)]
 pub struct Stylesheet {
     style: StyleBuilder,
-    scopes: BTreeMap<SelectorSegment, Stylesheet>,
+    scopes: BTreeMap<SelectorSegment, StylesheetScope>,
 }
 
 impl Stylesheet {
-    pub fn resolve(&self, scope: &[&str], token: Option<&str>) -> StyleBuilder {
+    pub fn resolve(&self, scopes: &[&str], token: Option<&str>) -> StyleBuilder {
         let mut style = self.style;
 
-        if let Some(substyle) = token.and_then(|token| self.scopes.get(&SelectorSegment::Token(format!("\"{}\"", token)))) {
-            style.merge_with(substyle.style);
+        let token_style = token
+            .map(|token| SelectorSegment::Token(token.to_string()))
+            .and_then(|scope| self.scopes.get(&scope))
+            .map(|scoped| scoped.get().style);
+
+        if let Some(token_style) = token_style {
+            style = style.merge_with(token_style);
         }
 
-        for i in (0..scope.len()).rev() {
-            if let Some(substyle) = self.scopes.get(&SelectorSegment::Node(scope[i].to_string())) {
-                style.merge_with(substyle.resolve(&scope[i..], token));
-
-                let direct_child = scope
-                    .get(i + 1)
-                    .and_then(|value| substyle.scopes.get(&SelectorSegment::DirectChild(value.to_string())));
-                if let Some(subsubstyle) = direct_child {
-                    style.merge_with(subsubstyle.resolve(&scope[i+1..], token));
+        (0..scopes.len())
+            .rev()
+            .fold(style, |style, i| {
+                if let Some(subscope) = self.scopes.get(&SelectorSegment::Kind(scopes[i].to_string())) {
+                    style.merge_with(subscope.resolve(&scopes[i+1..], token))
+                } else {
+                    style
                 }
-            }
-        }
-
-        style
+            })
     }
 }
 
@@ -114,27 +169,30 @@ impl Stylesheet {
         Ok(())
     }
 
-    fn parse_selector(source: &str, node: Node) -> Result<Vec<SelectorSegment>, Box<dyn std::error::Error>> {
-        let mut scope = vec![];
+    fn parse_selector(&mut self, source: &str, node: Node, stylebuilder: StyleBuilder) -> Result<(), Box<dyn std::error::Error>> {
+        let mut scope: &mut Stylesheet = self;
+        use SelectorSegment::*;
+        use StylesheetScope::*;
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
                 "node_kind" => {
                     let name = &source[child.start_byte()..child.end_byte()];
-                    scope.push(SelectorSegment::Node(name.to_string()));
+                    scope = scope.scopes.entry(Kind(name.to_string())).or_insert_with(|| Child(Stylesheet::default())).get_mut();
                 }
                 "token" => {
-                    let name = &source[child.start_byte()..child.end_byte()];
-                    scope.push(SelectorSegment::Token(name.to_string()));
+                    let name = &source[child.start_byte() + 1..child.end_byte() - 1];
+                    scope = scope.scopes.entry(Token(name.to_string())).or_insert_with(|| Child(Stylesheet::default())).get_mut();
                 }
                 "direct_child" => {
                     let named_child = child.named_child(0).ok_or(Box::new(Error(format!("Missing child when parsing direct_child"))))?;
                     let name = &source[named_child.start_byte()..named_child.end_byte()];
-                    scope.push(SelectorSegment::DirectChild(name.to_string()));
+                    scope = scope.scopes.entry(Kind(name.to_string())).or_insert_with(|| DirectChild(Stylesheet::default())).get_mut();
                 }
                 kind => return Err(Box::new(Error(format!("Invalid state {} while parsing selector", kind)))),
             }
         }
-        Ok(scope)
+        scope.style = stylebuilder;
+        Ok(())
     }
 
     fn parse_rule(&mut self, source: &str, node: Node) -> Result<(), Box<dyn std::error::Error>> {
@@ -142,17 +200,13 @@ impl Stylesheet {
         let mut stylebuilder = StyleBuilder::default();
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
-                "selector" => selectors.push(Stylesheet::parse_selector(source, child)?),
+                "selector" => selectors.push(child),
                 "style" => Stylesheet::parse_style(source, &mut stylebuilder, child)?,
                 kind => return Err(Box::new(Error(format!("Invalid state {} while parsing rule", kind)))),
             }
         }
-        for selector in &selectors {
-            let mut scoped: &mut Stylesheet = self;
-            for segment in selector {
-                scoped = scoped.scopes.entry(segment.clone()).or_default();
-            }
-            scoped.style.merge_with(stylebuilder);
+        for node in selectors.into_iter() {
+            self.parse_selector(source, node, stylebuilder)?;
         }
         Ok(())
     }
