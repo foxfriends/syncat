@@ -28,6 +28,7 @@
     "tree-sitter-go": "^0.13.3",
     "tree-sitter-html": "^0.13.5",
     "tree-sitter-javascript": "^0.13.10",
+    "tree-sitter-json": "^0.13.1",
     "tree-sitter-ocaml": "^0.13.1",
     "tree-sitter-php": "^0.13.1",
     "tree-sitter-python": "^0.13.6",
