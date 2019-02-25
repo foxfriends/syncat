@@ -1,0 +1,15 @@
+============
+Branch check
+============
+
+raw_element [tag_name "script"] raw_text {
+  language: js;
+}
+
+---
+
+(stylesheet
+  (rule
+    (selector (node_kind) (branch_check (selector (node_kind) (token))) (node_kind))
+    (styles 
+      (style (style_name) (style_value)))))

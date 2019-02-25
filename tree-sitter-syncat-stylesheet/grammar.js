@@ -26,10 +26,12 @@ module.exports = grammar({
     ),
 
     _selector_node: $ => choice(
+      $.branch_check,
       $.direct_child,
       $.node_kind,
     ),
 
+    branch_check: $ => seq('[', $.selector, ']'),
     direct_child: $ => seq($.node_kind, '>'),
     node_kind: $ => $._unquoted_string,
     token: $ => $._quoted_string,
