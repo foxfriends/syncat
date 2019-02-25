@@ -6,7 +6,7 @@ use crate::error::Error;
 
 include!(concat!(env!("OUT_DIR"), "/languages.rs"));
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Lang {
     C,
     Cpp,

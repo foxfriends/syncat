@@ -43,9 +43,9 @@ fn print<E: std::error::Error, I: Iterator<Item = (Option<String>, Result<String
                 })
                 .map(|(tree, lang)| {
                     if dev {
-                        colorize::tree(&contents, tree, &lang.style()?)
+                        colorize::print_tree(&contents, tree, &lang.style()?)
                     } else { 
-                        colorize::source(&contents, tree, &lang.style()?)
+                        colorize::print_source(&contents, tree, &lang.style()?)
                     }
                 })
                 .unwrap_or_else(move || Ok(contents))

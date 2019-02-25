@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use tree_sitter::{Tree, Node};
 use crate::error::Error;
 use crate::style::{Colour, StyleBuilder};
+use crate::language::Lang;
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 enum SelectorSegment {
@@ -163,6 +164,11 @@ impl Stylesheet {
 
             ("hidden", "true") => { stylebuilder.is_hidden = setting(important, true); }
             ("hidden", "false") => { stylebuilder.is_hidden = setting(important, false); }
+
+            ("language", lang) => {
+                let language = lang.parse::<Lang>()?;
+                stylebuilder.language = setting(important, language);
+            }
 
             _ => {}
         }

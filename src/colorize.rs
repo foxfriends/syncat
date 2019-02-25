@@ -1,4 +1,4 @@
-use tree_sitter::{Tree, Node};
+use tree_sitter::{Tree, Node, Parser};
 
 use crate::stylesheet::Stylesheet;
 
@@ -19,9 +19,16 @@ fn colorize_node<'a>(
         // print a child node
         let token = &source[node.start_byte()..node.end_byte()];
         scope.push(node.kind());
-        let style = stylesheet.resolve(scope, Some(token)).build();
+        let style = stylesheet.resolve(scope, Some(token));
         scope.pop();
-        output.push_str(&format!("{}", style.paint(token)));
+        if let Some(language) = style.language() {
+            let mut parser = Parser::new();
+            parser.set_language(language.parser()).unwrap();
+            let tree = parser.parse(token, None).unwrap();
+            output.push_str(&print_source(token, tree, &language.style()?)?);
+        } else {
+            output.push_str(&format!("{}", style.build().paint(token)));
+        }
         *pos = node.end_byte();
     } else {
         // recurse for a middle node
@@ -34,7 +41,7 @@ fn colorize_node<'a>(
     Ok(())
 }
 
-pub fn source<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, Box<dyn std::error::Error>> {
+pub fn print_source<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, Box<dyn std::error::Error>> {
     let source = source.as_ref();
     let node = tree.root_node();
     let mut output = String::new();
@@ -56,9 +63,17 @@ fn colorize_node_sexp<'a>(
         // print a child node
         let token = &source[node.start_byte()..node.end_byte()];
         scope.push(node.kind());
-        let style = stylesheet.resolve(scope, Some(token)).build();
+        let style = stylesheet.resolve(scope, Some(token));
         scope.pop();
-        output.push_str(&format!("({} \"{}\")", style.paint(node.kind()), style.paint(token)));
+        if let Some(language) = style.language() {
+            let mut parser = Parser::new();
+            parser.set_language(language.parser()).unwrap();
+            let tree = parser.parse(token, None).unwrap();
+            output.push_str(&print_tree(token, tree, &language.style()?)?);
+        } else {
+            let style = style.build();
+            output.push_str(&format!("({} \"{}\")", style.paint(node.kind()), style.paint(token)));
+        }
         *pos = node.end_byte();
     } else {
         // recurse for a middle node
@@ -75,7 +90,7 @@ fn colorize_node_sexp<'a>(
     Ok(())
 }
 
-pub fn tree<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, Box<dyn std::error::Error>> { 
+pub fn print_tree<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, Box<dyn std::error::Error>> { 
     let source = source.as_ref();
     let node = tree.root_node();
     let mut output = String::new();
