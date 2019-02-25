@@ -2,12 +2,15 @@
 Multiple selectors
 ==================
 
-hello world, second selector { }
+hello world, second selector { 
+  italic: true
+}
 
 ---
 
-(source_file
+(stylesheet
   (rule 
     (selector (node_kind) (node_kind))
     (selector (node_kind) (node_kind))
-    (styles)))
+    (styles
+      (style (style_name) (style_value)))))

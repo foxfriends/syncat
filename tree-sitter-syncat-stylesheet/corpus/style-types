@@ -1,0 +1,48 @@
+===========
+Style types
+===========
+
+color_types {
+  color: red;
+  background-color: blue;
+  colour: 133;
+  background-colour: #112233;
+}
+
+boolean_types {
+  italic: true;
+  underline: false;
+  strikethrough: true;
+  dim: false;
+  blink: true;
+  hidden: false;
+  reverse: true;
+}
+
+string_types { language: rs; language: "hello world" }
+
+---
+
+(stylesheet
+  (rule 
+    (selector (node_kind))
+    (styles
+      (style (style_name) (style_value))
+      (style (style_name) (style_value))
+      (style (style_name) (style_value))
+      (style (style_name) (style_value))))
+  (rule 
+    (selector (node_kind))
+    (styles
+      (style (style_name) (style_value))
+      (style (style_name) (style_value))
+      (style (style_name) (style_value))
+      (style (style_name) (style_value))
+      (style (style_name) (style_value))
+      (style (style_name) (style_value))
+      (style (style_name) (style_value))))
+  (rule 
+    (selector (node_kind))
+    (styles
+      (style (style_name) (style_value))
+      (style (style_name) (style_value)))))

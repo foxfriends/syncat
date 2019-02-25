@@ -8,7 +8,7 @@ block "{" {
 
 ---
 
-(source_file
+(stylesheet
   (rule 
     (selector (node_kind) (token))
     (styles

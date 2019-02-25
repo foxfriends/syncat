@@ -8,7 +8,7 @@ root {
 
 ---
 
-(source_file
+(stylesheet
   (rule 
     (selector (node_kind))
     (styles

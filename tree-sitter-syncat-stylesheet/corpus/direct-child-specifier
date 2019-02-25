@@ -1,6 +1,6 @@
-=========
-Specifier
-=========
+======================
+Direct child specifier
+======================
 
 function_item > identifier {
   color: blue;
@@ -8,7 +8,7 @@ function_item > identifier {
 
 ---
 
-(source_file
+(stylesheet
   (rule
     (selector (direct_child (node_kind)) (node_kind))
     (styles

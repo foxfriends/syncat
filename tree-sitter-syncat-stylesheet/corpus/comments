@@ -6,6 +6,7 @@ Comments
 
 test {
   // hello world
+  italic: true;
 }
 
 /* hello
@@ -13,9 +14,11 @@ world */
 
 ---
 
-(source_file
+(stylesheet
   (comment)
   (rule
     (selector (node_kind))
-    (styles (comment)))
+    (styles 
+      (comment) 
+      (style (style_name) (style_value))))
   (comment))
