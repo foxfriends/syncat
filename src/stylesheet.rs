@@ -225,7 +225,7 @@ impl Stylesheet {
 
     fn parse_node(&mut self, source: &str, node: Node) -> Result<(), Box<dyn std::error::Error>> {
         match node.kind() {
-            "source_file" => {
+            "stylesheet" => {
                 for child in node.children().filter(Node::is_named) {
                     self.parse_node(source, child)?;
                 }
