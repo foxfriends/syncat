@@ -12,6 +12,17 @@ enum SelectorSegment {
     BranchCheck(Vec<SelectorSegment>, Box<SelectorSegment>)
 }
 
+impl SelectorSegment {
+    fn to_basic(self) -> Self {
+        use SelectorSegment::*;
+        match self {
+            DirectChild(name) => Kind(name),
+            BranchCheck(.., inner) => inner.to_basic(),
+            _ => self,
+        }
+    }
+}
+
 #[derive(Debug)]
 enum StylesheetScope {
     Child(Stylesheet),
@@ -228,49 +239,35 @@ impl Stylesheet {
         Ok(selector)
     }
 
-    fn handle_selector(&mut self, source: &str, node: Node, stylebuilder: StyleBuilder) -> Result<(), Box<dyn std::error::Error>> {
+    fn handle_selector(&mut self, selector: Vec<SelectorSegment>, stylebuilder: StyleBuilder) -> Result<(), Box<dyn std::error::Error>> {
+        use SelectorSegment::*;
         let mut scope: &mut Stylesheet = self;
-        for child in node.children().filter(Node::is_named) {
-            match child.kind() {
-                "node_kind" => {
-                    let name = &source[child.start_byte()..child.end_byte()];
+        for segment in selector.into_iter() {
+            match segment {
+                Kind(..) | Token(..) => {
                     scope = scope.scopes
-                        .entry(SelectorSegment::Kind(name.to_string()))
+                        .entry(segment)
                         .or_insert_with(|| StylesheetScope::Child(Stylesheet::default()))
                         .get_mut();
                 }
-                "token" => {
-                    let name = &source[child.start_byte() + 1..child.end_byte() - 1];
+                DirectChild(..) => {
                     scope = scope.scopes
-                        .entry(SelectorSegment::Token(name.to_string()))
-                        .or_insert_with(|| StylesheetScope::Child(Stylesheet::default()))
-                        .get_mut();
-                }
-                "direct_child" => {
-                    let named_child = child.named_child(0).ok_or(Box::new(Error(format!("Missing child when parsing direct_child"))))?;
-                    let name = &source[named_child.start_byte()..named_child.end_byte()];
-                    scope = scope.scopes
-                        .entry(SelectorSegment::Kind(name.to_string()))
+                        .entry(segment.to_basic())
                         .or_insert_with(|| StylesheetScope::DirectChild(Stylesheet::default()))
                         .get_mut();
                 }
-                "branch_check" => {
-                    if let SelectorSegment::BranchCheck(selector, segment) = Stylesheet::parse_branch_check(source, child)? {
-                        let branch_check = scope.scopes
-                            .entry(*segment)
-                            .or_insert_with(|| StylesheetScope::BranchCheck(BTreeMap::default()));
-                        if let StylesheetScope::BranchCheck(map) = branch_check {
-                            scope = map
-                                .entry(selector)
-                                .or_insert_with(|| Stylesheet::default());
-                        } else {
-                            unreachable!("");
-                        }
+                BranchCheck(selector, segment) => {
+                    let branch_check = scope.scopes
+                        .entry(*segment)
+                        .or_insert_with(|| StylesheetScope::BranchCheck(BTreeMap::default()));
+                    if let StylesheetScope::BranchCheck(map) = branch_check {
+                        scope = map
+                            .entry(selector)
+                            .or_insert_with(|| Stylesheet::default());
                     } else {
-                        unreachable!("parse_branch_check always returns SelectorSegment::BranchCheck");
+                        unreachable!("");
                     }
                 }
-                kind => return Err(Box::new(Error(format!("Invalid state {} while parsing selector", kind)))),
             }
         }
         scope.style = stylebuilder;
@@ -292,14 +289,14 @@ impl Stylesheet {
         let mut stylebuilder = StyleBuilder::default();
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
-                "selector" => selectors.push(child),
+                "selector" => selectors.push(Stylesheet::parse_selector(source, child)?),
                 "important_styles" => Stylesheet::parse_styles(source, &mut stylebuilder, child, true)?,
                 "styles" => Stylesheet::parse_styles(source, &mut stylebuilder, child, false)?,
                 kind => return Err(Box::new(Error(format!("Invalid state {} while parsing rule", kind)))),
             }
         }
-        for node in selectors.into_iter() {
-            self.handle_selector(source, node, stylebuilder)?;
+        for selector in selectors.into_iter() {
+            self.handle_selector(selector, stylebuilder)?;
         }
         Ok(())
     }
