@@ -1,31 +1,6 @@
 use super::*;
 
 impl Stylesheet {
-    pub fn resolve(&self, scopes: &[&str], token: Option<&str>) -> StyleBuilder {
-        let mut style = self.style;
-
-        let token_style = token
-            .map(|token| SelectorSegment::Token(token.to_string()))
-            .and_then(|scope| self.scopes.get(&scope))
-            .map(|scoped| scoped.get().style);
-
-        if let Some(token_style) = token_style {
-            style = style.merge_with(token_style);
-        }
-
-        (0..scopes.len())
-            .rev()
-            .fold(style, |style, i| {
-                if let Some(subscope) = self.scopes.get(&SelectorSegment::Kind(scopes[i].to_string())) {
-                    style.merge_with(subscope.resolve(&scopes[i+1..], token))
-                } else {
-                    style
-                }
-            })
-    }
-}
-
-impl Stylesheet {
     fn parse_color(color: &str) -> Result<Colour, Box<dyn std::error::Error>> {
         match color {
             "red"    => Ok(Colour::Red),

@@ -4,7 +4,10 @@ use crate::error::Error;
 use crate::style::{Colour, StyleBuilder};
 use crate::language::Lang;
 
+mod resolver;
 mod parser;
+
+pub use resolver::Context;
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 enum SelectorSegment {
@@ -50,40 +53,6 @@ impl StylesheetScope {
             BranchCheck(..) => panic!("This is an invalid operation"),
         }
     }
-
-    fn resolve(&self, scopes: &[&str], token: Option<&str>) -> StyleBuilder {
-        use StylesheetScope::*;
-        match self {
-            Child(stylesheet) => stylesheet.resolve(scopes, token),
-            DirectChild(stylesheet) => {
-                let mut style = stylesheet.style;
-
-                if scopes.len() == 1 {
-                    let token_style = token
-                        .map(|token| SelectorSegment::Token(token.to_string()))
-                        .and_then(|scope| stylesheet.scopes.get(&scope))
-                        .map(|scoped| scoped.get().style);
-                    if let Some(token_style) = token_style {
-                        style = style.merge_with(token_style);
-                    }
-                }
-
-                let substyle = scopes.first()
-                    .map(|scope| SelectorSegment::Kind(scope.to_string()))
-                    .or(token.map(|token| SelectorSegment::Token(token.to_string())))
-                    .and_then(|scope| stylesheet.scopes.get(&scope))
-                    .map(|subsheet| subsheet.resolve(&scopes[1..], token));
-                if let Some(substyle) = substyle {
-                    style.merge_with(substyle)
-                } else {
-                    style
-                }
-            },
-            BranchCheck(branches) => {
-                unimplemented!();
-            },
-        }
-    }
 }
 
 #[derive(Default, Debug)]
@@ -91,4 +60,3 @@ pub struct Stylesheet {
     style: StyleBuilder,
     scopes: BTreeMap<SelectorSegment, StylesheetScope>,
 }
-
