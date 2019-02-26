@@ -91,11 +91,54 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "_conditional_terminal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_concrete_terminal"
+        }
+      ]
+    },
+    "_conditional_terminal": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "_branch_check_terminal"
+      },
+      "named": true,
+      "value": "branch_check"
+    },
+    "_concrete_terminal": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
           "name": "node_kind"
         },
         {
           "type": "SYMBOL",
           "name": "token"
+        }
+      ]
+    },
+    "_branch_check_terminal": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "["
+        },
+        {
+          "type": "SYMBOL",
+          "name": "selector"
+        },
+        {
+          "type": "STRING",
+          "value": "]"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_concrete_terminal"
         }
       ]
     },
@@ -126,8 +169,21 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "branch_check"
+          "name": "_conditional_node"
         },
+        {
+          "type": "SYMBOL",
+          "name": "_concrete_node"
+        }
+      ]
+    },
+    "_conditional_node": {
+      "type": "SYMBOL",
+      "name": "branch_check"
+    },
+    "_concrete_node": {
+      "type": "CHOICE",
+      "members": [
         {
           "type": "SYMBOL",
           "name": "direct_child"
@@ -152,6 +208,10 @@
         {
           "type": "STRING",
           "value": "]"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_concrete_node"
         }
       ]
     },

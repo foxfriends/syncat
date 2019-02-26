@@ -18,7 +18,19 @@ module.exports = grammar({
       seq($._selector_scope, $._terminal_selector),
     ),
 
-    _terminal_selector: $ => choice($.node_kind, $.token),
+    _terminal_selector: $ => choice(
+      $._conditional_terminal,
+      $._concrete_terminal,
+    ),
+
+    _conditional_terminal: $ => alias($._branch_check_terminal, $.branch_check),
+
+    _concrete_terminal: $ => choice(
+      $.node_kind, 
+      $.token,
+    ),
+
+    _branch_check_terminal: $ => seq('[', $.selector, ']', $._concrete_terminal),
 
     _selector_scope: $ => choice(
       seq($._selector_scope, $._selector_node),
@@ -26,12 +38,18 @@ module.exports = grammar({
     ),
 
     _selector_node: $ => choice(
-      $.branch_check,
+      $._conditional_node,
+      $._concrete_node,
+    ),
+
+    _conditional_node: $ => $.branch_check,
+
+    _concrete_node: $ => choice(
       $.direct_child,
       $.node_kind,
     ),
 
-    branch_check: $ => seq('[', $.selector, ']'),
+    branch_check: $ => seq('[', $.selector, ']', $._concrete_node),
     direct_child: $ => seq($.node_kind, '>'),
     node_kind: $ => $._unquoted_string,
     token: $ => $._quoted_string,

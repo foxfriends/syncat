@@ -8,28 +8,33 @@ use crate::language::Lang;
 enum SelectorSegment {
     Kind(String),
     Token(String),
+    DirectChild(String),
+    BranchCheck(Vec<SelectorSegment>, Box<SelectorSegment>)
 }
 
 #[derive(Debug)]
 enum StylesheetScope {
     Child(Stylesheet),
     DirectChild(Stylesheet),
+    BranchCheck(BTreeMap<Vec<SelectorSegment>, Stylesheet>),
 }
 
 impl StylesheetScope {
     fn get(&self) -> &Stylesheet {
         use StylesheetScope::*;
         match self {
-            Child(inner) => inner,
+            Child(inner)       => inner,
             DirectChild(inner) => inner,
+            BranchCheck(..) => panic!("This is an invalid operation"),
         }
     }
 
     fn get_mut(&mut self) -> &mut Stylesheet {
         use StylesheetScope::*;
         match self {
-            Child(inner) => inner,
+            Child(inner)       => inner,
             DirectChild(inner) => inner,
+            BranchCheck(..) => panic!("This is an invalid operation"),
         }
     }
 
@@ -61,7 +66,10 @@ impl StylesheetScope {
                 } else {
                     style
                 }
-            }
+            },
+            BranchCheck(branches) => {
+                unimplemented!();
+            },
         }
     }
 }
@@ -176,24 +184,91 @@ impl Stylesheet {
         Ok(())
     }
 
-    fn parse_selector(&mut self, source: &str, node: Node, stylebuilder: StyleBuilder) -> Result<(), Box<dyn std::error::Error>> {
-        let mut scope: &mut Stylesheet = self;
+    fn parse_selector_segment(source: &str, node: Node) -> Result<SelectorSegment, Box<dyn std::error::Error>> {
         use SelectorSegment::*;
-        use StylesheetScope::*;
+        match node.kind() {
+            "node_kind" => {
+                let name = &source[node.start_byte()..node.end_byte()];
+                Ok(Kind(name.to_string()))
+            }
+            "token" => {
+                let name = &source[node.start_byte() + 1..node.end_byte() - 1];
+                Ok(Token(name.to_string()))
+            }
+            "direct_child" => {
+                let named_child = node.named_child(0).ok_or(Box::new(Error(format!("Missing child when parsing direct_child"))))?;
+                let name = &source[named_child.start_byte()..named_child.end_byte()];
+                Ok(DirectChild(name.to_string()))
+            }
+            "branch_check" => Stylesheet::parse_branch_check(source, node),
+            kind => return Err(Box::new(Error(format!("Invalid state {} while parsing selector", kind)))),
+        }
+    }
+
+    fn parse_branch_check(source: &str, node: Node) -> Result<SelectorSegment, Box<dyn std::error::Error>> {
+        let mut selector = None;
+        let mut kind = None;
+        for child in node.children().filter(Node::is_named) {
+            match child.kind() {
+                "selector" => selector = Some(Stylesheet::parse_selector(source, child)?),
+                _ => kind = Some(Stylesheet::parse_selector_segment(source, child)?),
+            }
+        }
+        match (selector, kind) {
+            (Some(selector), Some(kind)) => Ok(SelectorSegment::BranchCheck(selector, Box::new(kind))),
+            _ => Err(Box::new(Error(format!("Failed to parse branch_check")))),
+        }
+    }
+
+    fn parse_selector(source: &str, node: Node) -> Result<Vec<SelectorSegment>, Box<dyn std::error::Error>> {
+        let mut selector = vec![];
+        for child in node.children().filter(Node::is_named) {
+            selector.push(Stylesheet::parse_selector_segment(source, child)?);
+        }
+        Ok(selector)
+    }
+
+    fn handle_selector(&mut self, source: &str, node: Node, stylebuilder: StyleBuilder) -> Result<(), Box<dyn std::error::Error>> {
+        let mut scope: &mut Stylesheet = self;
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
                 "node_kind" => {
                     let name = &source[child.start_byte()..child.end_byte()];
-                    scope = scope.scopes.entry(Kind(name.to_string())).or_insert_with(|| Child(Stylesheet::default())).get_mut();
+                    scope = scope.scopes
+                        .entry(SelectorSegment::Kind(name.to_string()))
+                        .or_insert_with(|| StylesheetScope::Child(Stylesheet::default()))
+                        .get_mut();
                 }
                 "token" => {
                     let name = &source[child.start_byte() + 1..child.end_byte() - 1];
-                    scope = scope.scopes.entry(Token(name.to_string())).or_insert_with(|| Child(Stylesheet::default())).get_mut();
+                    scope = scope.scopes
+                        .entry(SelectorSegment::Token(name.to_string()))
+                        .or_insert_with(|| StylesheetScope::Child(Stylesheet::default()))
+                        .get_mut();
                 }
                 "direct_child" => {
                     let named_child = child.named_child(0).ok_or(Box::new(Error(format!("Missing child when parsing direct_child"))))?;
                     let name = &source[named_child.start_byte()..named_child.end_byte()];
-                    scope = scope.scopes.entry(Kind(name.to_string())).or_insert_with(|| DirectChild(Stylesheet::default())).get_mut();
+                    scope = scope.scopes
+                        .entry(SelectorSegment::Kind(name.to_string()))
+                        .or_insert_with(|| StylesheetScope::DirectChild(Stylesheet::default()))
+                        .get_mut();
+                }
+                "branch_check" => {
+                    if let SelectorSegment::BranchCheck(selector, segment) = Stylesheet::parse_branch_check(source, child)? {
+                        let branch_check = scope.scopes
+                            .entry(*segment)
+                            .or_insert_with(|| StylesheetScope::BranchCheck(BTreeMap::default()));
+                        if let StylesheetScope::BranchCheck(map) = branch_check {
+                            scope = map
+                                .entry(selector)
+                                .or_insert_with(|| Stylesheet::default());
+                        } else {
+                            unreachable!("");
+                        }
+                    } else {
+                        unreachable!("parse_branch_check always returns SelectorSegment::BranchCheck");
+                    }
                 }
                 kind => return Err(Box::new(Error(format!("Invalid state {} while parsing selector", kind)))),
             }
@@ -224,7 +299,7 @@ impl Stylesheet {
             }
         }
         for node in selectors.into_iter() {
-            self.parse_selector(source, node, stylebuilder)?;
+            self.handle_selector(source, node, stylebuilder)?;
         }
         Ok(())
     }
