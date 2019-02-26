@@ -19,38 +19,38 @@ module.exports = grammar({
     ),
 
     _terminal_selector: $ => choice(
-      $._conditional_terminal,
-      $._concrete_terminal,
+      $._simple_terminal,
+      $._complex_terminal,
     ),
-
-    _conditional_terminal: $ => alias($._branch_check_terminal, $.branch_check),
-
-    _concrete_terminal: $ => choice(
-      $.node_kind, 
-      $.token,
-    ),
-
-    _branch_check_terminal: $ => seq('[', $.selector, ']', $._concrete_terminal),
 
     _selector_scope: $ => choice(
-      seq($._selector_scope, $._selector_node),
       $._selector_node,
+      seq($._selector_scope, $._selector_node),
     ),
 
     _selector_node: $ => choice(
-      $._conditional_node,
-      $._concrete_node,
+      $._complex_node,
+      $._simple_node,
     ),
 
-    _conditional_node: $ => $.branch_check,
+    _simple_terminal: $ => choice(
+      $.node_kind,
+      $.token,
+    ),
 
-    _concrete_node: $ => choice(
-      $.direct_child,
+    _complex_terminal: $ => alias($.direct_terminal, $.direct_child),
+
+    _simple_node: $ => choice(
+      $.branch_check,
       $.node_kind,
     ),
 
-    branch_check: $ => seq('[', $.selector, ']', $._concrete_node),
-    direct_child: $ => seq($.node_kind, '>'),
+    _complex_node: $ => $.direct_child,
+
+    direct_child: $ => seq('>', $._simple_node),
+    direct_terminal: $ => seq('>', $._simple_terminal),
+
+    branch_check: $ => seq('[', $.selector, ']'),
     node_kind: $ => $._unquoted_string,
     token: $ => $._quoted_string,
 

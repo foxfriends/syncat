@@ -2,7 +2,9 @@
 Direct child specifier
 ======================
 
-function_item > identifier {
+function_item > "fn",
+function_item > identifier,
+function_item > arguments identifier {
   color: blue;
 }
 
@@ -10,6 +12,8 @@ function_item > identifier {
 
 (stylesheet
   (rule
-    (selector (direct_child (node_kind)) (node_kind))
+    (selector (node_kind) (direct_child (token)))
+    (selector (node_kind) (direct_child (node_kind)))
+    (selector (node_kind) (direct_child (node_kind)) (node_kind))
     (styles
       (style (style_name) (style_value)))))

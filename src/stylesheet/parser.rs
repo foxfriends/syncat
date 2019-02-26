@@ -91,27 +91,17 @@ impl Stylesheet {
                 Ok(Token(name.to_string()))
             }
             "direct_child" => {
-                let named_child = node.named_child(0).ok_or(Box::new(Error(format!("Missing child when parsing direct_child"))))?;
-                let name = &source[named_child.start_byte()..named_child.end_byte()];
-                Ok(DirectChild(name.to_string()))
+                Ok(DirectChild(Box::new(Stylesheet::parse_selector_segment(
+                    source, 
+                    node.named_child(0).ok_or(Box::new(Error(format!("Missing child when parsing direct_child"))))?,
+                )?)))
             }
-            "branch_check" => Stylesheet::parse_branch_check(source, node),
+            "branch_check" => {
+                let selector_node = node.named_child(0).ok_or(Box::new(Error(format!("Missing child when parsing branch_check"))))?;
+                let selector = Stylesheet::parse_selector(source, selector_node)?;
+                Ok(BranchCheck(selector))
+            }
             kind => return Err(Box::new(Error(format!("Invalid state {} while parsing selector", kind)))),
-        }
-    }
-
-    fn parse_branch_check(source: &str, node: Node) -> Result<SelectorSegment, Box<dyn std::error::Error>> {
-        let mut selector = None;
-        let mut kind = None;
-        for child in node.children().filter(Node::is_named) {
-            match child.kind() {
-                "selector" => selector = Some(Stylesheet::parse_selector(source, child)?),
-                _ => kind = Some(Stylesheet::parse_selector_segment(source, child)?),
-            }
-        }
-        match (selector, kind) {
-            (Some(selector), Some(kind)) => Ok(SelectorSegment::BranchCheck(selector, Box::new(kind))),
-            _ => Err(Box::new(Error(format!("Failed to parse branch_check")))),
         }
     }
 
@@ -124,35 +114,11 @@ impl Stylesheet {
     }
 
     fn handle_selector(&mut self, selector: Vec<SelectorSegment>, stylebuilder: StyleBuilder) -> Result<(), Box<dyn std::error::Error>> {
-        use SelectorSegment::*;
         let mut scope: &mut Stylesheet = self;
         for segment in selector.into_iter() {
-            match segment {
-                Kind(..) | Token(..) => {
-                    scope = scope.scopes
-                        .entry(segment)
-                        .or_insert_with(|| StylesheetScope::Child(Stylesheet::default()))
-                        .get_mut();
-                }
-                DirectChild(..) => {
-                    scope = scope.scopes
-                        .entry(segment.to_basic())
-                        .or_insert_with(|| StylesheetScope::DirectChild(Stylesheet::default()))
-                        .get_mut();
-                }
-                BranchCheck(selector, segment) => {
-                    let branch_check = scope.scopes
-                        .entry(*segment)
-                        .or_insert_with(|| StylesheetScope::BranchCheck(BTreeMap::default()));
-                    if let StylesheetScope::BranchCheck(map) = branch_check {
-                        scope = map
-                            .entry(selector)
-                            .or_insert_with(|| Stylesheet::default());
-                    } else {
-                        unreachable!("");
-                    }
-                }
-            }
+            scope = scope.scopes
+                .entry(segment)
+                .or_default();
         }
         scope.style = stylebuilder;
         Ok(())

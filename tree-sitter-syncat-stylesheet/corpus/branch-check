@@ -4,7 +4,7 @@ Branch check
 
 raw_element [tag_name "script"] raw_text,
 raw_element > [tag_name "script"] raw_text,
-raw_element [tag_name "script"] raw_text > test {
+raw_element > [tag_name "script"] > raw_text {
   language: js;
 }
 
@@ -12,8 +12,8 @@ raw_element [tag_name "script"] raw_text > test {
 
 (stylesheet
   (rule
-    (selector (node_kind) (branch_check (selector (node_kind) (token)) (node_kind)))
-    (selector (direct_child (node_kind)) (branch_check (selector (node_kind) (token)) (node_kind)))
-    (selector (node_kind) (branch_check (selector (node_kind) (token)) (direct_child (node_kind))) (node_kind))
+    (selector (node_kind) (branch_check (selector (node_kind) (token))) (node_kind))
+    (selector (node_kind) (direct_child (branch_check (selector (node_kind) (token)))) (node_kind))
+    (selector (node_kind) (direct_child (branch_check (selector (node_kind) (token)))) (direct_child (node_kind)))
     (styles 
       (style (style_name) (style_value)))))

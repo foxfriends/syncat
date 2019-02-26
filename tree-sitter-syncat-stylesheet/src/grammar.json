@@ -91,60 +91,21 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "_conditional_terminal"
+          "name": "_simple_terminal"
         },
         {
           "type": "SYMBOL",
-          "name": "_concrete_terminal"
-        }
-      ]
-    },
-    "_conditional_terminal": {
-      "type": "ALIAS",
-      "content": {
-        "type": "SYMBOL",
-        "name": "_branch_check_terminal"
-      },
-      "named": true,
-      "value": "branch_check"
-    },
-    "_concrete_terminal": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "node_kind"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "token"
-        }
-      ]
-    },
-    "_branch_check_terminal": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "["
-        },
-        {
-          "type": "SYMBOL",
-          "name": "selector"
-        },
-        {
-          "type": "STRING",
-          "value": "]"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_concrete_terminal"
+          "name": "_complex_terminal"
         }
       ]
     },
     "_selector_scope": {
       "type": "CHOICE",
       "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_selector_node"
+        },
         {
           "type": "SEQ",
           "members": [
@@ -157,10 +118,6 @@
               "name": "_selector_node"
             }
           ]
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_selector_node"
         }
       ]
     },
@@ -169,28 +126,76 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "_conditional_node"
+          "name": "_complex_node"
         },
         {
           "type": "SYMBOL",
-          "name": "_concrete_node"
+          "name": "_simple_node"
         }
       ]
     },
-    "_conditional_node": {
-      "type": "SYMBOL",
-      "name": "branch_check"
-    },
-    "_concrete_node": {
+    "_simple_terminal": {
       "type": "CHOICE",
       "members": [
         {
           "type": "SYMBOL",
-          "name": "direct_child"
+          "name": "node_kind"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "token"
+        }
+      ]
+    },
+    "_complex_terminal": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "direct_terminal"
+      },
+      "named": true,
+      "value": "direct_child"
+    },
+    "_simple_node": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "branch_check"
         },
         {
           "type": "SYMBOL",
           "name": "node_kind"
+        }
+      ]
+    },
+    "_complex_node": {
+      "type": "SYMBOL",
+      "name": "direct_child"
+    },
+    "direct_child": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": ">"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_simple_node"
+        }
+      ]
+    },
+    "direct_terminal": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": ">"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_simple_terminal"
         }
       ]
     },
@@ -208,23 +213,6 @@
         {
           "type": "STRING",
           "value": "]"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "_concrete_node"
-        }
-      ]
-    },
-    "direct_child": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "node_kind"
-        },
-        {
-          "type": "STRING",
-          "value": ">"
         }
       ]
     },

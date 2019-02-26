@@ -28,66 +28,57 @@ impl Context {
                 .or_default();
         }
     }
-}
 
-impl StylesheetScope {
-    fn resolve(&self, context: &Context, scopes: &[&str], token: Option<&str>) -> StyleBuilder {
-        use StylesheetScope::*;
-        match self {
-            Child(stylesheet) => stylesheet.resolve(context, scopes, token),
-            DirectChild(stylesheet) => {
-                let mut style = stylesheet.style;
-
-                if scopes.len() == 1 {
-                    let token_style = token
-                        .map(|token| SelectorSegment::Token(token.to_string()))
-                        .and_then(|scope| stylesheet.scopes.get(&scope))
-                        .map(|scoped| scoped.get().style);
-                    if let Some(token_style) = token_style {
-                        style = style.merge_with(token_style);
-                    }
-                }
-
-                let substyle = scopes.first()
-                    .map(|scope| SelectorSegment::Kind(scope.to_string()))
-                    .or(token.map(|token| SelectorSegment::Token(token.to_string())))
-                    .and_then(|scope| stylesheet.scopes.get(&scope))
-                    .map(|subsheet| subsheet.resolve(context, &scopes[1..], token));
-                if let Some(substyle) = substyle {
-                    style.merge_with(substyle)
-                } else {
-                    style
-                }
-            },
-            BranchCheck(branches) => {
-                unimplemented!();
-            },
-        }
+    fn satisfies_selector(&self, selector: &[SelectorSegment]) -> bool {
+        false
     }
 }
 
 impl Stylesheet {
     pub fn resolve(&self, context: &Context, scopes: &[&str], token: Option<&str>) -> StyleBuilder {
-        let mut style = self.style;
-
-        let token_style = token
-            .map(|token| SelectorSegment::Token(token.to_string()))
-            .and_then(|scope| self.scopes.get(&scope))
-            .map(|scoped| scoped.get().style);
-
-        if let Some(token_style) = token_style {
-            style = style.merge_with(token_style);
-        }
-
-        (0..scopes.len())
-            .rev()
-            .fold(style, |style, i| {
-                if let Some(subscope) = self.scopes.get(&SelectorSegment::Kind(scopes[i].to_string())) {
-                    style.merge_with(subscope.resolve(context, &scopes[i+1..], token))
-                } else {
-                    style
+        if scopes.is_empty() { return self.style }
+        self.scopes.iter()
+            .fold(self.style, |style, (selector_segment, stylesheet)| match selector_segment {
+                SelectorSegment::Kind(name) => (0..scopes.len()).rev()
+                    .fold(style, |style, i| {
+                        if scopes[i] == name {
+                            style.merge_with(stylesheet.resolve(context, &scopes[i+1..], token))
+                        } else {
+                            style
+                        }
+                    }),
+                SelectorSegment::Token(name) => {
+                    if token == Some(name) {
+                        style.merge_with(stylesheet.style)
+                    } else {
+                        style
+                    }
+                }
+                SelectorSegment::BranchCheck(selector) => {
+                    if context.satisfies_selector(&selector) {
+                        style.merge_with(stylesheet.resolve(context, scopes, token))
+                    } else {
+                        style
+                    }
+                }
+                SelectorSegment::DirectChild(segment) => match segment.as_ref() {
+                    SelectorSegment::Kind(name) => {
+                        if scopes[0] == name {
+                            style.merge_with(stylesheet.resolve(context, &scopes[1..], token))
+                        } else {
+                            style
+                        }
+                    }
+                    SelectorSegment::Token(name) => {
+                        if scopes.len() <= 1 && token == Some(name) {
+                            style.merge_with(stylesheet.style)
+                        } else {
+                            style
+                        }
+                    }
+                    SelectorSegment::BranchCheck(_selector) => unimplemented!(),
+                    SelectorSegment::DirectChild(_name) => unreachable!(),
                 }
             })
     }
 }
-
