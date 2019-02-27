@@ -23,3 +23,7 @@ comment {
   color: 15;
   italic: true;
 }
+
+regex {
+  language: regex;
+}
