@@ -1,6 +1,11 @@
-string {
-  color: green;
+pair string {
+  color: red;
 }
+
+value > string,
+pair [> ":"] > string {|
+  color: green;
+|}
 
 number {
   color: 11;
