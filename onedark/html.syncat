@@ -26,3 +26,11 @@ comment {
   color: 15;
   italic: true;
 }
+
+raw_element [tag_name "style"] raw_text {
+  language: css;
+}
+
+raw_element [tag_name "script"] raw_text {
+  language: js;
+}

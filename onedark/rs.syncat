@@ -2,7 +2,7 @@
 
 let, const, static, mutable_specifier, ref, move, dyn,
 fn, struct, enum, trait, impl, type,
-pub, mod, crate, use,
+pub, mod, crate, use, super, where,
 if, else, match, loop, for, while, return, in {
   color: purple;
 }
@@ -55,8 +55,24 @@ binary_expression > "||",
 binary_expression > "&",
 binary_expression > "|",
 binary_expression > "^",
+assignment_expression > "=",
+assignment_expression > "+=",
+assignment_expression > "-=",
+assignment_expression > "*=",
+assignment_expression > "/=",
+assignment_expression > "%=",
+assignment_expression > "|=",
+assignment_expression > "&=",
+assignment_expression > "^=",
+assignment_expression > "<<=",
+assignment_expression > ">>=",
 range_expression > "..",
-try_expression > "?" {
+try_expression > "?",
+index_expression > "[",
+index_expression > "]",
+let_declaration > "=",
+if_let_declaration > "=",
+while_let_declaration > "=" {
   color: purple;
 }
 
@@ -95,8 +111,11 @@ function_item > identifier {
 }
 
 function_item > "->",
+function_type > "->",
 type_arguments > "<",
-type_arguments > ">" {
+type_arguments > ">",
+type_parameters > "<",
+type_parameters > ">" {
   color: purple;
 }
 
@@ -136,6 +155,9 @@ identifier "Ok", identifier "Err", identifier "Some", identifier "None" {|
 
 identifier "Self",
 type_identifier "Self",
+type_identifier "Fn",
+type_identifier "FnOnce",
+type_identifier "FnMut",
 "_" {|
   color: purple;
 |}
