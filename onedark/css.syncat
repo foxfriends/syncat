@@ -15,7 +15,7 @@ color_value, float_value, integer_value, plain_value {
 }
 
 property_name /^\-\-/,
-call_expression [function_name "var"] arguments plain_value {|
+call_expression [function_name "var"] arguments plain_value /^\-\-/ {|
   color: red;
 |}
 
