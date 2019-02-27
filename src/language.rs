@@ -27,6 +27,7 @@ pub enum Lang {
     Java,
     Scala,
     Agda,
+    Haskell,
     Regex,
     Syncat,
 }
@@ -60,6 +61,7 @@ impl std::str::FromStr for Lang {
             "java"                              => Ok(Java),
             "scala"                             => Ok(Scala),
             "css"                               => Ok(Css),
+            "hs" | "lhs" | "haskell"            => Ok(Haskell),
             "regex"                             => Ok(Regex),
             "syncat"                            => Ok(Syncat),
             _                                   => Err(Box::new(Error(format!("Unknown language {}", name)))),
@@ -91,6 +93,7 @@ impl Lang {
                 Css              => tree_sitter_css(),
                 Java             => tree_sitter_java(),
                 Scala            => tree_sitter_scala(),
+                Haskell          => tree_sitter_haskell(),
                 Regex            => tree_sitter_regex(),
                 Syncat           => tree_sitter_syncat_stylesheet(),
             }
@@ -119,6 +122,7 @@ impl Lang {
             Css              => "css",
             Java             => "java",
             Scala            => "scala",
+            Haskell          => "hs",
             Regex            => "regex",
             Syncat           => "syncat",
         }
