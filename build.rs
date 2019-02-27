@@ -3,7 +3,6 @@ use std::path::Path;
 use std::fs::{self, File};
 use std::io::Write;
 use std::ffi::OsString;
-use std::process::Command;
 use std::env;
 
 use serde::Deserialize;
@@ -28,12 +27,6 @@ fn main() {
     let package_json = Path::new(&manifest_dir).join("package.json");
     let node_modules = Path::new(&manifest_dir).join("node_modules");
     let stylesheet_syntax = Path::new(&manifest_dir).join("tree-sitter-syncat-stylesheet/src");
-
-    // Run `npm install` to ensure all dependencies are available
-    let result = Command::new("npm").arg("install").status().expect("Failed to run `npm install`. Do you have npm installed?");
-    if !result.success() {
-        panic!("Failed to run npm install");
-    }
 
     let data = fs::read_to_string(&package_json).expect("The package.json cannot be read");
     let package = serde_json::from_str::<Package>(&data).expect("The package.json is invalid.");
