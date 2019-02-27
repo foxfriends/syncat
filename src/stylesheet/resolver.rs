@@ -6,6 +6,8 @@ enum ContextNode<'a> {
     Leaf(&'a str),
 }
 
+// NOTE: the Regex gets parsed way too many times here, so maybe it should be stored in some random
+// cache.
 impl<'a> ContextNode<'a> {
     fn satisfies_selector(&self, selector: &[SelectorSegment]) -> bool {
         match &selector[0] {
@@ -18,6 +20,13 @@ impl<'a> ContextNode<'a> {
                 ContextNode::Node(.., context) => context.satisfies_selector(selector),
                 ContextNode::Leaf(token) => token == name,
             }
+            SelectorSegment::TokenPattern(pattern) => {
+                let pattern = Regex::new(pattern).unwrap();
+                match self {
+                    ContextNode::Node(.., context) => context.satisfies_selector(selector),
+                    ContextNode::Leaf(token) => pattern.is_match(token),
+                }
+            }
             SelectorSegment::DirectChild(child) => match child.as_ref() {
                 SelectorSegment::Kind(name) => match self {
                     ContextNode::Node(kind, context) if kind == name => context.satisfies_selector(&selector[1..]),
@@ -26,6 +35,13 @@ impl<'a> ContextNode<'a> {
                 SelectorSegment::Token(name) => match self {
                     ContextNode::Node(..) => false,
                     ContextNode::Leaf(token) => token == name,
+                }
+                SelectorSegment::TokenPattern(pattern) => {
+                    let pattern = Regex::new(pattern).unwrap();
+                    match self {
+                        ContextNode::Node(..) => false,
+                        ContextNode::Leaf(token) => pattern.is_match(token),
+                    }
                 }
                 SelectorSegment::BranchCheck(..) => unimplemented!("Consider using `[> selector]` instead of `> [selector]` for the same effect"),
                 SelectorSegment::DirectChild(..) => unreachable!(),
@@ -105,6 +121,13 @@ impl Stylesheet {
                         style
                     }
                 }
+                SelectorSegment::TokenPattern(name) => {
+                    if token.map(|token| Regex::new(name).unwrap().is_match(token)).unwrap_or(false) {
+                        style.merge_with(stylesheet.style)
+                    } else {
+                        style
+                    }
+                }
                 SelectorSegment::BranchCheck(selector) => {
                     if context.satisfies_selector(&selector) {
                         style.merge_with(stylesheet.resolve(context, scopes, token))
@@ -122,6 +145,13 @@ impl Stylesheet {
                     }
                     SelectorSegment::Token(name) => {
                         if scopes.is_empty() && token == Some(name) {
+                            style.merge_with(stylesheet.style)
+                        } else {
+                            style
+                        }
+                    }
+                    SelectorSegment::TokenPattern(name) => {
+                        if scopes.is_empty() && token.map(|token| Regex::new(name).unwrap().is_match(token)).unwrap_or(false) {
                             style.merge_with(stylesheet.style)
                         } else {
                             style

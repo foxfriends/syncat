@@ -36,6 +36,7 @@ module.exports = grammar({
     _simple_terminal: $ => choice(
       $.node_kind,
       $.token,
+      $.token_pattern,
     ),
 
     _complex_terminal: $ => alias($.direct_terminal, $.direct_child),
@@ -53,6 +54,7 @@ module.exports = grammar({
     branch_check: $ => seq('[', $.selector, ']'),
     node_kind: $ => $._unquoted_string,
     token: $ => $._quoted_string,
+    token_pattern: $ => $.regex,
 
     _style_block: $ => choice(
       $.important_styles,
@@ -95,9 +97,7 @@ module.exports = grammar({
     ),
 
     _boolean_value: $ => choice('true', 'false'),
-
     _string_style: $ => 'language',
-
     _string_value: $ => choice($._unquoted_string, $._quoted_string),
 
     comment: $ => token(choice(
@@ -109,6 +109,7 @@ module.exports = grammar({
       )
     )),
 
+    regex: $ => /\/([^\/\\]|\\.)+\/i?/,
     _unquoted_string: $ => /[A-Za-z0-9-_]+/,
     _quoted_string: $ => /"(?:[^"\\]|\\.)+"/,
   },

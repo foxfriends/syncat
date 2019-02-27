@@ -144,6 +144,10 @@
         {
           "type": "SYMBOL",
           "name": "token"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "token_pattern"
         }
       ]
     },
@@ -223,6 +227,10 @@
     "token": {
       "type": "SYMBOL",
       "name": "_quoted_string"
+    },
+    "token_pattern": {
+      "type": "SYMBOL",
+      "name": "regex"
     },
     "_style_block": {
       "type": "CHOICE",
@@ -587,6 +595,10 @@
           }
         ]
       }
+    },
+    "regex": {
+      "type": "PATTERN",
+      "value": "\\/([^\\/\\\\]|\\\\.)+\\/i?"
     },
     "_unquoted_string": {
       "type": "PATTERN",

@@ -90,6 +90,11 @@ impl Stylesheet {
                 let name = &source[node.start_byte() + 1..node.end_byte() - 1];
                 Ok(Token(name.to_string()))
             }
+            "token_pattern" => {
+                let pattern = &source[node.start_byte() + 1..node.end_byte() - 1];
+                pattern.parse::<Regex>().map_err(Box::new)?;
+                Ok(TokenPattern(pattern.to_string()))
+            }
             "direct_child" => {
                 Ok(DirectChild(Box::new(Stylesheet::parse_selector_segment(
                     source, 

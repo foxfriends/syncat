@@ -1,0 +1,16 @@
+==============
+Token patterns
+==============
+
+block /hello_.*/i {
+  color: white;
+}
+
+---
+
+(stylesheet
+  (rule 
+    (selector (node_kind) (token_pattern (regex)))
+    (styles
+      (style (style_name) (style_value)))))
+

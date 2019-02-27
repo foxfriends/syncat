@@ -1,5 +1,8 @@
 use std::collections::BTreeMap;
+
 use tree_sitter::{Tree, Node};
+use regex::Regex;
+
 use crate::error::Error;
 use crate::style::{Colour, StyleBuilder};
 use crate::language::Lang;
@@ -13,6 +16,7 @@ pub use resolver::Context;
 enum SelectorSegment {
     Kind(String),
     Token(String),
+    TokenPattern(String),
     DirectChild(Box<SelectorSegment>),
     BranchCheck(Vec<SelectorSegment>),
 }
