@@ -3,7 +3,8 @@ command_name {
   color: blue;
 }
 
-"&&", "||", "&", "|", "!", "!=", "==",
+"&&", "||", "&", "|",
+"!", "!=", "==", "<", ">", "<=", ">=",
 "export",
 "return", "exit", "function",
 "if", "then", "elif", "else", "fi",
@@ -11,6 +12,10 @@ command_name {
 "for", "while", "do", "done",
 test_command > "[",
 test_command > "]",
+test_command > "[[",
+test_command > "]]",
+test_command > "((",
+test_command > "))",
 test_operator {
   color: purple;
 }
@@ -51,7 +56,7 @@ command [command_name] word /^-/ {
   color: 11;
 }
 
-command_name ".", 
+command_name ".",
 command_name "cd",
 command_name "alias" {
   color: cyan;
