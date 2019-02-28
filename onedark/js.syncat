@@ -7,7 +7,8 @@ export_clause > "{", export_clause > "}",
 "for", "while", "in", "of", "do",
 "try", "catch", "finally", "throw",
 "super", "constructor",
-"with"
+"with",
+"async", "yield", "await",
 {
   color: purple;
 }
@@ -16,9 +17,10 @@ identifier /^[A-Z]/,
 shorthand_property_identifier /^[A-Z]/,
 property_identifier /^[A-Z]/,
 export_specifier /^[A-Z]/,
-new_expression > identifier {
+call_expression /^[A-Z]/,
+new_expression > identifier {|
   color: yellow;
-}
+|}
 
 member_expression > property_identifier {
   color: red;
@@ -27,7 +29,8 @@ member_expression > property_identifier {
 "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "|=", "&=", "^=", "**=", "++", "--",
 "+", "-", "*", "/", "**", "%", "^", "|", "&", "~", "<<", ">>",
 "===", "!==", "==", "!=", "<=", ">=", "<", ">",
-"&&", "||", "!",
+"&&", "||", "!", 
+"...",
 subscript_expression > "[",
 subscript_expression > "]",
 "typeof", "instanceof", "new" {
@@ -35,6 +38,7 @@ subscript_expression > "]",
 }
 
 function > identifier,
+generator_function > identifier,
 method_definition > property_identifier,
 call_expression > identifier,
 call_expression > member_expression > property_identifier {|
@@ -81,6 +85,7 @@ identifier > "Math",
 identifier > "JSON",
 identifier > "document",
 identifier > "module",
+identifier > "console",
 [> identifier "module"] > property_identifier "exports",
 identifier > "window" {|
   color: cyan;
