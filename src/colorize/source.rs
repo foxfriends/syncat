@@ -10,8 +10,9 @@ fn colorize_node<'a>(
     output: &mut String,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // put any leading characters into the result text
-    let outer_style = stylesheet.resolve(context, scope, None).build();
-    output.push_str(&format!("{}", outer_style.paint(&source[*pos..node.start_byte()])));
+    let outer_style = stylesheet.resolve(context, scope, None);
+
+    output.push_str(&format!("{}", outer_style.build().paint(&source[*pos..node.start_byte()])));
     *pos = node.start_byte();
 
     if node.child_count() == 0 {
@@ -38,6 +39,20 @@ fn colorize_node<'a>(
     } else {
         // recurse for a middle node
         scope.push((node.kind(), index));
+        // put any leading characters into the result text
+        let style = stylesheet.resolve(context, scope, None);
+
+        if let Some(language) = style.language() {
+            let token = &source[node.start_byte()..node.end_byte()];
+            *pos = node.end_byte();
+            let mut parser = Parser::new();
+            parser.set_language(language.parser()).unwrap();
+            let tree = parser.parse(token, None).unwrap();
+            output.push_str(&print_source(token, tree, &language.style()?)?);
+            scope.pop();
+            return Ok(())
+        }
+
         for child in node.children().enumerate() {
             colorize_node(
                 source,

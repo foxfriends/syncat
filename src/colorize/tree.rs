@@ -40,8 +40,22 @@ fn colorize_node_sexp<'a>(
     } else {
         // recurse for a middle node
         scope.push((node.kind(), index));
-        let style = stylesheet.resolve(context, scope, None).build();
-        output.push_str(&format!("({}", style.paint(node.kind())));
+        let style = stylesheet.resolve(context, scope, None);
+
+        if let Some(language) = style.language() {
+            let token = &source[node.start_byte()..node.end_byte()];
+            *pos = node.end_byte();
+            let mut parser = Parser::new();
+            parser.set_language(language.parser()).unwrap();
+            let tree = parser.parse(token, None).unwrap();
+            output.push_str(&format!("({} [{:?}: ", style.build().paint(node.kind()), language));
+            output.push_str(&print_tree(token, tree, &language.style()?)?);
+            output.push_str("])");
+            scope.pop();
+            return Ok(())
+        }
+
+        output.push_str(&format!("({}", style.build().paint(node.kind())));
         for child in node.children().enumerate() {
             output.push(' ');
             colorize_node_sexp(
