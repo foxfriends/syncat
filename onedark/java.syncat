@@ -1,14 +1,22 @@
 "package", "import", "module",
 "class", "enum", "interface",
 "extends", "implements",
-"new",
-"switch", "if", "else",
-"for", "while",
+"new", "synchronized",
+"switch", "case", "default",
+"if", "else",
+"for", "do", "while",
 "try", "catch", "finally",
+"throw", "throws",
 "return", "break", "continue",
 "var",
+wildcard > "?",
 modifier {
   color: purple;
+}
+
+"goto", "const" {
+  color: white;
+  background-color: 9;
 }
 
 "super", "this" {
@@ -19,8 +27,10 @@ modifier {
 "+", "-", "*", "/", "%", "&", "|", "^", "~", "<<", ">>",
 "<", "<=", ">", ">=", "==", "!=",
 "&&", "||", "!",
+"instanceof",
 ternary_expression > "?",
-ternary_expression > ":" {
+ternary_expression > ":",
+lambda_expression > "->" {
   color: purple;
 }
 
@@ -29,12 +39,17 @@ import_declaration > identifier {
   color: blue;
 }
 
+import_declaration asterisk {
+  color: purple;
+}
+
 void_type,
 integral_type,
 floating_point_type,
 boolean_type,
 character_type,
 type_identifier,
+type_parameter > identifier,
 constructor_declarator > identifier,
 class_declaration > identifier {
   color: yellow;
@@ -52,6 +67,13 @@ method_declarator > identifier,
 method_invocation > identifier {
   color: blue;
 }
+
+labeled_statement > identifier,
+labeled_statement > ":",
+continue_statement > identifier,
+break_statement > identifier {|
+  color: cyan;
+|}
 
 identifier /^[A-Z_]+$/,
 null_literal,
