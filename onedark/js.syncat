@@ -2,6 +2,14 @@ string {
   color: green;
 }
 
+regex > "/" {
+  color: purple;
+}
+
+regex > regex_pattern {
+  language: regex;
+}
+
 comment {
   color: 15;
   italic: true;
