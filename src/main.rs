@@ -20,8 +20,9 @@ use self::meta::load_meta_stylesheet;
 #[derive(StructOpt, Debug)]
 #[structopt(name = "syncat")]
 struct Opts {
-    #[structopt(short="u")]
-    ignored: bool,
+    /// Squeeze consecutive blank lines into one
+    #[structopt(short="s", long="squeeze")]
+    squeeze_blank_lines: bool,
 
     /// Show line endings
     #[structopt(short="e", long="endings")]
@@ -38,15 +39,17 @@ struct Opts {
     /// Prints a parsed s-expression, for debugging and theme creation
     #[structopt(long="dev")]
     dev: bool,
-    /// The syntax to use to parse the files
-    #[structopt(short="s", long="syntax")]
+
+    /// The language to use to parse the files
+    #[structopt(short="l", long="language")]
     syntax: Option<String>,
+
     /// Files to parse and print
     #[structopt(name="FILE", parse(from_os_str))]
     files: Vec<PathBuf>,
 }
 
-fn print<E, I>(Opts { dev, syntax, show_line_endings, number_lines_nonblank, number_lines, .. }: Opts, sources: I)
+fn print<E, I>(Opts { dev, syntax, squeeze_blank_lines, show_line_endings, number_lines_nonblank, number_lines, .. }: Opts, sources: I)
 where E: std::error::Error,
       I: Iterator<Item = (Option<String>, Result<String, E>)>
 {
@@ -76,13 +79,37 @@ where E: std::error::Error,
 
         // apply filters
         .map(|source| {
+            if dev { 
+                source
+            } else if squeeze_blank_lines {
+                Ok(source?.lines()
+                   .scan(false, |was_blank, line| {
+                       if line.is_empty() {
+                           let output = if *was_blank {
+                                None
+                           } else {
+                               Some(line)
+                           };
+                           *was_blank = true;
+                           Some(output)
+                       } else {
+                            *was_blank = false;
+                            Some(Some(line))
+                       }
+                   })
+                   .filter_map(|x| x)
+                   .collect::<Vec<_>>()
+                   .join("\n"))
+            } else {
+                source
+            }
+        })
+        .map(|source| {
             let margin = meta_style.margin
                 .build()
                 .paint(meta_style.margin.content().unwrap_or("  "));
-
             if dev {
                 source
-
             } else if number_lines_nonblank {
                 Ok(source?.lines()
                     .map(|line| {
@@ -94,8 +121,7 @@ where E: std::error::Error,
                             format!("{: >6}{}{}\n", line_number_str, margin, line)
                         }
                     })
-                    .collect::<String>())
-
+                    .collect())
             } else if number_lines {
                 Ok(source?.lines()
                     .map(|line| {
@@ -103,8 +129,7 @@ where E: std::error::Error,
                         let line_number_str = format!("{}", meta_style.line_number.build().paint(format!("{: >6}", line_number)));
                         format!("{}{}{}\n", line_number_str, margin, line)
                     })
-                    .collect::<String>())
-
+                    .collect())
             } else {
                 source
             }
@@ -113,13 +138,12 @@ where E: std::error::Error,
             let line_ending = meta_style.line_ending
                 .build()
                 .paint(meta_style.line_ending.content().unwrap_or("$"));
-
             if dev {
                 source
             } else if show_line_endings {
                 Ok(source?.lines()
                     .map(|line| format!("{}{}\n", line, line_ending))
-                    .collect::<String>())
+                    .collect())
             } else {
                 source
             }

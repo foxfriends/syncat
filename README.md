@@ -47,6 +47,6 @@ syncat src/main.rs
 # Uses the bash expansion, colouring each file by its own extension
 syncat src/*.rs
 
-# Colours the file using a specific syntax
-syncat -s js src/package.json
+# Colours the file using a specific language
+syncat -l js src/package.json
 ```
