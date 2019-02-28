@@ -87,7 +87,7 @@ string_literal, character_literal {
   color: green;
 }
 
-comment {
+comment {|
   color: 15;
   italic: true;
-}
+|}
