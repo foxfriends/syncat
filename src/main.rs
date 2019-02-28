@@ -23,16 +23,16 @@ struct Opts {
     #[structopt(short="u")]
     ignored: bool,
 
-    /// Add $ to the end of every line
-    #[structopt(short="E")]
-    show_ends: bool,
+    /// Show line endings
+    #[structopt(short="e", long="endings")]
+    show_line_endings: bool,
 
     /// Number non-empty input lines (overrides -n)
     #[structopt(short="b")]
     number_lines_nonblank: bool,
 
     /// Number all input lines
-    #[structopt(short="n")]
+    #[structopt(short="n", long="--numbered")]
     number_lines: bool,
 
     /// Prints a parsed s-expression, for debugging and theme creation
@@ -46,7 +46,7 @@ struct Opts {
     files: Vec<PathBuf>,
 }
 
-fn print<E, I>(Opts { dev, syntax, show_ends, number_lines_nonblank, number_lines, .. }: Opts, sources: I)
+fn print<E, I>(Opts { dev, syntax, show_line_endings, number_lines_nonblank, number_lines, .. }: Opts, sources: I)
 where E: std::error::Error,
       I: Iterator<Item = (Option<String>, Result<String, E>)>
 {
@@ -116,7 +116,7 @@ where E: std::error::Error,
 
             if dev {
                 source
-            } else if show_ends {
+            } else if show_line_endings {
                 Ok(source?.lines()
                     .map(|line| format!("{}{}\n", line, line_ending))
                     .collect::<String>())
