@@ -32,4 +32,7 @@ tag_name { color: red; }
 class_selector { color: yellow; }
 id_selector { color: blue; }
 
-comment { color: 15; }
+comment { 
+  color: 15;
+  italic: true;
+}

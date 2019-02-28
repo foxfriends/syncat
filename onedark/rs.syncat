@@ -143,7 +143,6 @@ attribute_item {
 
 line_comment, block_comment {
   color: 15;
-  dim: true;
   italic: true;
 }
 

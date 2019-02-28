@@ -1,3 +1,8 @@
 string {
   color: green;
 }
+
+comment {
+  color: 15;
+  italic: true;
+}

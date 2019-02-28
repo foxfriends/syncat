@@ -1,0 +1,71 @@
+"package", "import", "module",
+"class", "enum", "interface",
+"extends", "implements",
+"new",
+"switch", "if", "else",
+"for", "while",
+"try", "catch", "finally",
+"return", "break", "continue",
+"var",
+modifier {
+  color: purple;
+}
+
+"super", "this" {
+  color: red;
+}
+
+"=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "++", "--",
+"+", "-", "*", "/", "%", "&", "|", "^", "~", "<<", ">>",
+"<", "<=", ">", ">=", "==", "!=",
+"&&", "||", "!",
+ternary_expression > "?",
+ternary_expression > ":" {
+  color: purple;
+}
+
+package_declaration > identifier,
+import_declaration > identifier {
+  color: blue;
+}
+
+void_type,
+integral_type,
+floating_point_type,
+boolean_type,
+character_type,
+type_identifier,
+constructor_declarator > identifier,
+class_declaration > identifier {
+  color: yellow;
+}
+
+generic_type > "<>",
+generic_type > ">",
+generic_type > "<",
+array_type dims > "[",
+array_type dims > "]" {
+  color: purple;
+}
+
+method_declarator > identifier,
+method_invocation > identifier {
+  color: blue;
+}
+
+identifier /^[A-Z_]+$/,
+null_literal,
+boolean_literal,
+floating_point_literal,
+integer_literal {
+  color: 11;
+}
+
+string_literal, character_literal {
+  color: green;
+}
+
+comment {
+  color: 15;
+  italic: true;
+}

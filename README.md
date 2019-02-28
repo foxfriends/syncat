@@ -227,3 +227,18 @@ There are 3 kinds of values:
 *   `boolean` values can be either `true` or `false`, and will always default to `false`
 *   `string` values can be left unquoted if they only contain letters, numbers, _ and -, but must be
     quoted otherwise. Only double quotes are supported.
+
+## Meta
+
+In addition to the `[language].syncat` files which style the source code of each language, you can
+include the `.syncat` file (with no name portion) to configure some of the Syncat features.
+
+There are only a few, specific selectors which are supported. Each accepts any of the regular style
+options as above (though `language` will have no effect), and some have extra options documented
+below:
+
+*   `line_number`: The styling for line numbers (pass `-n` option)
+*   `line_ending`: The styling for the end of line marker (pass `-E` option)
+    *   `content: [string]`: Use the provided string as the end of line marker
+*   `margin`: The separator between the line numbers and the source code
+    *   `content: [string]`: Use the provided string as the margin
