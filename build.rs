@@ -57,6 +57,7 @@ fn main() {
                         }
                         build
                             .include(&path)
+                            .warnings(false)
                             .compile(&format!("{}-{}", package, file.path().file_stem().unwrap().to_str().unwrap()));
                     }
                     Err(..) => {}
