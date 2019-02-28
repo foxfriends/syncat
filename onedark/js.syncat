@@ -4,7 +4,7 @@ export_clause > "{", export_clause > "}",
 "var", "let", "const", "class", "extends", "function", "=>",
 "if", "else", "switch", "case", "default",
 "break", "continue", "return",
-"for", "while", "in", "of",
+"for", "while", "in", "of", "do",
 "try", "catch", "finally", "throw",
 "super", "constructor",
 "with"
