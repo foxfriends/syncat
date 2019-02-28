@@ -29,7 +29,7 @@ member_expression > property_identifier {
 "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "|=", "&=", "^=", "**=", "++", "--",
 "+", "-", "*", "/", "**", "%", "^", "|", "&", "~", "<<", ">>",
 "===", "!==", "==", "!=", "<=", ">=", "<", ">",
-"&&", "||", "!", 
+"&&", "||", "!",
 "...",
 subscript_expression > "[",
 subscript_expression > "]",
@@ -95,3 +95,41 @@ comment {|
   color: 15;
   italic: true;
 |}
+
+// JSX
+
+jsx_opening_element > "<",
+jsx_opening_element > ">",
+jsx_closing_element > "<",
+jsx_closing_element > "/",
+jsx_opening_element > "<",
+jsx_self_closing_element > "<",
+jsx_self_closing_element > "/",
+jsx_self_closing_element > ">" {
+  color: purple;
+}
+
+jsx_opening_element > identifier /^[a-z]/,
+jsx_closing_element > identifier /^[a-z]/,
+jsx_self_closing_element > identifier /^[a-z]/ {
+  color: red;
+}
+
+jsx_opening_element > identifier /^[A-Z]/,
+jsx_closing_element > identifier /^[A-Z]/,
+jsx_self_closing_element > identifier /^[A-Z]/ {
+  color: yellow;
+}
+
+jsx_expression > "{",
+jsx_expression > "}" {
+  color: red;
+}
+
+jsx_attribute property_identifier {
+  color: 11;
+}
+
+jsx_text {
+  color: green;
+}
