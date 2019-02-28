@@ -542,8 +542,17 @@
       ]
     },
     "_string_style": {
-      "type": "STRING",
-      "value": "language"
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "language"
+        },
+        {
+          "type": "STRING",
+          "value": "content"
+        }
+      ]
     },
     "_string_value": {
       "type": "CHOICE",

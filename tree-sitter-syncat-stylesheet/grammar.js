@@ -97,7 +97,7 @@ module.exports = grammar({
     ),
 
     _boolean_value: $ => choice('true', 'false'),
-    _string_style: $ => 'language',
+    _string_style: $ => choice('language', 'content'),
     _string_value: $ => choice($._unquoted_string, $._quoted_string),
 
     comment: $ => token(choice(

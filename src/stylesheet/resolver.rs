@@ -105,32 +105,32 @@ impl<'a> Context<'a> {
 impl Stylesheet {
     pub fn resolve(&self, context: &Context, scopes: &[(&str, usize)], token: Option<&str>) -> StyleBuilder {
         self.scopes.iter()
-            .fold(self.style, |style, (selector_segment, stylesheet)| match selector_segment {
+            .fold(self.style.clone(), |style, (selector_segment, stylesheet)| match selector_segment {
                 SelectorSegment::Kind(name) => (0..scopes.len()).rev()
                     .fold(style, |style, i| {
                         if scopes[i].0 == name {
-                            style.merge_with(stylesheet.resolve(context.child(i+1).unwrap_or(&Context::default()), &scopes[i+1..], token))
+                            style.merge_with(&stylesheet.resolve(context.child(i+1).unwrap_or(&Context::default()), &scopes[i+1..], token))
                         } else {
                             style
                         }
                     }),
                 SelectorSegment::Token(name) => {
                     if token == Some(name) {
-                        style.merge_with(stylesheet.style)
+                        style.merge_with(&stylesheet.style)
                     } else {
                         style
                     }
                 }
                 SelectorSegment::TokenPattern(name) => {
                     if token.map(|token| Regex::new(name).unwrap().is_match(token)).unwrap_or(false) {
-                        style.merge_with(stylesheet.style)
+                        style.merge_with(&stylesheet.style)
                     } else {
                         style
                     }
                 }
                 SelectorSegment::BranchCheck(selector) => {
                     if context.satisfies_selector(&selector) {
-                        style.merge_with(stylesheet.resolve(context, scopes, token))
+                        style.merge_with(&stylesheet.resolve(context, scopes, token))
                     } else {
                         style
                     }
@@ -138,21 +138,21 @@ impl Stylesheet {
                 SelectorSegment::DirectChild(segment) => match segment.as_ref() {
                     SelectorSegment::Kind(name) => {
                         if scopes.first().map(|x| x.0) == Some(&name.as_str()) {
-                            style.merge_with(stylesheet.resolve(context.child(1).unwrap_or(&Context::default()), &scopes[1..], token))
+                            style.merge_with(&stylesheet.resolve(context.child(1).unwrap_or(&Context::default()), &scopes[1..], token))
                         } else {
                             style
                         }
                     }
                     SelectorSegment::Token(name) => {
                         if scopes.is_empty() && token == Some(name) {
-                            style.merge_with(stylesheet.style)
+                            style.merge_with(&stylesheet.style)
                         } else {
                             style
                         }
                     }
                     SelectorSegment::TokenPattern(name) => {
                         if scopes.is_empty() && token.map(|token| Regex::new(name).unwrap().is_match(token)).unwrap_or(false) {
-                            style.merge_with(stylesheet.style)
+                            style.merge_with(&stylesheet.style)
                         } else {
                             style
                         }

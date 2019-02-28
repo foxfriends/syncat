@@ -1,6 +1,14 @@
 use super::*;
 
 impl Stylesheet {
+    fn parse_string(string: &str) -> &str {
+        if string.starts_with("\"") {
+            &string[1..string.len() - 1]
+        } else {
+            string
+        }
+    }
+
     fn parse_color(color: &str) -> Result<Colour, Box<dyn std::error::Error>> {
         match color {
             "red"    => Ok(Colour::Red),
@@ -69,8 +77,12 @@ impl Stylesheet {
             ("hidden", "false") => { stylebuilder.is_hidden = setting(important, false); }
 
             ("language", lang) => {
-                let language = lang.parse::<Lang>()?;
+                let language = Stylesheet::parse_string(lang).parse::<Lang>()?;
                 stylebuilder.language = setting(important, language);
+            }
+
+            ("content", content) => {
+                stylebuilder.content = setting(important, Stylesheet::parse_string(content).to_string());
             }
 
             _ => {}
@@ -151,7 +163,7 @@ impl Stylesheet {
             }
         }
         for selector in selectors.into_iter() {
-            self.handle_selector(selector, stylebuilder)?;
+            self.handle_selector(selector, stylebuilder.clone())?;
         }
         Ok(())
     }

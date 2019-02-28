@@ -25,6 +25,26 @@ impl<T> Setting<T> {
         }
     }
 
+    fn cloned_or(&self, other: Setting<T>) -> Self 
+    where T: Clone {
+        use Setting::*;
+        match (self, other) {
+            (Important(value), ..) => Important(value.clone()),
+            (.., Important(value)) => Important(value),
+            (Set(value), ..) => Set(value.clone()),
+            (Unset, other) => other,
+        }
+    }
+
+    fn as_ref(&self) -> Setting<&T> {
+        use Setting::*;
+        match self {
+            Unset => Unset,
+            Set(value) => Set(value),
+            Important(value) => Important(value),
+        }
+    }
+
     fn optional(self) -> Option<T> {
         use Setting::*;
         match self {
@@ -46,7 +66,7 @@ impl<T: Default> Setting<T> {
     }
 }
 
-#[derive(Copy, Clone, Default, Debug)]
+#[derive(Clone, Default, Debug)]
 pub struct StyleBuilder {
     pub language:         Setting<Lang>,
     pub foreground:       Setting<Colour>,
@@ -59,11 +79,16 @@ pub struct StyleBuilder {
     pub is_blink:         Setting<bool>,
     pub is_hidden:        Setting<bool>,
     pub is_reverse:       Setting<bool>,
+    pub content:          Setting<String>,
 }
 
 impl StyleBuilder {
     pub fn language(&self) -> Option<Lang> {
         self.language.optional()
+    }
+
+    pub fn content(&self) -> Option<&str> {
+        self.content.as_ref().optional().map(|string| string.as_str())
     }
 
     pub fn build(&self) -> Style {
@@ -81,7 +106,7 @@ impl StyleBuilder {
         }
     }
 
-    pub fn merge_with(mut self, other: StyleBuilder) -> Self {
+    pub fn merge_with(mut self, other: &StyleBuilder) -> Self {
         self.language         = other.language.or(self.language);
         self.foreground       = other.foreground.or(self.foreground);
         self.background       = other.background.or(self.background);
@@ -93,6 +118,7 @@ impl StyleBuilder {
         self.is_blink         = other.is_blink.or(self.is_blink);
         self.is_hidden        = other.is_hidden.or(self.is_hidden);
         self.is_reverse       = other.is_reverse.or(self.is_reverse);
+        self.content          = other.content.cloned_or(self.content);
         self
     }
 }
