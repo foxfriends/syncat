@@ -1,5 +1,67 @@
+"import", "export", "from", "as",
+named_imports > "{", named_imports > "}",
+export_clause > "{", export_clause > "}",
+"var", "let", "const", "class", "extends", "function", "=>",
+"if", "else", "switch", "case", "default",
+"break", "continue", "return",
+"for", "while", "in", "of",
+"try", "catch", "finally", "throw",
+"super", "constructor",
+"with"
+{
+  color: purple;
+}
+
+identifier /^[A-Z]/,
+shorthand_property_identifier /^[A-Z]/,
+property_identifier /^[A-Z]/,
+export_specifier /^[A-Z]/,
+new_expression > identifier {
+  color: yellow;
+}
+
+member_expression > property_identifier {
+  color: red;
+}
+
+"=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "|=", "&=", "^=", "**=", "++", "--",
+"+", "-", "*", "/", "**", "%", "^", "|", "&", "~", "<<", ">>",
+"===", "!==", "==", "!=", "<=", ">=", "<", ">",
+"&&", "||", "!",
+subscript_expression > "[",
+subscript_expression > "]",
+"typeof", "instanceof", "new" {
+  color: purple;
+}
+
+function > identifier,
+method_definition > property_identifier,
+call_expression > identifier,
+call_expression > member_expression > property_identifier {|
+  color: blue;
+|}
+
+array > "[",
+array > "]",
+identifier /^[A-Z_]+$/,
+null, number, boolean  {
+  color: 11;
+}
+
+export_specifier,
+object > shorthand_property_identifier,
+object > pair > property_identifier {
+  color: red;
+}
+
+template_string,
 string {
   color: green;
+}
+
+template_substitution > "${",
+template_substitution > "}" {
+  color: red;
 }
 
 regex > "/" {
@@ -10,7 +72,21 @@ regex > regex_pattern {
   language: regex;
 }
 
-comment {
+identifier > "global",
+"this" {|
+  color: red;
+|}
+
+identifier > "Math",
+identifier > "JSON",
+identifier > "document",
+identifier > "module",
+[> identifier "module"] > property_identifier "exports",
+identifier > "window" {|
+  color: cyan;
+|}
+
+comment {|
   color: 15;
   italic: true;
-}
+|}
