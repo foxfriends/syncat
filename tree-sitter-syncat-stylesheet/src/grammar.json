@@ -152,13 +152,22 @@
       ]
     },
     "_complex_terminal": {
-      "type": "ALIAS",
-      "content": {
-        "type": "SYMBOL",
-        "name": "direct_terminal"
-      },
-      "named": true,
-      "value": "direct_child"
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "direct_terminal"
+          },
+          "named": true,
+          "value": "direct_child"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "no_children"
+        }
+      ]
     },
     "_simple_node": {
       "type": "CHOICE",
@@ -198,8 +207,30 @@
           "value": ">"
         },
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "no_children"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_simple_terminal"
+            }
+          ]
+        }
+      ]
+    },
+    "no_children": {
+      "type": "SEQ",
+      "members": [
+        {
           "type": "SYMBOL",
-          "name": "_simple_terminal"
+          "name": "node_kind"
+        },
+        {
+          "type": "STRING",
+          "value": "."
         }
       ]
     },

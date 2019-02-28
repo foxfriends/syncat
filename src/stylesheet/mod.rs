@@ -17,6 +17,7 @@ enum SelectorSegment {
     Kind(String),
     Token(String),
     TokenPattern(String),
+    NoChildren(Box<SelectorSegment>),
     DirectChild(Box<SelectorSegment>),
     BranchCheck(Vec<SelectorSegment>),
 }

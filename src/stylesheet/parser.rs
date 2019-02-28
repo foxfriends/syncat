@@ -107,6 +107,12 @@ impl Stylesheet {
                 pattern.parse::<Regex>().map_err(Box::new)?;
                 Ok(TokenPattern(pattern.to_string()))
             }
+            "no_children" => {
+                Ok(NoChildren(Box::new(Stylesheet::parse_selector_segment(
+                    source, 
+                    node.named_child(0).ok_or(Box::new(Error(format!("Missing child when parsing no_children"))))?,
+                )?)))
+            }
             "direct_child" => {
                 Ok(DirectChild(Box::new(Stylesheet::parse_selector_segment(
                     source, 

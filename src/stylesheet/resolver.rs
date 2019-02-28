@@ -27,6 +27,7 @@ impl<'a> ContextNode<'a> {
                     ContextNode::Leaf(token) => pattern.is_match(token),
                 }
             }
+            SelectorSegment::NoChildren(..) => unimplemented!(". cannot be used in a branch check"),
             SelectorSegment::DirectChild(child) => match child.as_ref() {
                 SelectorSegment::Kind(name) => match self {
                     ContextNode::Node(kind, context) if kind == name => context.satisfies_selector(&selector[1..]),
@@ -43,6 +44,7 @@ impl<'a> ContextNode<'a> {
                         ContextNode::Leaf(token) => pattern.is_match(token),
                     }
                 }
+                SelectorSegment::NoChildren(..) => unimplemented!(". cannot be used in a branch check"),
                 SelectorSegment::BranchCheck(..) => unimplemented!("Consider using `[> selector]` instead of `> [selector]` for the same effect"),
                 SelectorSegment::DirectChild(..) => unreachable!(),
             }
@@ -135,9 +137,23 @@ impl Stylesheet {
                         style
                     }
                 }
+                SelectorSegment::NoChildren(segment) => match segment.as_ref() {
+                    SelectorSegment::Kind(name) => {
+                        if scopes.last().map(|x| x.0) == Some(name) {
+                            style.merge_with(&stylesheet.style)
+                        } else {
+                            style
+                        }
+                    }
+                    SelectorSegment::Token(..) => unreachable!(),
+                    SelectorSegment::TokenPattern(..) => unreachable!(),
+                    SelectorSegment::NoChildren(..) => unreachable!(),
+                    SelectorSegment::BranchCheck(..) => unreachable!(),
+                    SelectorSegment::DirectChild(..) => unreachable!(),
+                }
                 SelectorSegment::DirectChild(segment) => match segment.as_ref() {
                     SelectorSegment::Kind(name) => {
-                        if scopes.first().map(|x| x.0) == Some(&name.as_str()) {
+                        if scopes.first().map(|x| x.0) == Some(name) {
                             style.merge_with(&stylesheet.resolve(context.child(1).unwrap_or(&Context::default()), &scopes[1..], token))
                         } else {
                             style
@@ -156,6 +172,20 @@ impl Stylesheet {
                         } else {
                             style
                         }
+                    }
+                    SelectorSegment::NoChildren(segment) => match segment.as_ref() {
+                        SelectorSegment::Kind(name) => {
+                            if scopes.len() == 1 && scopes[0].0 == name {
+                                style.merge_with(&stylesheet.style)
+                            } else {
+                                style
+                            }
+                        }
+                        SelectorSegment::Token(..) => unreachable!(),
+                        SelectorSegment::TokenPattern(..) => unreachable!(),
+                        SelectorSegment::NoChildren(..) => unreachable!(),
+                        SelectorSegment::BranchCheck(..) => unreachable!(),
+                        SelectorSegment::DirectChild(..) => unreachable!(),
                     }
                     SelectorSegment::BranchCheck(..) => unimplemented!("Consider using `[> selector]` instead of `> [selector]` for the same effect"),
                     SelectorSegment::DirectChild(..) => unreachable!(),

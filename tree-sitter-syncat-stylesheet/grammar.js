@@ -39,7 +39,10 @@ module.exports = grammar({
       $.token_pattern,
     ),
 
-    _complex_terminal: $ => alias($.direct_terminal, $.direct_child),
+    _complex_terminal: $ => choice(
+      alias($.direct_terminal, $.direct_child),
+      $.no_children,
+    ),
 
     _simple_node: $ => choice(
       $.branch_check,
@@ -49,7 +52,9 @@ module.exports = grammar({
     _complex_node: $ => $.direct_child,
 
     direct_child: $ => seq('>', $._simple_node),
-    direct_terminal: $ => seq('>', $._simple_terminal),
+    direct_terminal: $ => seq('>', choice($.no_children, $._simple_terminal)),
+
+    no_children: $ => seq($.node_kind, "."),
 
     branch_check: $ => seq('[', $.selector, ']'),
     node_kind: $ => $._unquoted_string,
