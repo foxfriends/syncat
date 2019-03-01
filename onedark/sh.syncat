@@ -34,7 +34,7 @@ word /^\d+$/ {
 }
 
 raw_string,
-string {
+string. {
   color: green;
 }
 
