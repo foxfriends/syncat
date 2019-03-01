@@ -63,76 +63,74 @@ Here's an example syntax tree for a trivial piece of code. You can see that they
 very complex. The output from the `--dev` view is not even as well formatted, but it does include
 the applied colours!
 
-```rust
-fn main() {
-    let hello = vec!["hello", "world"];
-    for word in &hello {
-        print!("{} ", word);
-    }
-    println!();
+```javascript
+function sayHello(subject) {
+  return `Hello ${subject}`;
+  throw new Error('Unreachable');
 }
+
+console.log(sayHello('world'));
 ```
 
 ```
-(source_file
-  (function_item
-    ("fn")
-    (identifier "main")
-    (parameters ("(") (")"))
-    (block ("{")
-      (let_declaration
-        ("let")
-        (identifier "hello")
-        ("=")
-        (macro_invocation (identifier "vec") ("!")
-          (token_tree ("[") (string_literal (""") (""")) (",") (string_literal (""") (""")) ("]")))
+(program
+  (function
+    ("function")
+    (identifier "sayHello")
+    (formal_parameters ("(") (identifier "subject") (")"))
+    (statement_block
+      ("{")
+      (return_statement
+        ("return")
+          (template_string ("`") (template_substitution ("${") (identifier "subject") ("}")) ("`"))
+          (";"))
+      (throw_statement 
+        ("throw") 
+        (new_expression 
+          ("new") 
+          (identifier "Error") 
+          (arguments ("(") (string ("'") ("'")) (")"))) 
         (";"))
-      (for_expression
-        ("for")
-        (identifier "word")
-        ("in")
-        (reference_expression ("&") (identifier "hello"))
-        (block ("{")
-          (macro_invocation
-            (identifier "print")
-            ("!")
-            (token_tree ("(") (string_literal (""") (""")) (",") (identifier "word") (")")))
-            (";")
-            ("}")))
-      (macro_invocation
-        (identifier "println")
-        ("!")
-        (token_tree ("(") (")")))
-        (";")
-      ("}"))))
+      ("}")))
+  (expression_statement
+    (call_expression
+      (member_expression (identifier "console") (".") (property_identifier "log"))
+      (arguments
+        ("(")
+          (call_expression
+            (identifier "sayHello")
+            (arguments ("(") (string ("'") ("'")) (")")))
+        (")")))
+    (";")))
 ```
 
-To highlight, for example, the macro invocations in blue, use the most basic type of selector - node kind
-selectors. A node kind selector is just the name of the node kind, without quotation marks:
+To highlight, for example, the function name in blue, you might try the following:
 
 ```syncat
-macro_invocation {
+function {
   color: blue;
 }
 ```
 
 A selector like this will match that node, as well as all of its children. That is, children will
-inherit all styles from their parent nodes.
+inherit all styles from their parent nodes. Unfortunately, this means that the above rule will turn
+the entire function blue! 
 
-If you only want to match the identifier, and not the other children of the macro invocation, then you can
-chain selectors to match children, just like CSS:
+If you only want to match the identifier, and not the other children of the function declaration, 
+you can chain selectors to match children, just like CSS:
 
 ```syncat
-macro_invocation identifier {
+function identifier {
   color: blue
 }
 ```
 
-Unfortunately, the above selector will also match any identifiers, at any depth, including
-parameters to the macro invocation. To only match direct children, include the `>` separator:
+Unfortunately, the above selector will still match any identifiers at any depth, including in the
+method body. To get around this, we can use the direct child specifier `>` to indicate to only match
+nodes that are direct children of the specified parent.
 
 ```syncat
-macro_invocation > identifier {
+function > identifier {
   color: blue;
 }
 ```
@@ -144,29 +142,41 @@ the selector. The snippet below will turn the macro invocation exclamation marks
 Note that some tokens are named (often identifiers) while many are not named (often symbols like ";").
 You can use the node name of a named token just like any other node.
 
+To turn the function keyword purple, you could do the following:
+
 ```syncat
-macro_invocation > "!" {
-  color: blue;
+"function" {
+  color: purple;
 }
 ```
 
-Since these two selectors are related, and perform the same styling, they can be combined into one
-rule by listing all applicable selectors with commas:
+There are often many elements you would want to style in the same way, so to make things easier, you
+can write a list of selectors separated by commas:
 
 ```syncat
-macro_invocation > identifier,
-macro_invocation > "!" {
-  color: blue;
+"function", "return" {
+  color: purple;
 }
 ```
 
-A regular expression can also be used in place of a plain string to match token values. This can be 
-useful at times for matching specific types of identifiers. To make all printing macros come up 
-yellow, you could do the following:
+A regular expression can also be used in place of a plain string to match token values. This can be
+useful at times for matching specific forms of identifiers. You could turn functions with names that
+start with "say" cyan like this:
 
 ```syncat
-macro_invocation > identifier /^print/ {
-  color: yellow;
+function > identifier /^say/ {
+  color: cyan;
+}
+```
+
+There are times when you would rather not apply a style to all children. One common occurrence of
+this is for template strings. You don't want to highlight the interpolated text the same colour as
+the string. You can end a rule with a `.` to prevent its styles from being inherited by any
+children:
+
+```syncat
+template_string. {
+  color: green;
 }
 ```
 
@@ -177,9 +187,11 @@ them yellow to match. Note that the `>` separator must come *inside* the bracket
 ensure that the sub-selector is matching directly in the parent scope, and not anywhere in the child
 hierarchy.
 
+For example, to highlight the unreachable `throw` after the `return` statement, you could do this:
+
 ```
-macro_invocation [> identifier /^print/] > "!' {
-  color: yellow;
+function [return_statement] throw_statement {
+  background-color: red;
 }
 ```
 
@@ -194,8 +206,8 @@ precedence of these important blocks is also not defined, so using them extensiv
 much.
 
 ```
-"println" {|
-  color: purple;
+"console" {|
+  color: yellow;
 |}
 ```
 

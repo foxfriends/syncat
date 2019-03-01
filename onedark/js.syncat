@@ -58,7 +58,7 @@ object > pair > property_identifier {
   color: red;
 }
 
-template_string,
+template_string.,
 string {
   color: green;
 }
