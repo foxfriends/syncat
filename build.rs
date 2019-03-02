@@ -72,7 +72,6 @@ fn main() {
                             .include(&path)
                             .warnings(false)
                             .compile(&format!("{}-{}", package, file.path().file_stem().unwrap().to_str().unwrap()));
-                        println!("cargo:warning={:?}", file.path());
                     }
                     Err(..) => {}
                 }
