@@ -11,3 +11,25 @@ margin {
   color: 15;
   content: " | ";
 }
+
+vcs_addition {
+  color: green;
+  content: "+";
+}
+
+vcs_modification {
+  color: yellow;
+  content: "~";
+}
+
+vcs_deletion_above, vcs_deletion_below {
+  color: red;
+}
+
+vcs_deletion_above {
+  content: "‾";
+}
+
+vcs_deletion_below {
+  content: "_";
+}
