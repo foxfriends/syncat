@@ -1,15 +1,11 @@
 use crate::Opts;
-use crate::meta::MetaStylesheet;
+use crate::line::Line;
 
-pub fn line_endings<E>(&Opts { dev, show_line_endings, .. }: &Opts, meta_style: &MetaStylesheet, source: Result<String, E>) -> Result<String, E> {
-    let line_ending = meta_style.line_ending
-        .build()
-        .paint(meta_style.line_ending.content().unwrap_or("$"));
-    if dev {
-        source
-    } else if show_line_endings {
-        Ok(source?.lines()
-           .map(|line| format!("{}{}\n", line, line_ending))
+pub fn line_endings<E>(&Opts { show_line_endings, .. }: &Opts, source: Result<Vec<Line>, E>) -> Result<Vec<Line>, E> {
+    if show_line_endings {
+        Ok(source?
+           .into_iter()
+           .map(Line::with_line_ending)
            .collect())
     } else {
         source

@@ -3,18 +3,10 @@ use std::collections::HashMap;
 use std::fs;
 use git2::{DiffOptions, IntoCString, Repository};
 use crate::Opts;
-use crate::meta::MetaStylesheet;
-
-#[derive(Copy, Clone, Debug)]
-pub enum LineChange {
-    Added,
-    RemovedAbove,
-    RemovedBelow,
-    Modified,
-}
+use crate::line::{Line, LineChange};
 
 /// This code is pretty much taken straight from [Bat](https://github.com/sharkdp/bat/blob/master/src/diff.rs)
-fn do_git_transform(source: &str, repo: Repository, meta_style: &MetaStylesheet, path: &PathBuf) -> Option<String> {
+fn do_git_transform(source: &[Line], repo: Repository, path: &PathBuf) -> Option<Vec<Line>> {
     let repo_path_absolute = fs::canonicalize(repo.workdir()?).ok()?;
     let filepath_absolute = fs::canonicalize(path).ok()?;
     let filepath_relative_to_repo = filepath_absolute.strip_prefix(&repo_path_absolute).ok()?;
@@ -73,50 +65,26 @@ fn do_git_transform(source: &str, repo: Repository, meta_style: &MetaStylesheet,
         None,
     );
 
-    let added = meta_style.vcs_addition
-        .build()
-        .paint(meta_style.vcs_addition.content().unwrap_or("+"));
-    let modified = meta_style.vcs_modification
-        .build()
-        .paint(meta_style.vcs_modification.content().unwrap_or("~"));
-    let removed_above = meta_style.vcs_deletion_above
-        .build()
-        .paint(meta_style.vcs_deletion_above.content().unwrap_or("-"));
-    let removed_below = meta_style.vcs_deletion_below
-        .build()
-        .paint(meta_style.vcs_deletion_below.content().unwrap_or("_"));
     Some(source
-        .lines()
+        .iter()
         .enumerate()
-        .map(move |(i, line)| {
-            match line_changes.get(&(i as u32)) {
-                Some(LineChange::Added) => format!(" {}{}", added, line),
-                Some(LineChange::RemovedAbove) => format!(" {}{}", removed_above, line),
-                Some(LineChange::RemovedBelow) => format!(" {}{}", removed_below, line),
-                Some(LineChange::Modified) => format!(" {}{}", modified, line),
-                None => format!("  {}", line),
-            }
-        })
-        .collect::<Vec<_>>()
-        .join("\n"))
+        .map(move |(i, line)| line.clone().with_status(line_changes.remove(&(i as u32)).unwrap_or_default()))
+        .collect())
 }
 
 pub fn git<E>(
-    &Opts { dev, show_git, .. }: &Opts, 
-    meta_style: &MetaStylesheet, 
-    source: Result<String, E>,
+    &Opts { show_git, .. }: &Opts, 
+    source: Result<Vec<Line>, E>,
     filename: Option<&PathBuf>,
-) -> Result<String, E> {
+) -> Result<Vec<Line>, E> {
     let path = match filename {
         Some(path) => path,
         None => return source,
     };
-    if dev {
-        source
-    } else if show_git {
+    if show_git {
         if let Some(repository) = filename.and_then(|path| Repository::discover(path).ok()) {
             let source = source?;
-            Ok(do_git_transform(&source, repository, meta_style, path).unwrap_or(source))
+            Ok(do_git_transform(&source, repository, path).unwrap_or(source))
         } else {
             source
         }

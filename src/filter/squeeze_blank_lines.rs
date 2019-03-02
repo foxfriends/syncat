@@ -1,10 +1,10 @@
+use std::convert::identity;
 use crate::Opts;
+use crate::line::Line;
 
-pub fn squeeze_blank_lines<E>(&Opts { dev, squeeze_blank_lines, .. }: &Opts, source: Result<String, E>) -> Result<String, E> {
-    if dev { 
-        source
-    } else if squeeze_blank_lines {
-        Ok(source?.lines()
+pub fn squeeze_blank_lines<E>(&Opts { squeeze_blank_lines, .. }: &Opts, source: Result<Vec<Line>, E>) -> Result<Vec<Line>, E> {
+    if squeeze_blank_lines {
+        Ok(source?.into_iter()
            .scan(false, |was_blank, line| {
                if line.is_empty() {
                    let output = if *was_blank {
@@ -19,9 +19,8 @@ pub fn squeeze_blank_lines<E>(&Opts { dev, squeeze_blank_lines, .. }: &Opts, sou
                    Some(Some(line))
                }
            })
-           .filter_map(|x| x)
-           .collect::<Vec<_>>()
-           .join("\n"))
+           .filter_map(identity)
+           .collect())
     } else {
         source
     }

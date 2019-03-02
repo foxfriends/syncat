@@ -1,20 +1,12 @@
 use crate::Opts;
-use crate::meta::MetaStylesheet;
+use crate::line::Line;
 
 pub fn margin<E>(
-    &Opts { dev, show_git, number_lines_nonblank, number_lines, .. }: &Opts,
-    meta_style: &MetaStylesheet,
-    source: Result<String, E>,
-) -> Result<String, E> {
-    let margin = meta_style.margin
-        .build()
-        .paint(meta_style.margin.content().unwrap_or(" | "));
-    if dev {
-        source
-    } else if show_git || number_lines_nonblank || number_lines {
-        Ok(source?.lines()
-           .map(|line| format!("{}{}\n", margin, line))
-           .collect())
+    &Opts { show_git, number_lines_nonblank, number_lines, .. }: &Opts,
+    source: Result<Vec<Line>, E>,
+) -> Result<Vec<Line>, E> {
+    if show_git || number_lines_nonblank || number_lines {
+        Ok(source?.into_iter().map(Line::with_margin).collect())
     } else {
         source
     }

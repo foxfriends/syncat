@@ -6,15 +6,17 @@ use structopt::StructOpt;
 use tree_sitter::Parser;
 
 mod colorize;
-mod filter;
-mod language;
 mod dirs;
 mod error;
+mod filter;
+mod language;
+mod line;
 mod meta;
 mod style;
 mod stylesheet;
 
 use self::language::Lang;
+use self::line::Line;
 use self::meta::load_meta_stylesheet;
 
 /// Syntax aware cat utility.
@@ -60,14 +62,14 @@ where
     I: Iterator<Item = (Option<String>, Result<String, E>, Option<PathBuf>)>
 {
     let meta_style = load_meta_stylesheet();
-    let mut line_numbers = filter::line_numbers(opts, &meta_style);
+    let mut line_numbers = filter::line_numbers(opts);
 
-    sources
+    let coloured = sources
         // parse
-        .map(|(lang, contents, path)| -> (Result<String, Box<dyn std::error::Error>>, Option<PathBuf>) {
+        .map(|(lang, contents, path)| -> (String, Result<String, Box<dyn std::error::Error>>, Option<PathBuf>) {
             let contents: String = match contents {
                 Ok(contents) => contents,
-                Err(error) => return (Err(Box::new(error)), path),
+                Err(error) => return (String::default(), Err(Box::new(error)), path),
             };
             let source = opts.syntax.as_ref()
                 .or(lang.as_ref())
@@ -84,24 +86,49 @@ where
                         colorize::print_source(&contents, tree, &lang.style()?)
                     }
                 })
-                .unwrap_or_else(move || Ok(contents));
-            (source, path)
-        })
-
-        // apply filters
-        .map(|(source, path)| (filter::margin(opts, &meta_style, source), path))
-        .map(|(source, path)| (filter::git(opts, &meta_style, source, path.as_ref()), path))
-        .map(|(source, path)| (filter::squeeze_blank_lines(opts, source), path))
-        .map(move |(source, path)| (line_numbers(source), path))
-        .map(|(source, path)| (filter::line_endings(opts, &meta_style, source), path))
-
-        // print
-        .for_each(|(result, _path)| {
-            match result {
-                Ok(text) => print!("{}", text),
-                Err(error) => eprint!("syncat: {}", error),
-            }
+                .unwrap_or_else(|| Ok(contents.clone()));
+            (contents, source, path)
         });
+
+    if opts.dev {
+        coloured
+            // print
+            .for_each(|(_original, result, _path)| {
+                match result {
+                    Ok(text) => print!("{}", text),
+                    Err(error) => eprint!("syncat: {}", error),
+                }
+            });
+    } else {
+        coloured
+            .map(|(original, source, path)| {
+                let lines = source.map(|source| {
+                    let mut lines = source
+                        .lines()
+                        .map(|line| Line::new(line.to_owned()))
+                        .collect::<Vec<_>>();
+                    if !original.ends_with("\n") {
+                        lines.last_mut().unwrap().no_newline = true;
+                    }
+                    lines
+                 });
+                (lines, path)
+            })
+            // apply filters
+            .map(|(source, path)| (filter::margin(opts, source), path))
+            .map(|(source, path)| (filter::git(opts, source, path.as_ref()), path))
+            .map(|(source, path)| (filter::squeeze_blank_lines(opts, source), path))
+            .map(move |(source, path)| (line_numbers(source), path))
+            .map(|(source, path)| (filter::line_endings(opts, source), path))
+
+            // print
+            .for_each(|(result, _path)| {
+                match result {
+                    Ok(lines) => lines.iter().for_each(|line| print!("{}", line.to_string(&meta_style))),
+                    Err(error) => eprint!("syncat: {}", error),
+                }
+            });
+    }
 }
 
 fn main() {

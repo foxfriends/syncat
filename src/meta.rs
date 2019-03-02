@@ -1,5 +1,6 @@
 use std::fs;
 use tree_sitter::Parser;
+use ansi_term::ANSIGenericString;
 
 use crate::language::Lang;
 use crate::dirs::config;
@@ -49,6 +50,44 @@ impl Default for MetaStylesheet {
                 ..StyleBuilder::default()
             },
         }
+    }
+}
+
+impl MetaStylesheet {
+    pub fn margin(&self) -> ANSIGenericString<str> {
+        self.margin
+            .build()
+            .paint(self.margin.content().unwrap_or(" | "))
+    }
+
+    pub fn added(&self) -> ANSIGenericString<str> {
+        self.vcs_addition
+            .build()
+            .paint(self.vcs_addition.content().unwrap_or("+"))
+    }
+
+    pub fn modified(&self) -> ANSIGenericString<str> {
+        self.vcs_modification
+            .build()
+            .paint(self.vcs_modification.content().unwrap_or("~"))
+    }
+
+    pub fn removed_above(&self) -> ANSIGenericString<str> {
+        self.vcs_deletion_above
+            .build()
+            .paint(self.vcs_deletion_above.content().unwrap_or("-"))
+    }
+
+    pub fn removed_below(&self) -> ANSIGenericString<str> {
+        self.vcs_deletion_below
+            .build()
+            .paint(self.vcs_deletion_below.content().unwrap_or("_"))
+    }
+
+    pub fn line_ending(&self) -> ANSIGenericString<str> {
+        self.line_ending
+            .build()
+            .paint(self.line_ending.content().unwrap_or("$"))
     }
 }
 

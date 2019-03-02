@@ -1,32 +1,29 @@
 use crate::Opts;
-use crate::meta::MetaStylesheet;
+use crate::line::Line;
 
 pub fn line_numbers<'a, E>(
-    &Opts { dev, number_lines_nonblank, number_lines, .. }: &Opts, 
-    meta_style: &'a MetaStylesheet,
-) -> impl 'a + FnMut(Result<String, E>) -> Result<String, E> {
+    &Opts { number_lines_nonblank, number_lines, .. }: &Opts, 
+) -> impl 'a + FnMut(Result<Vec<Line>, E>) -> Result<Vec<Line>, E> {
     let mut line_number = 0usize;
-    return move |source| -> Result<String, E> {
-        if dev {
-            source
-        } else if number_lines_nonblank {
-            Ok(source?.lines()
+    return move |source| {
+        if number_lines_nonblank {
+            Ok(source?
+               .into_iter()
                .map(|line| {
                    if line.is_empty() {
-                       format!("      {}\n", line.to_string())
+                       line
                    } else {
                        line_number += 1;
-                       let line_number_str = format!("{}", meta_style.line_number.build().paint(format!("{: >6}", line_number)));
-                       format!("{: >6}{}\n", line_number_str, line)
+                       line.with_number(line_number)
                    }
                })
                .collect())
         } else if number_lines {
-            Ok(source?.lines()
+            Ok(source?
+               .into_iter()
                .map(|line| {
                    line_number += 1;
-                   let line_number_str = format!("{}", meta_style.line_number.build().paint(format!("{: >6}", line_number)));
-                   format!("{}{}\n", line_number_str, line)
+                   line.with_number(line_number)
                })
                .collect())
         } else {
