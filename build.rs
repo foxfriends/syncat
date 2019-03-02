@@ -14,6 +14,14 @@ struct Package {
     dependencies: BTreeMap<String, String>,
 }
 
+fn clean(mut string: String) -> String {
+    if string.starts_with("@") {
+        string = string.split('/').nth(1).unwrap().to_string()
+    }
+
+    string
+}
+
 fn main() {
     println!("cargo:rerun-if-changed=package.json");
     println!("cargo:rerun-if-changed=package-lock.json");
@@ -36,7 +44,7 @@ fn main() {
         .dependencies
         .into_iter()
         .map(|(package_name, _)| package_name)
-        .map(|package_name| (Path::new(&node_modules).join(&format!("{}/src", package_name)), package_name))
+        .map(|package_name| (Path::new(&node_modules).join(&format!("{}/src", package_name)), clean(package_name)))
         .chain(vec![(stylesheet_syntax, "tree-sitter-syncat-stylesheet".to_string())])
         .for_each(move |(path, package)| {
             writeln!(output_list, "extern \"C\" {{ fn {}() -> Language; }}", package.replace("-", "_")).unwrap();
@@ -46,6 +54,9 @@ fn main() {
                 let mut build = cc::Build::new();
                 match file {
                     Ok(file) => {
+                        if file.path().is_dir() {
+                            continue;
+                        }
                         if file.path().file_name() == Some(&OsString::from("binding.cc")) {
                             // we don't want the C++ binding
                             continue;
@@ -54,11 +65,14 @@ fn main() {
                             build.file(file.path());
                         } else if file.path().extension() == Some(&OsString::from("cc")) {
                             build.cpp(true).file(file.path());
+                        } else {
+                            continue;
                         }
                         build
                             .include(&path)
                             .warnings(false)
                             .compile(&format!("{}-{}", package, file.path().file_stem().unwrap().to_str().unwrap()));
+                        println!("cargo:warning={:?}", file.path());
                     }
                     Err(..) => {}
                 }

@@ -7,7 +7,7 @@
     "start": "tree-sitter generate",
     "test": "tree-sitter test"
   },
-  "author": "",
+  "author": "Cameron Eldridge",
   "license": "ISC",
   "devDependencies": {
     "tree-sitter-cli": "^0.14.4"

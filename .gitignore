@@ -6,3 +6,9 @@ node_modules/*
 !node_modules/tree-sitter-*
 node_modules/tree-sitter-*/*
 !node_modules/tree-sitter-*/src
+
+!node_modules/@dicy
+node_modules/@dicy/*
+!node_modules/@dicy/tree-sitter-*
+node_modules/@dicy/tree-sitter-*/*
+!node_modules/@dicy/tree-sitter-*/src

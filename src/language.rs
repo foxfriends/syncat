@@ -30,6 +30,10 @@ pub enum Lang {
     Haskell,
     Regex,
     Syncat,
+    Tex,
+    Lua,
+    Clojure,
+    TreeSitterCorpus,
 }
 
 impl std::str::FromStr for Lang {
@@ -47,9 +51,9 @@ impl std::str::FromStr for Lang {
             "rb" | "ruby"                       => Ok(Ruby),
             "cs" | "csharp" | "c#"              => Ok(CSharp),
             "erb" | "ejs"                       => Ok(EmbeddedTemplate),
-            "js" | "javascript"                 => Ok(JavaScript),
+            "js" | "jsx" | "javascript"         => Ok(JavaScript),
             "json"                              => Ok(Json),
-            "ts" | "typescript"                 => Ok(TypeScript),
+            "ts" | "tsx" | "typescript"         => Ok(TypeScript),
             "sh" | "bash"                       => Ok(Bash),
             "py" | "python" | "python3"         => Ok(Python),
             "go"                                => Ok(Go),
@@ -64,6 +68,10 @@ impl std::str::FromStr for Lang {
             "hs" | "lhs" | "haskell"            => Ok(Haskell),
             "regex"                             => Ok(Regex),
             "syncat"                            => Ok(Syncat),
+            "lua"                               => Ok(Lua),
+            "clj" | "cljs"                      => Ok(Clojure),
+            "tex" | "latex" | "xetex"           => Ok(Tex),
+            "corpus"                            => Ok(TreeSitterCorpus),
             _                                   => Err(Box::new(Error(format!("Unknown language {}", name)))),
         }
     }
@@ -95,6 +103,10 @@ impl Lang {
                 Scala            => tree_sitter_scala(),
                 Haskell          => tree_sitter_haskell(),
                 Regex            => tree_sitter_regex(),
+                Lua              => tree_sitter_lua(),
+                Tex              => tree_sitter_latex(),
+                TreeSitterCorpus => tree_sitter_test(),
+                Clojure          => tree_sitter_clojure(),
                 Syncat           => tree_sitter_syncat_stylesheet(),
             }
         }
@@ -124,6 +136,10 @@ impl Lang {
             Scala            => "scala",
             Haskell          => "hs",
             Regex            => "regex",
+            Clojure          => "clj",
+            Tex              => "tex",
+            TreeSitterCorpus => "corpus",
+            Lua              => "lua",
             Syncat           => "syncat",
         }
     }
