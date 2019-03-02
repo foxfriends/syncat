@@ -1,6 +1,6 @@
-use std::path::PathBuf;
 use std::fs;
 use std::io::{self, Read};
+use std::path::PathBuf;
 
 use structopt::StructOpt;
 use tree_sitter::Parser;
@@ -55,15 +55,21 @@ pub struct Opts {
 }
 
 fn print<E, I>(opts: &Opts, sources: I)
-where E: std::error::Error,
-      I: Iterator<Item = (Option<String>, Result<String, E>)>
+where 
+    E: std::error::Error,
+    I: Iterator<Item = (Option<String>, Result<String, E>, Option<PathBuf>)>
 {
     let meta_style = load_meta_stylesheet();
+    let mut line_numbers = filter::line_numbers(opts, &meta_style);
+
     sources
         // parse
-        .map(|(lang, contents)| -> Result<String, Box<dyn std::error::Error>> {
-            let contents: String = contents?;
-            opts.syntax.as_ref()
+        .map(|(lang, contents, path)| -> (Result<String, Box<dyn std::error::Error>>, Option<PathBuf>) {
+            let contents: String = match contents {
+                Ok(contents) => contents,
+                Err(error) => return (Err(Box::new(error)), path),
+            };
+            let source = opts.syntax.as_ref()
                 .or(lang.as_ref())
                 .and_then(|lang| lang.parse::<Lang>().ok())
                 .and_then(|lang| {
@@ -78,17 +84,19 @@ where E: std::error::Error,
                         colorize::print_source(&contents, tree, &lang.style()?)
                     }
                 })
-                .unwrap_or_else(move || Ok(contents))
+                .unwrap_or_else(move || Ok(contents));
+            (source, path)
         })
 
         // apply filters
-        .map(|source| filter::git(opts, &meta_style, source))
-        .map(|source| filter::squeeze_blank_lines(opts, source))
-        .map(filter::line_numbers(opts, &meta_style))
-        .map(|source| filter::line_endings(opts, &meta_style, source))
+        .map(|(source, path)| (filter::margin(opts, &meta_style, source), path))
+        .map(|(source, path)| (filter::git(opts, &meta_style, source, path.as_ref()), path))
+        .map(|(source, path)| (filter::squeeze_blank_lines(opts, source), path))
+        .map(move |(source, path)| (line_numbers(source), path))
+        .map(|(source, path)| (filter::line_endings(opts, &meta_style, source), path))
 
         // print
-        .for_each(|result| {
+        .for_each(|(result, _path)| {
             match result {
                 Ok(text) => print!("{}", text),
                 Err(error) => eprint!("syncat: {}", error),
@@ -105,7 +113,7 @@ fn main() {
             let mut source = String::new();
             match stdin.read_to_string(&mut source) {
                 Ok(..) => {
-                    let sources: Vec<(_, Result<_, error::Error>)> = vec![(None, Ok(source))];
+                    let sources: Vec<(_, Result<_, error::Error>, _)> = vec![(None, Ok(source), None)];
                     print(&opts, sources.into_iter());
                 },
                 Err(error) => eprintln!("{}", error),
@@ -133,6 +141,7 @@ fn main() {
                     .map(|s| s.to_string()),
                 fs::read_to_string(&path)
                     .map_err(|error| error::Error(format!("{:?}: {}", path, error))),
+                Some(path.clone()),
             ));
         print(&opts, sources);
     }
