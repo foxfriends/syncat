@@ -6,6 +6,7 @@ use structopt::StructOpt;
 use tree_sitter::Parser;
 
 mod colorize;
+mod filter;
 mod language;
 mod dirs;
 mod error;
@@ -19,47 +20,50 @@ use self::meta::load_meta_stylesheet;
 /// Syntax aware cat utility.
 #[derive(StructOpt, Debug)]
 #[structopt(name = "syncat")]
-struct Opts {
+pub struct Opts {
+    /// Use Git to show recent changes
+    #[structopt(short="g", long="git")]
+    pub show_git: bool,
+
     /// Squeeze consecutive blank lines into one
     #[structopt(short="s", long="squeeze")]
-    squeeze_blank_lines: bool,
+    pub squeeze_blank_lines: bool,
 
     /// Show line endings
     #[structopt(short="e", long="endings")]
-    show_line_endings: bool,
+    pub show_line_endings: bool,
 
     /// Number non-empty input lines (overrides -n)
     #[structopt(short="b")]
-    number_lines_nonblank: bool,
+    pub number_lines_nonblank: bool,
 
     /// Number all input lines
     #[structopt(short="n", long="--numbered")]
-    number_lines: bool,
+    pub number_lines: bool,
 
     /// Prints a parsed s-expression, for debugging and theme creation
     #[structopt(long="dev")]
-    dev: bool,
+    pub dev: bool,
 
     /// The language to use to parse the files
     #[structopt(short="l", long="language")]
-    syntax: Option<String>,
+    pub syntax: Option<String>,
 
     /// Files to parse and print
     #[structopt(name="FILE", parse(from_os_str))]
-    files: Vec<PathBuf>,
+    pub files: Vec<PathBuf>,
 }
 
-fn print<E, I>(Opts { dev, syntax, squeeze_blank_lines, show_line_endings, number_lines_nonblank, number_lines, .. }: Opts, sources: I)
+fn print<E, I>(opts: &Opts, sources: I)
 where E: std::error::Error,
       I: Iterator<Item = (Option<String>, Result<String, E>)>
 {
-    let mut line_number: usize = 0;
     let meta_style = load_meta_stylesheet();
     sources
         // parse
         .map(|(lang, contents)| -> Result<String, Box<dyn std::error::Error>> {
             let contents: String = contents?;
-            syntax.as_ref()
+            opts.syntax.as_ref()
                 .or(lang.as_ref())
                 .and_then(|lang| lang.parse::<Lang>().ok())
                 .and_then(|lang| {
@@ -68,7 +72,7 @@ where E: std::error::Error,
                     Some((parser.parse(&contents, None)?, lang))
                 })
                 .map(|(tree, lang)| {
-                    if dev {
+                    if opts.dev {
                         colorize::print_tree(&contents, tree, &lang.style()?)
                     } else {
                         colorize::print_source(&contents, tree, &lang.style()?)
@@ -78,76 +82,10 @@ where E: std::error::Error,
         })
 
         // apply filters
-        .map(|source| {
-            if dev { 
-                source
-            } else if squeeze_blank_lines {
-                Ok(source?.lines()
-                   .scan(false, |was_blank, line| {
-                       if line.is_empty() {
-                           let output = if *was_blank {
-                                None
-                           } else {
-                               Some(line)
-                           };
-                           *was_blank = true;
-                           Some(output)
-                       } else {
-                            *was_blank = false;
-                            Some(Some(line))
-                       }
-                   })
-                   .filter_map(|x| x)
-                   .collect::<Vec<_>>()
-                   .join("\n"))
-            } else {
-                source
-            }
-        })
-        .map(|source| {
-            let margin = meta_style.margin
-                .build()
-                .paint(meta_style.margin.content().unwrap_or("  "));
-            if dev {
-                source
-            } else if number_lines_nonblank {
-                Ok(source?.lines()
-                    .map(|line| {
-                        if line.is_empty() {
-                            format!("      {}{}\n", margin, line.to_string())
-                        } else {
-                            line_number += 1;
-                            let line_number_str = format!("{}", meta_style.line_number.build().paint(format!("{: >6}", line_number)));
-                            format!("{: >6}{}{}\n", line_number_str, margin, line)
-                        }
-                    })
-                    .collect())
-            } else if number_lines {
-                Ok(source?.lines()
-                    .map(|line| {
-                        line_number += 1;
-                        let line_number_str = format!("{}", meta_style.line_number.build().paint(format!("{: >6}", line_number)));
-                        format!("{}{}{}\n", line_number_str, margin, line)
-                    })
-                    .collect())
-            } else {
-                source
-            }
-        })
-        .map(|source| {
-            let line_ending = meta_style.line_ending
-                .build()
-                .paint(meta_style.line_ending.content().unwrap_or("$"));
-            if dev {
-                source
-            } else if show_line_endings {
-                Ok(source?.lines()
-                    .map(|line| format!("{}{}\n", line, line_ending))
-                    .collect())
-            } else {
-                source
-            }
-        })
+        .map(|source| filter::git(opts, &meta_style, source))
+        .map(|source| filter::squeeze_blank_lines(opts, source))
+        .map(filter::line_numbers(opts, &meta_style))
+        .map(|source| filter::line_endings(opts, &meta_style, source))
 
         // print
         .for_each(|result| {
@@ -168,7 +106,7 @@ fn main() {
             match stdin.read_to_string(&mut source) {
                 Ok(..) => {
                     let sources: Vec<(_, Result<_, error::Error>)> = vec![(None, Ok(source))];
-                    print(opts, sources.into_iter());
+                    print(&opts, sources.into_iter());
                 },
                 Err(error) => eprintln!("{}", error),
             }
@@ -196,6 +134,6 @@ fn main() {
                 fs::read_to_string(&path)
                     .map_err(|error| error::Error(format!("{:?}: {}", path, error))),
             ));
-        print(opts, sources);
+        print(&opts, sources);
     }
 }

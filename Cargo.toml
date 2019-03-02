@@ -11,6 +11,7 @@ structopt = "0.2"
 directories = "1.0"
 hex = "0.3"
 regex = "1.1"
+git2 = "0.8"
 
 [build-dependencies]
 serde = { version = "1.0", features = ["derive"] }
