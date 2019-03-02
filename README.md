@@ -52,6 +52,10 @@ are:
 *   Haskell: `hs.syncat`
 *   Regex: `regex.syncat`
 *   Syncat: `syncat.syncat`
+*   Lua: `lua.syncat`
+*   Clojure: `clj.syncat`
+*   TeX: `tex.syncat`
+*   Tree sitter corpus tests: `corpus.syncat`
 
 ### Selectors
 
