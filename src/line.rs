@@ -19,7 +19,7 @@ impl Default for LineChange {
 pub struct Line {
     pub source: String,
     pub margin: bool,
-    pub number: Option<usize>,
+    pub number: Option<Option<usize>>,
     pub git_status: Option<LineChange>,
     pub line_ending: bool,
     pub no_newline: bool,
@@ -44,7 +44,12 @@ impl Line {
     }
 
     pub fn with_number(mut self, number: usize) -> Self {
-        self.number = Some(number);
+        self.number = Some(Some(number));
+        self
+    }
+
+    pub fn with_no_number(mut self) -> Self {
+        self.number = Some(None);
         self
     }
 
@@ -66,9 +71,11 @@ impl Line {
             output = format!("{}{}", meta_style.margin(), output);
         }
         if let Some(number) = self.number {
-            output = format!("{}{}", meta_style.line_number.build().paint(format!("{: >6}", number)), output);
-        } else if self.margin {
-            output = format!("      {}", output);
+            if let Some(number) = number {
+                output = format!("{}{}", meta_style.line_number.build().paint(format!("{: >6}", number)), output);
+            } else {
+                output = format!("      {}", output);
+            }
         }
         if let Some(status) = self.git_status {
             use LineChange::*;

@@ -11,7 +11,7 @@ pub fn line_numbers<'a, E>(
                .into_iter()
                .map(|line| {
                    if line.is_empty() {
-                       line
+                       line.with_no_number()
                    } else {
                        line_number += 1;
                        line.with_number(line_number)
