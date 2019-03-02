@@ -1,4 +1,7 @@
 use super::*;
+use std::sync::RwLock;
+use std::collections::BTreeMap;
+use lazy_static::lazy_static;
 
 #[derive(Debug)]
 enum ContextNode<'a> {
@@ -6,8 +9,19 @@ enum ContextNode<'a> {
     Leaf(&'a str),
 }
 
-// NOTE: the Regex gets parsed way too many times here, so maybe it should be stored in some random
-// cache.
+lazy_static! {
+    static ref REGEX: RwLock<BTreeMap<String, Regex>> = RwLock::default();
+}
+
+fn regex(name: &str) -> Regex {
+    if let Some(regex) = REGEX.read().unwrap().get(name) {
+        return regex.clone();
+    }
+    REGEX.write().unwrap().entry(name.to_string())
+        .or_insert_with(move || regex(name))
+        .clone()
+}
+
 impl<'a> ContextNode<'a> {
     fn satisfies_selector(&self, selector: &[SelectorSegment]) -> bool {
         match &selector[0] {
@@ -21,7 +35,7 @@ impl<'a> ContextNode<'a> {
                 ContextNode::Leaf(token) => token == name,
             }
             SelectorSegment::TokenPattern(pattern) => {
-                let pattern = Regex::new(pattern).unwrap();
+                let pattern = regex(pattern);
                 match self {
                     ContextNode::Node(.., context) => context.satisfies_selector(selector),
                     ContextNode::Leaf(token) => pattern.is_match(token),
@@ -38,7 +52,7 @@ impl<'a> ContextNode<'a> {
                     ContextNode::Leaf(token) => token == name,
                 }
                 SelectorSegment::TokenPattern(pattern) => {
-                    let pattern = Regex::new(pattern).unwrap();
+                    let pattern = regex(pattern);
                     match self {
                         ContextNode::Node(..) => false,
                         ContextNode::Leaf(token) => pattern.is_match(token),
@@ -124,7 +138,7 @@ impl Stylesheet {
                     }
                 }
                 SelectorSegment::TokenPattern(name) => {
-                    if token.map(|token| Regex::new(name).unwrap().is_match(token)).unwrap_or(false) {
+                    if token.map(|token| regex(name).is_match(token)).unwrap_or(false) {
                         style.merge_with(&stylesheet.style)
                     } else {
                         style
@@ -167,7 +181,7 @@ impl Stylesheet {
                         }
                     }
                     SelectorSegment::TokenPattern(name) => {
-                        if scopes.is_empty() && token.map(|token| Regex::new(name).unwrap().is_match(token)).unwrap_or(false) {
+                        if scopes.is_empty() && token.map(|token| regex(name).is_match(token)).unwrap_or(false) {
                             style.merge_with(&stylesheet.style)
                         } else {
                             style
