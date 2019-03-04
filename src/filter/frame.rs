@@ -29,7 +29,7 @@ pub fn frame_header<E>(
                     print!("{}", style.margin().cross());
                 }
             }
-            for _ in margin_start + 3..width {
+            for _ in margin_start + if margin_start != 0 { 3 } else { 0 } ..width {
                 print!("{}", style.margin().top());
             }
             println!();
@@ -45,7 +45,7 @@ pub fn frame_header<E>(
                     print!("{}", style.margin().cross());
                 }
             }
-            for _ in margin_start + 3..width {
+            for _ in margin_start + if margin_start != 0 { 3 } else { 0 } ..width {
                 print!("{}", style.margin().top());
             }
             println!();
@@ -58,7 +58,7 @@ pub fn frame_header<E>(
             }
             println!("{}", style.title().paint(path.and_then(|path| path.to_str()).unwrap_or("Input")));
 
-            for _ in 0..margin_start {
+            for _ in margin_start + if margin_start != 0 { 3 } else { 0 } ..width {
                 print!("{}", style.margin().top());
             }
             if margin_start != 0 {
@@ -95,7 +95,7 @@ pub fn frame_footer<E>(
                 if margin_start != 0 {
                     print!("{}", style.margin().bottom_end());
                 }
-                for _ in margin_start + 3..width {
+                for _ in margin_start + if margin_start != 0 { 3 } else { 0 } ..width {
                     print!("{}", style.margin().bottom());
                 }
                 println!();
