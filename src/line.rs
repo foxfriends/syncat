@@ -87,7 +87,7 @@ impl Line {
                 RemovedBelow => format!("{} {}", meta_style.removed_below(), output),
             };
         }
-        if self.line_ending {
+        if self.line_ending &&!self.no_newline {
             output = format!("{}{}", output, meta_style.line_ending());
         }
         if !self.no_newline {

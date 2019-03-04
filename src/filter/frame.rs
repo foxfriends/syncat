@@ -86,6 +86,9 @@ pub fn frame_footer<E>(
     match frame {
         0 => {}
         _ => {
+            if source.as_ref().ok().and_then(|vec| vec.last()).map(|line| line.no_newline).unwrap_or(false) {
+                println!();
+            }
             if index == count - 1 {
                 // TODO: assumptions being made about the number of characters in each segment should
                 // be avoided
