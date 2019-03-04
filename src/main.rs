@@ -22,41 +22,46 @@ use self::meta::load_meta_stylesheet;
 /// Syntax aware cat utility.
 #[derive(StructOpt, Debug)]
 #[structopt(name = "syncat")]
+#[structopt(rename_all = "kebab-case")]
 pub struct Opts {
+    /// Level of framing around each file. Repeat for bigger frame
+    #[structopt(short, long, parse(from_occurrences))]
+    pub frame: usize,
+
     /// Use Git to show recent changes
-    #[structopt(short="g", long="git")]
-    pub show_git: bool,
+    #[structopt(short, long)]
+    pub git: bool,
 
     /// Squeeze consecutive blank lines into one
-    #[structopt(short="s", long="squeeze")]
-    pub squeeze_blank_lines: bool,
+    #[structopt(short, long)]
+    pub squeeze: bool,
 
     /// Show line endings
     #[structopt(short="e", long="endings")]
     pub show_line_endings: bool,
 
     /// Number non-empty input lines (overrides -n)
-    #[structopt(short="b")]
-    pub number_lines_nonblank: bool,
+    #[structopt(short="b", long)]
+    pub numbered_nonblank: bool,
 
     /// Number all input lines
-    #[structopt(short="n", long="--numbered")]
-    pub number_lines: bool,
+    #[structopt(short, long)]
+    pub numbered: bool,
 
     /// Prints a parsed s-expression, for debugging and theme creation
-    #[structopt(long="dev")]
+    #[structopt(long)]
     pub dev: bool,
 
     /// The language to use to parse the files
-    #[structopt(short="l", long="language")]
-    pub syntax: Option<String>,
+    #[structopt(short, long)]
+    pub language: Option<String>,
 
     /// Files to parse and print
     #[structopt(name="FILE", parse(from_os_str))]
     pub files: Vec<PathBuf>,
 }
 
-fn print<E, I>(opts: &Opts, sources: I)
+fn print<E, I>(opts: &Opts, sources: I, count: usize)
 where 
     E: std::error::Error,
     I: Iterator<Item = (Option<String>, Result<String, E>, Option<PathBuf>)>
@@ -71,7 +76,7 @@ where
                 Ok(contents) => contents,
                 Err(error) => return (String::default(), Err(Box::new(error)), path),
             };
-            let source = opts.syntax.as_ref()
+            let source = opts.language.as_ref()
                 .or(lang.as_ref())
                 .and_then(|lang| lang.parse::<Lang>().ok())
                 .and_then(|lang| {
@@ -122,11 +127,14 @@ where
             .map(|(source, path)| (filter::line_endings(opts, source), path))
 
             // print
-            .for_each(|(result, _path)| {
-                match result {
+            .enumerate()
+            .for_each(|(i, (source, path))| {
+                let result = filter::frame_header((i, count), &opts, source, path.as_ref(), &meta_style);
+                match &result {
                     Ok(lines) => lines.iter().for_each(|line| print!("{}", line.to_string(&meta_style))),
                     Err(error) => eprint!("syncat: {}", error),
                 }
+                let _ = filter::frame_footer((i, count), &opts, result, path.as_ref(), &meta_style);
             });
     }
 }
@@ -136,12 +144,12 @@ fn main() {
 
     if opts.files.is_empty() {
         let mut stdin = io::stdin();
-        if opts.syntax.is_some() {
+        if opts.language.is_some() {
             let mut source = String::new();
             match stdin.read_to_string(&mut source) {
                 Ok(..) => {
                     let sources: Vec<(_, Result<_, error::Error>, _)> = vec![(None, Ok(source), None)];
-                    print(&opts, sources.into_iter());
+                    print(&opts, sources.into_iter(), 1);
                 },
                 Err(error) => eprintln!("{}", error),
             }
@@ -170,6 +178,6 @@ fn main() {
                     .map_err(|error| error::Error(format!("{:?}: {}", path, error))),
                 Some(path.clone()),
             ));
-        print(&opts, sources);
+        print(&opts, sources, opts.files.len());
     }
 }

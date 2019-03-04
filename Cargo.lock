@@ -368,7 +368,17 @@ dependencies = [
  "serde 1.0.88 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.38 (registry+https://github.com/rust-lang/crates.io-index)",
  "structopt 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)",
+ "terminal_size 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "tree-sitter 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "terminal_size"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "libc 0.2.48 (registry+https://github.com/rust-lang/crates.io-index)",
+ "winapi 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -534,6 +544,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum structopt 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)" = "670ad348dc73012fcf78c71f06f9d942232cdd4c859d4b6975e27836c3efc0c3"
 "checksum structopt-derive 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)" = "ef98172b1a00b0bec738508d3726540edcbd186d50dfd326f2b1febbb3559f04"
 "checksum syn 0.15.26 (registry+https://github.com/rust-lang/crates.io-index)" = "f92e629aa1d9c827b2bb8297046c1ccffc57c99b947a680d3ccff1f136a3bee9"
+"checksum terminal_size 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)" = "023345d35850b69849741bd9a5432aa35290e3d8eb76af8717026f270d1cf133"
 "checksum termion 1.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "689a3bdfaab439fd92bc87df5c4c78417d3cbe537487274e9b0b2dce76e92096"
 "checksum textwrap 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "307686869c93e71f94da64286f9a9524c0f308a9e1c87a583de8e9c9039ad3f6"
 "checksum thread_local 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "c6b53e329000edc2b34dbe8545fd20e55a333362d0a321909685a19bd28c3f1b"

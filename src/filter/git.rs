@@ -73,7 +73,7 @@ fn do_git_transform(source: &[Line], repo: Repository, path: &PathBuf) -> Option
 }
 
 pub fn git<E>(
-    &Opts { show_git, .. }: &Opts, 
+    &Opts { git, .. }: &Opts, 
     source: Result<Vec<Line>, E>,
     filename: Option<&PathBuf>,
 ) -> Result<Vec<Line>, E> {
@@ -81,7 +81,7 @@ pub fn git<E>(
         Some(path) => path,
         None => return source,
     };
-    if show_git {
+    if git {
         if let Some(repository) = filename.and_then(|path| Repository::discover(path).ok()) {
             let source = source?;
             Ok(do_git_transform(&source, repository, path).unwrap_or(source))

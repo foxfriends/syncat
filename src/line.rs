@@ -68,7 +68,7 @@ impl Line {
     ) -> String {
         let mut output = self.source.clone();
         if self.margin {
-            output = format!("{}{}", meta_style.margin(), output);
+            output = format!("{}{}", meta_style.margin().left(), output);
         }
         if let Some(number) = self.number {
             if let Some(number) = number {

@@ -2,11 +2,11 @@ use crate::Opts;
 use crate::line::Line;
 
 pub fn line_numbers<'a, E>(
-    &Opts { number_lines_nonblank, number_lines, .. }: &Opts, 
+    &Opts { numbered_nonblank, numbered, .. }: &Opts, 
 ) -> impl 'a + FnMut(Result<Vec<Line>, E>) -> Result<Vec<Line>, E> {
     let mut line_number = 0usize;
     return move |source| {
-        if number_lines_nonblank {
+        if numbered_nonblank {
             Ok(source?
                .into_iter()
                .map(|line| {
@@ -18,7 +18,7 @@ pub fn line_numbers<'a, E>(
                    }
                })
                .collect())
-        } else if number_lines {
+        } else if numbered {
             Ok(source?
                .into_iter()
                .map(|line| {
