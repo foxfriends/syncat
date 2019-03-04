@@ -6,7 +6,7 @@
 "if", "else",
 "for", "do", "while",
 "try", "catch", "finally",
-"throw", "throws",
+"throw", "throws", "assert",
 "return", "break", "continue",
 "var",
 wildcard > "?",
