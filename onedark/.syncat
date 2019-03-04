@@ -9,7 +9,12 @@ line_number {
 
 margin {
   color: 15;
-  content: " │ ";
+  content: unicode;
+}
+
+title {
+  bold: true;
+  color: white;
 }
 
 vcs_addition {

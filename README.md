@@ -256,5 +256,19 @@ below:
 *   `line_number`: The styling for line numbers (pass `-n` option)
 *   `line_ending`: The styling for the end of line marker (pass `-E` option)
     *   `content: [string]`: Use the provided string as the end of line marker
-*   `margin`: The separator between the line numbers and the source code
-    *   `content: [string]`: Use the provided string as the margin
+*   `margin`: The frame drawing characters, between line numbers and the code, and between the
+    files when using `-f` flags
+    *   `content: [string]`: Valid values are "ascii" (uses `-|+` characters) or "unicode" (unicode box drawing characters)
+*   `title`: The file name when drawn in the title frame (`-ff` flag)
+*   `vcs_addition`: Additions detected by Git
+    *   `content: [string]`: Use the provided string as the indicator. It is recommended to use only 1
+        character
+*   `vcs_modification`: Modifications detected by Git
+    *   `content: [string]`: Use the provided string as the indicator. It is recommended to use only 1
+        character
+*   `vcs_deletion_above`: Deletions above the current line detected by Git
+    *   `content: [string]`: Use the provided string as the indicator. It is recommended to use only 1
+        character
+*   `vcs_deletion_below`: Deletions below the current line detected by Git
+    *   `content: [string]`: Use the provided string as the indicator. It is recommended to use only 1
+        character
