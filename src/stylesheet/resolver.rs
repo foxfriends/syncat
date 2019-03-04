@@ -18,7 +18,7 @@ fn regex(name: &str) -> Regex {
         return regex.clone();
     }
     REGEX.write().unwrap().entry(name.to_string())
-        .or_insert_with(move || regex(name))
+        .or_insert_with(move || Regex::new(name).unwrap())
         .clone()
 }
 
