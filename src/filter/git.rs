@@ -86,7 +86,10 @@ pub fn git<E>(
             let source = source?;
             Ok(do_git_transform(&source, repository, path).unwrap_or(source))
         } else {
-            source
+            Ok(source?
+                .into_iter()
+                .map(|line| line.with_status(LineChange::Unchanged))
+                .collect())
         }
     } else {
         source
