@@ -35,7 +35,7 @@ impl Line {
 
     pub fn with_status(mut self, status: LineChange) -> Self {
         self.git_status = Some(status);
-        self
+        self.with_margin()
     }
 
     pub fn with_margin(mut self) -> Self {
@@ -45,12 +45,12 @@ impl Line {
 
     pub fn with_number(mut self, number: usize) -> Self {
         self.number = Some(Some(number));
-        self
+        self.with_margin()
     }
 
     pub fn with_no_number(mut self) -> Self {
         self.number = Some(None);
-        self
+        self.with_margin()
     }
 
     pub fn with_line_ending(mut self) -> Self {

@@ -2,20 +2,26 @@ use crate::Opts;
 use crate::line::Line;
 
 pub fn line_numbers<'a, E>(
-    &Opts { numbered_nonblank, numbered, .. }: &Opts, 
+    &Opts { frame, numbered_nonblank, numbered, .. }: &Opts, 
 ) -> impl 'a + FnMut(Result<Vec<Line>, E>) -> Result<Vec<Line>, E> {
-    let mut line_number = 1usize;
+    let mut line_number = 0usize;
+    let mut skip_next = false;
     return move |source| {
         if numbered_nonblank {
             Ok(source?
                 .into_iter()
                 .map(|line| {
-                    if line.is_empty() {
+                    if skip_next {
+                        skip_next = false;
+                        line
+                    } else if line.is_empty() || skip_next {
                         line.with_no_number()
                     } else {
-                        let line_with_number = line.with_number(line_number);
                         line_number += 1;
-                        line_with_number
+                        if line.no_newline {
+                            skip_next = frame == 0;
+                        }
+                        line.with_number(line_number)
                     }
                 })
                 .collect())
@@ -23,9 +29,16 @@ pub fn line_numbers<'a, E>(
             Ok(source?
                 .into_iter()
                 .map(|line| {
-                    let line_with_number = line.with_number(line_number);
-                    line_number += 1;
-                    line_with_number
+                    if skip_next {
+                        skip_next = false;
+                        line
+                    } else {
+                        line_number += 1;
+                        if line.no_newline {
+                            skip_next = frame == 0;
+                        }
+                        line.with_number(line_number)
+                    }
                 })
                 .collect())
         } else {

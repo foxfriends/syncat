@@ -120,7 +120,6 @@ where
                 (lines, path)
             })
             // apply filters
-            .map(|(source, path)| (filter::margin(opts, source), path))
             .map(|(source, path)| (filter::git(opts, source, path.as_ref()), path))
             .map(|(source, path)| (filter::squeeze_blank_lines(opts, source), path))
             .map(move |(source, path)| (line_numbers(source), path))
