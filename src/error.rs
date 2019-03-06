@@ -14,3 +14,5 @@ impl Display for Error {
         writeln!(f, "{}", self.0)
     }
 }
+
+pub type BoxedError = Box<dyn std::error::Error + Send + Sync>;

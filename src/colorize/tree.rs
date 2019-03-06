@@ -8,7 +8,7 @@ fn colorize_node_sexp<'a>(
     context: &mut Context<'a>,
     scope: &mut Vec<(&'a str, usize)>,
     output: &mut String,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), crate::BoxedError> {
     if node.child_count() == 0 {
         // print a child node
         let token = &source[node.start_byte()..node.end_byte()];
@@ -74,7 +74,7 @@ fn colorize_node_sexp<'a>(
     Ok(())
 }
 
-pub fn print_tree<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, Box<dyn std::error::Error>> {
+pub fn print_tree<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, crate::BoxedError> {
     let source = source.as_ref();
     let node = tree.root_node();
     let mut output = String::new();

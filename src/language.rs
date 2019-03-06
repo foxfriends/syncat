@@ -37,7 +37,7 @@ pub enum Lang {
 }
 
 impl std::str::FromStr for Lang {
-    type Err = Box<dyn std::error::Error>;
+    type Err = crate::BoxedError;
 
     fn from_str(name: &str) -> Result<Lang, Self::Err> {
         use Lang::*;
@@ -144,7 +144,7 @@ impl Lang {
         }
     }
 
-    pub fn style(&self) -> Result<Stylesheet, Box<dyn std::error::Error>> {
+    pub fn style(&self) -> Result<Stylesheet, crate::BoxedError> {
         let mut parser = Parser::new();
         parser.set_language(Lang::Syncat.parser()).unwrap();
         let style_file = config().join("style/active").join(self.ext()).with_extension("syncat");

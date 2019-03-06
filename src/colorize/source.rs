@@ -8,7 +8,7 @@ fn colorize_node<'a>(
     context: &mut Context<'a>,
     scope: &mut Vec<(&'a str, usize)>,
     output: &mut String,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), crate::BoxedError> {
     // put any leading characters into the result text
     let outer_style = stylesheet.resolve(context, scope, None);
 
@@ -69,7 +69,7 @@ fn colorize_node<'a>(
     Ok(())
 }
 
-pub fn print_source<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, Box<dyn std::error::Error>> {
+pub fn print_source<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, crate::BoxedError> {
     let source = source.as_ref();
     let node = tree.root_node();
     let mut output = String::new();

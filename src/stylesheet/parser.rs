@@ -9,7 +9,7 @@ impl Stylesheet {
         }
     }
 
-    fn parse_color(color: &str) -> Result<Colour, Box<dyn std::error::Error>> {
+    fn parse_color(color: &str) -> Result<Colour, crate::BoxedError> {
         match color {
             "red"    => Ok(Colour::Red),
             "blue"   => Ok(Colour::Blue),
@@ -32,7 +32,7 @@ impl Stylesheet {
         }
     }
 
-    fn parse_style(source: &str, stylebuilder: &mut StyleBuilder, node: Node, important: bool) -> Result<(), Box<dyn std::error::Error>> {
+    fn parse_style(source: &str, stylebuilder: &mut StyleBuilder, node: Node, important: bool) -> Result<(), crate::BoxedError> {
         use crate::style::setting;
         let mut style = None;
         let mut value = None;
@@ -91,7 +91,7 @@ impl Stylesheet {
         Ok(())
     }
 
-    fn parse_selector_segment(source: &str, node: Node) -> Result<SelectorSegment, Box<dyn std::error::Error>> {
+    fn parse_selector_segment(source: &str, node: Node) -> Result<SelectorSegment, crate::BoxedError> {
         use SelectorSegment::*;
         match node.kind() {
             "node_kind" => {
@@ -128,7 +128,7 @@ impl Stylesheet {
         }
     }
 
-    fn parse_selector(source: &str, node: Node) -> Result<Vec<SelectorSegment>, Box<dyn std::error::Error>> {
+    fn parse_selector(source: &str, node: Node) -> Result<Vec<SelectorSegment>, crate::BoxedError> {
         let mut selector = vec![];
         for child in node.children().filter(Node::is_named) {
             selector.push(Stylesheet::parse_selector_segment(source, child)?);
@@ -136,7 +136,7 @@ impl Stylesheet {
         Ok(selector)
     }
 
-    fn handle_selector(&mut self, selector: Vec<SelectorSegment>, stylebuilder: StyleBuilder) -> Result<(), Box<dyn std::error::Error>> {
+    fn handle_selector(&mut self, selector: Vec<SelectorSegment>, stylebuilder: StyleBuilder) -> Result<(), crate::BoxedError> {
         let mut scope: &mut Stylesheet = self;
         for segment in selector.into_iter() {
             scope = scope.scopes
@@ -147,7 +147,7 @@ impl Stylesheet {
         Ok(())
     }
 
-    fn parse_styles(source: &str, stylebuilder: &mut StyleBuilder, node: Node, important: bool) -> Result<(), Box<dyn std::error::Error>> {
+    fn parse_styles(source: &str, stylebuilder: &mut StyleBuilder, node: Node, important: bool) -> Result<(), crate::BoxedError> {
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
                 "style" => Stylesheet::parse_style(source, stylebuilder, child, important)?,
@@ -157,7 +157,7 @@ impl Stylesheet {
         Ok(())
     }
 
-    fn parse_rule(&mut self, source: &str, node: Node) -> Result<(), Box<dyn std::error::Error>> {
+    fn parse_rule(&mut self, source: &str, node: Node) -> Result<(), crate::BoxedError> {
         let mut selectors = vec![];
         let mut stylebuilder = StyleBuilder::default();
         for child in node.children().filter(Node::is_named) {
@@ -174,7 +174,7 @@ impl Stylesheet {
         Ok(())
     }
 
-    fn parse_node(&mut self, source: &str, node: Node) -> Result<(), Box<dyn std::error::Error>> {
+    fn parse_node(&mut self, source: &str, node: Node) -> Result<(), crate::BoxedError> {
         match node.kind() {
             "stylesheet" => {
                 for child in node.children().filter(Node::is_named) {
@@ -188,7 +188,7 @@ impl Stylesheet {
         Ok(())
     }
 
-    pub fn parse(source: &str, tree: Tree) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn parse(source: &str, tree: Tree) -> Result<Self, crate::BoxedError> {
         let root = tree.root_node();
         let mut stylesheet = Stylesheet {
             style: StyleBuilder::default(),

@@ -18,6 +18,7 @@ mod stylesheet;
 use self::language::Lang;
 use self::line::Line;
 use self::meta::load_meta_stylesheet;
+use self::error::BoxedError;
 
 /// Syntax aware cat utility.
 #[derive(StructOpt, Debug)]
@@ -63,15 +64,12 @@ pub struct Opts {
 
 fn print<E, I>(opts: &Opts, sources: I, count: usize)
 where 
-    E: std::error::Error,
+    E: 'static + std::error::Error + Sync + Send,
     I: Iterator<Item = (Option<String>, Result<String, E>, Option<PathBuf>)>
 {
-    let meta_style = load_meta_stylesheet();
-    let mut line_numbers = filter::line_numbers(opts);
-
     let coloured = sources
         // parse
-        .map(|(lang, contents, path)| -> (String, Result<String, Box<dyn std::error::Error>>, Option<PathBuf>) {
+        .map(|(lang, contents, path)| -> (String, Result<String, BoxedError>, Option<PathBuf>) {
             let contents: String = match contents {
                 Ok(contents) => contents,
                 Err(error) => return (String::default(), Err(Box::new(error)), path),
@@ -105,6 +103,8 @@ where
                 }
             });
     } else {
+        let meta_style = load_meta_stylesheet();
+        let mut line_numbers = filter::line_numbers(opts);
         coloured
             .map(|(original, source, path)| {
                 let lines = source.map(|source| {
