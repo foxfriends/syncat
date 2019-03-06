@@ -1,6 +1,7 @@
 use std::fs;
 use std::io::{self, Read};
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 
 use structopt::StructOpt;
 use tree_sitter::Parser;
@@ -62,79 +63,83 @@ pub struct Opts {
     pub files: Vec<PathBuf>,
 }
 
-fn print<E, I>(opts: &Opts, sources: I, count: usize)
-where 
-    E: 'static + std::error::Error + Sync + Send,
-    I: Iterator<Item = (Option<String>, Result<String, E>, Option<PathBuf>)>
-{
-    let coloured = sources
-        // parse
-        .map(|(lang, contents, path)| -> (String, Result<String, BoxedError>, Option<PathBuf>) {
-            let contents: String = match contents {
-                Ok(contents) => contents,
-                Err(error) => return (String::default(), Err(Box::new(error)), path),
-            };
-            let source = opts.language.as_ref()
-                .or(lang.as_ref())
-                .and_then(|lang| lang.parse::<Lang>().ok())
-                .and_then(|lang| {
-                    let mut parser = Parser::new();
-                    parser.set_language(lang.parser()).ok()?;
-                    Some((parser.parse(&contents, None)?, lang))
-                })
-                .map(|(tree, lang)| {
-                    if opts.dev {
-                        colorize::print_tree(&contents, tree, &lang.style()?)
-                    } else {
-                        colorize::print_source(&contents, tree, &lang.style()?)
-                    }
-                })
-                .unwrap_or_else(|| Ok(contents.clone()));
-            (contents, source, path)
-        });
+fn transform(
+    opts: &Opts,
+    lang: Option<&String>, 
+    contents: String,
+    path: Option<&PathBuf>, 
+) -> Result<Vec<Line>, BoxedError> {
+    let source: String = opts.language.as_ref()
+        .or(lang)
+        .and_then(|lang| lang.parse::<Lang>().ok())
+        .and_then(|lang| {
+            let mut parser = Parser::new();
+            parser.set_language(lang.parser()).ok()?;
+            Some((parser.parse(contents.as_str(), None)?, lang))
+        })
+        .map(|(tree, lang)| {
+            if opts.dev {
+                colorize::print_tree(&contents, tree, &lang.style()?)
+            } else {
+                colorize::print_source(&contents, tree, &lang.style()?)
+            }
+        })
+        .unwrap_or_else(|| Ok(contents.clone()))?;
 
     if opts.dev {
-        coloured
-            // print
-            .for_each(|(_original, result, _path)| {
-                match result {
-                    Ok(text) => print!("{}", text),
-                    Err(error) => eprint!("syncat: {}", error),
-                }
-            });
+        Ok(vec![Line::new(source)])
     } else {
-        let meta_style = load_meta_stylesheet();
-        let mut line_numbers = filter::line_numbers(opts);
-        coloured
-            .map(|(original, source, path)| {
-                let lines = source.map(|source| {
-                    let mut lines = source
-                        .lines()
-                        .map(|line| Line::new(line.to_owned()))
-                        .collect::<Vec<_>>();
-                    if !original.ends_with("\n") {
-                        lines.last_mut().unwrap().no_newline = true;
-                    }
-                    lines
-                 });
-                (lines, path)
-            })
-            // apply filters
-            .map(|(source, path)| (filter::git(opts, source, path.as_ref()), path))
-            .map(|(source, path)| (filter::squeeze_blank_lines(opts, source), path))
-            .map(move |(source, path)| (line_numbers(source), path))
-            .map(|(source, path)| (filter::line_endings(opts, source), path))
+        let mut lines = source
+            .lines()
+            .map(|line| Line::new(line.to_owned()))
+            .collect::<Vec<_>>();
+        if !contents.ends_with("\n") {
+            lines.last_mut().unwrap().no_newline = true;
+        }
 
-            // print
-            .enumerate()
-            .for_each(|(i, (source, path))| {
-                let result = filter::frame_header((i, count), &opts, source, path.as_ref(), &meta_style);
-                match &result {
-                    Ok(lines) => lines.iter().for_each(|line| print!("{}", line.to_string(&meta_style))),
-                    Err(error) => eprint!("syncat: {}", error),
+        let lines = filter::git(opts, lines, path);
+        let lines = filter::squeeze_blank_lines(opts, lines);
+        let lines = filter::line_endings(opts, lines);
+
+        Ok(lines)
+    }
+}
+
+fn print<I>(opts: Opts, sources: I, count: usize)
+where 
+    I: Iterator<Item = (Option<String>, Result<String, BoxedError>, Option<PathBuf>)>
+{
+    let opts = Arc::new(opts);
+    let meta_style = Arc::new(load_meta_stylesheet());
+    let line_numbers = Arc::new(Mutex::new(filter::line_numbers(opts.as_ref())));
+    let mut threads = vec![];
+    for (i, (lang, contents, path)) in sources.enumerate() {
+        let opts = opts.clone();
+        let meta_style = meta_style.clone();
+        let line_numbers = line_numbers.clone();
+        threads.push(std::thread::spawn(move || {
+            let lines = contents
+                .and_then(|source| transform(opts.as_ref(), lang.as_ref(), source, path.as_ref()));
+            // TODO: wait_for_turn()
+            match lines {
+                Ok(lines) => {
+                    let line_numbers = &mut *line_numbers.lock().unwrap();
+                    let lines = line_numbers(lines);
+                    let lines = filter::frame_header((i, count), opts.as_ref(), lines, path.as_ref(), &meta_style);
+                    for line in &lines {
+                        print!("{}", line.to_string(&meta_style));
+                    }
+                    let _ = filter::frame_footer((i, count), opts.as_ref(), lines, path.as_ref(), &meta_style);
                 }
-                let _ = filter::frame_footer((i, count), &opts, result, path.as_ref(), &meta_style);
-            });
+                Err(error) => {
+                    eprint!("syncat: {}", error);
+                }
+            }
+            // TODO: completed();
+        }));
+    }
+    for thread in threads {
+        thread.join().unwrap();
     }
 }
 
@@ -147,8 +152,8 @@ fn main() {
             let mut source = String::new();
             match stdin.read_to_string(&mut source) {
                 Ok(..) => {
-                    let sources: Vec<(_, Result<_, error::Error>, _)> = vec![(None, Ok(source), None)];
-                    print(&opts, sources.into_iter(), 1);
+                    let sources = vec![(None, Ok(source), None)];
+                    print(opts, sources.into_iter(), 1);
                 },
                 Err(error) => eprintln!("{}", error),
             }
@@ -174,9 +179,10 @@ fn main() {
                     .and_then(|s| s.to_str())
                     .map(|s| s.to_string()),
                 fs::read_to_string(&path)
-                    .map_err(|error| error::Error(format!("{:?}: {}", path, error))),
+                    .map_err(|error| Box::new(error::Error(format!("{:?}: {}", path, error))) as BoxedError),
                 Some(path.clone()),
             ));
-        print(&opts, sources, opts.files.len());
+        let file_count = opts.files.len();
+        print(opts, sources, file_count);
     }
 }

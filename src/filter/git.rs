@@ -72,24 +72,28 @@ fn do_git_transform(source: &[Line], repo: Repository, path: &PathBuf) -> Option
         .collect())
 }
 
-pub fn git<E>(
+pub fn git(
     &Opts { git, .. }: &Opts, 
-    source: Result<Vec<Line>, E>,
+    source: Vec<Line>,
     filename: Option<&PathBuf>,
-) -> Result<Vec<Line>, E> {
+) -> Vec<Line> {
     let path = match filename {
         Some(path) => path,
         None => return source,
     };
     if git {
         if let Some(repository) = filename.and_then(|path| Repository::discover(path).ok()) {
-            let source = source?;
-            Ok(do_git_transform(&source, repository, path).unwrap_or(source))
+            do_git_transform(&source, repository, path)
+                .unwrap_or_else(move || source
+                    .into_iter()
+                    .map(|line| line.with_status(LineChange::Unchanged))
+                    .collect()
+                )
         } else {
-            Ok(source?
+            source
                 .into_iter()
                 .map(|line| line.with_status(LineChange::Unchanged))
-                .collect())
+                .collect()
         }
     } else {
         source

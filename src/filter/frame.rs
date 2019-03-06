@@ -4,14 +4,13 @@ use crate::meta::MetaStylesheet;
 use crate::line::Line;
 use crate::Opts;
 
-pub fn frame_header<E>(
+pub fn frame_header(
     (index, _count): (usize, usize),
     &Opts { frame, git, numbered, numbered_nonblank, .. }: &Opts,
-    source: Result<Vec<Line>, E>,
+    source: Vec<Line>,
     path: Option<&PathBuf>,
     style: &MetaStylesheet,
-) -> Result<Vec<Line>, E> {
-    if source.is_err() { return source }
+) -> Vec<Line> {
     let width = terminal_size().map(|x| (x.0).0).unwrap_or(80);
     let margin_start = if git { 2 } else { 0 }
         + if numbered || numbered_nonblank { 6 } else { 0 };
@@ -75,21 +74,20 @@ pub fn frame_header<E>(
     source
 }
 
-pub fn frame_footer<E>(
+pub fn frame_footer(
     (index, count): (usize, usize),
     &Opts { frame, git, numbered, numbered_nonblank, .. }: &Opts,
-    source: Result<Vec<Line>, E>,
+    source: Vec<Line>,
     _path: Option<&PathBuf>,
     style: &MetaStylesheet,
-) -> Result<Vec<Line>, E> {
-    if source.is_err() { return source }
+) -> Vec<Line> {
     let width = terminal_size().map(|x| (x.0).0).unwrap_or(80);
     let margin_start = if git { 2 } else { 0 }
         + if numbered || numbered_nonblank { 6 } else { 0 };
     match frame {
         0 => {}
         _ => {
-            if source.as_ref().ok().and_then(|vec| vec.last()).map(|line| line.no_newline).unwrap_or(false) {
+            if source.last().map(|line| line.no_newline).unwrap_or(false) {
                 println!();
             }
             if index == count - 1 {

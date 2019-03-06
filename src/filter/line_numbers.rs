@@ -1,14 +1,14 @@
 use crate::Opts;
 use crate::line::Line;
 
-pub fn line_numbers<'a, E>(
+pub fn line_numbers<'a>(
     &Opts { frame, numbered_nonblank, numbered, .. }: &Opts, 
-) -> impl 'a + FnMut(Result<Vec<Line>, E>) -> Result<Vec<Line>, E> {
+) -> impl 'a + FnMut(Vec<Line>) -> Vec<Line> {
     let mut line_number = 0usize;
     let mut skip_next = false;
     return move |source| {
         if numbered_nonblank {
-            Ok(source?
+            source
                 .into_iter()
                 .map(|line| {
                     if skip_next {
@@ -24,9 +24,9 @@ pub fn line_numbers<'a, E>(
                         line.with_number(line_number)
                     }
                 })
-                .collect())
+                .collect()
         } else if numbered {
-            Ok(source?
+            source
                 .into_iter()
                 .map(|line| {
                     if skip_next {
@@ -40,7 +40,7 @@ pub fn line_numbers<'a, E>(
                         line.with_number(line_number)
                     }
                 })
-                .collect())
+                .collect()
         } else {
             source
         }
