@@ -11,6 +11,7 @@ pub fn frame_header<E>(
     path: Option<&PathBuf>,
     style: &MetaStylesheet,
 ) -> Result<Vec<Line>, E> {
+    if source.is_err() { return source }
     let width = terminal_size().map(|x| (x.0).0).unwrap_or(80);
     let margin_start = if git { 2 } else { 0 }
         + if numbered || numbered_nonblank { 6 } else { 0 };
@@ -81,6 +82,7 @@ pub fn frame_footer<E>(
     _path: Option<&PathBuf>,
     style: &MetaStylesheet,
 ) -> Result<Vec<Line>, E> {
+    if source.is_err() { return source }
     let width = terminal_size().map(|x| (x.0).0).unwrap_or(80);
     let margin_start = if git { 2 } else { 0 }
         + if numbered || numbered_nonblank { 6 } else { 0 };
