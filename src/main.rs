@@ -1,7 +1,7 @@
 use std::fs;
 use std::io::{self, Read};
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, mpsc::channel};
 
 use structopt::StructOpt;
 use tree_sitter::Parser;
@@ -113,14 +113,20 @@ where
     let meta_style = Arc::new(load_meta_stylesheet());
     let line_numbers = Arc::new(Mutex::new(filter::line_numbers(opts.as_ref())));
     let mut threads = vec![];
+    let mut prev_done = None;
     for (i, (lang, contents, path)) in sources.enumerate() {
+        let (completed, next_done) = channel();
+        let wait_for = prev_done.take();
+        prev_done = Some(next_done);
         let opts = opts.clone();
         let meta_style = meta_style.clone();
         let line_numbers = line_numbers.clone();
         threads.push(std::thread::spawn(move || {
             let lines = contents
                 .and_then(|source| transform(opts.as_ref(), lang.as_ref(), source, path.as_ref()));
-            // TODO: wait_for_turn()
+            if let Some(rx) = wait_for {
+                rx.recv().unwrap();
+            }
             match lines {
                 Ok(lines) => {
                     let line_numbers = &mut *line_numbers.lock().unwrap();
@@ -135,11 +141,11 @@ where
                     eprint!("syncat: {}", error);
                 }
             }
-            // TODO: completed();
+            completed.send(()).unwrap();
         }));
     }
-    for thread in threads {
-        thread.join().unwrap();
+    if let Some(rx) = prev_done {
+        rx.recv().unwrap();
     }
 }
 
