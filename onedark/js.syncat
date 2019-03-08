@@ -18,9 +18,9 @@ shorthand_property_identifier /^[A-Z]/,
 property_identifier /^[A-Z]/,
 export_specifier /^[A-Z]/,
 call_expression /^[A-Z]/,
-new_expression > identifier {|
+new_expression > identifier {
   color: yellow;
-|}
+}
 
 member_expression > property_identifier {
   color: red;
@@ -41,9 +41,9 @@ function > identifier,
 generator_function > identifier,
 method_definition > property_identifier,
 call_expression > identifier,
-call_expression > member_expression > property_identifier {|
+call_expression > member_expression > property_identifier {
   color: blue;
-|}
+}
 
 array > "[",
 array > "]",
@@ -87,9 +87,9 @@ identifier > "document",
 identifier > "module",
 identifier > "console",
 [> identifier "module"] > property_identifier "exports",
-identifier > "window" {|
+identifier > "window" {
   color: cyan;
-|}
+}
 
 comment {|
   color: 15;

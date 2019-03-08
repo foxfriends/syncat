@@ -28,9 +28,9 @@ storage_class_specifier,
 
 preproc_function_def > identifier,
 call_expression > identifier,
-function_declarator > identifier {|
+function_declarator > identifier {
   color: blue;
-|}
+}
 
 subscript_expression > "[",
 subscript_expression > "]",

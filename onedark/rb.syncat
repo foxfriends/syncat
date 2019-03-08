@@ -60,9 +60,9 @@ interpolation > "}" {
 global_variable,
 instance_variable,
 
-"self" {|
+"self" {
   color: red;
-|}
+}
 
 comment {|
   color: 15;
