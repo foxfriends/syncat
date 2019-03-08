@@ -2,46 +2,42 @@ pub use ansi_term::{Style, Colour};
 use crate::language::Lang;
 
 #[derive(Copy, Clone, Debug)]
-pub enum Setting<T> {
+pub enum Setting<T, P: Copy + Ord = (usize, usize)> {
     Unset,
-    Set(T),
-    Important(T),
+    Set(P, T),
 }
 
-impl<T> Default for Setting<T> {
+impl<T, P: Copy + Ord> Default for Setting<T, P> {
     fn default() -> Self {
         Setting::Unset
     }
 }
 
-impl<T> Setting<T> {
-    fn or(self, other: Setting<T>) -> Self {
+impl<T, P: Copy + Ord> Setting<T, P> {
+    fn or(self, other: Self) -> Self {
         use Setting::*;
-        match (self, other) {
-            (Important(value), ..) => Important(value),
-            (.., Important(value)) => Important(value),
-            (Set(value), ..) => Set(value),
-            (Unset, other) => other,
+        match (&self, &other) {
+            (Set(x, ..), Set(y, ..)) if x >= y => self,
+            (.., Unset) => self,
+            _ => other,
         }
     }
 
-    fn cloned_or(&self, other: Setting<T>) -> Self 
+    fn cloned_or(&self, other: Self) -> Self
     where T: Clone {
         use Setting::*;
         match (self, other) {
-            (Important(value), ..) => Important(value.clone()),
-            (.., Important(value)) => Important(value),
-            (Set(value), ..) => Set(value.clone()),
-            (Unset, other) => other,
+            (Set(x, value), Set(y, ..)) if *x >= y => Set(*x, value.clone()),
+            (ours, Unset) => ours.clone(),
+            (.., other) => other,
         }
     }
 
-    fn as_ref(&self) -> Setting<&T> {
+    fn as_ref(&self) -> Setting<&T, P> {
         use Setting::*;
         match self {
             Unset => Unset,
-            Set(value) => Set(value),
-            Important(value) => Important(value),
+            Set(priority, value) => Set(*priority, value),
         }
     }
 
@@ -49,19 +45,24 @@ impl<T> Setting<T> {
         use Setting::*;
         match self {
             Unset => None,
-            Set(value) => Some(value),
-            Important(value) => Some(value),
+            Set(.., value) => Some(value),
         }
     }
-}
 
-impl<T: Default> Setting<T> {
-    fn unwrap_or_default(self) -> T {
+    fn set_priority(&mut self, priority: P) {
+        if let Setting::Set(my_priority, ..) = self {
+            if priority > *my_priority {
+                *my_priority = priority;
+            }
+        }
+    }
+
+    fn unwrap_or_default(self) -> T 
+    where T: Default {
         use Setting::*;
         match self {
             Unset => T::default(),
-            Set(value) => value,
-            Important(value) => value,
+            Set(.., value) => value,
         }
     }
 }
@@ -106,6 +107,21 @@ impl StyleBuilder {
         }
     }
 
+    pub fn set_priorities(&mut self, priority: (usize, usize)) {
+        self.language.set_priority(priority);
+        self.foreground.set_priority(priority);
+        self.background.set_priority(priority);
+        self.is_italic.set_priority(priority);
+        self.is_bold.set_priority(priority);
+        self.is_dimmed.set_priority(priority);
+        self.is_underline.set_priority(priority);
+        self.is_strikethrough.set_priority(priority);
+        self.is_blink.set_priority(priority);
+        self.is_hidden.set_priority(priority);
+        self.is_reverse.set_priority(priority);
+        self.content.set_priority(priority);
+    }
+
     pub fn merge_with(mut self, other: &StyleBuilder) -> Self {
         self.language         = other.language.or(self.language);
         self.foreground       = other.foreground.or(self.foreground);
@@ -120,13 +136,5 @@ impl StyleBuilder {
         self.is_reverse       = other.is_reverse.or(self.is_reverse);
         self.content          = other.content.cloned_or(self.content);
         self
-    }
-}
-
-pub fn setting<T>(important: bool, value: T) -> Setting<T> {
-    if important {
-        Setting::Important(value)
-    } else {
-        Setting::Set(value)
     }
 }

@@ -5,7 +5,7 @@ use ansi_term::ANSIGenericString;
 use crate::language::Lang;
 use crate::dirs::config;
 use crate::stylesheet::{Stylesheet, Context};
-use crate::style::{setting, StyleBuilder, Colour, Style};
+use crate::style::{Setting, StyleBuilder, Colour, Style};
 
 macro_rules! component {
     ($name:ident) => {
@@ -100,38 +100,39 @@ pub struct MetaStylesheet {
 
 impl Default for MetaStylesheet {
     fn default() -> MetaStylesheet {
+        let pri = (0, 0);
         MetaStylesheet {
             line_ending: StyleBuilder {
-                content: setting(false, "$".to_string()),
+                content: Setting::Set(pri, "$".to_string()),
                 ..StyleBuilder::default()
             },
             line_number: StyleBuilder::default(),
             vcs_addition: StyleBuilder {
-                foreground: setting(false, Colour::Green),
-                content: setting(false, "+".to_string()),
+                foreground: Setting::Set(pri, Colour::Green),
+                content: Setting::Set(pri, "+".to_string()),
                 ..StyleBuilder::default()
             },
             vcs_modification: StyleBuilder {
-                foreground: setting(false, Colour::Yellow),
-                content: setting(false, "~".to_string()),
+                foreground: Setting::Set(pri, Colour::Yellow),
+                content: Setting::Set(pri, "~".to_string()),
                 ..StyleBuilder::default()
             },
             vcs_deletion_above: StyleBuilder {
-                foreground: setting(false, Colour::Red),
-                content: setting(false, "-".to_string()),
+                foreground: Setting::Set(pri, Colour::Red),
+                content: Setting::Set(pri, "-".to_string()),
                 ..StyleBuilder::default()
             },
             vcs_deletion_below: StyleBuilder {
-                foreground: setting(false, Colour::Red),
-                content: setting(false, "_".to_string()),
+                foreground: Setting::Set(pri, Colour::Red),
+                content: Setting::Set(pri, "_".to_string()),
                 ..StyleBuilder::default()
             },
             margin: StyleBuilder {
-                content: setting(false, "ascii".to_string()),
+                content: Setting::Set(pri, "ascii".to_string()),
                 ..StyleBuilder::default()
             },
             title: StyleBuilder {
-                is_bold: setting(false, true),
+                is_bold: Setting::Set(pri, true),
                 ..StyleBuilder::default()
             },
         }

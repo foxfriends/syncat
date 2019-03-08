@@ -4,7 +4,7 @@ use tree_sitter::{Tree, Node};
 use regex::Regex;
 
 use crate::error::Error;
-use crate::style::{Colour, StyleBuilder};
+use crate::style::{Colour, StyleBuilder, Setting};
 use crate::language::Lang;
 
 mod resolver;
@@ -17,9 +17,23 @@ enum SelectorSegment {
     Kind(String),
     Token(String),
     TokenPattern(String),
-    NoChildren(Box<SelectorSegment>),
     DirectChild(Box<SelectorSegment>),
     BranchCheck(Vec<SelectorSegment>),
+    NoChildren(Box<SelectorSegment>),
+}
+
+impl SelectorSegment {
+    pub fn score(&self) -> (usize, usize) {
+        use SelectorSegment::*;
+        match self {
+            Kind(..) => (0, 1),
+            Token(..) => (1, 0),
+            TokenPattern(..) => (1, 0),
+            DirectChild(child) => child.score(),
+            BranchCheck(child) => child.iter().map(SelectorSegment::score).fold((0, 0), |(a, b), (c, d)| (a + c, b + d)),
+            NoChildren(..) => (1, 0),
+        }
+    }
 }
 
 #[derive(Default, Debug)]
