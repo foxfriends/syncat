@@ -1,10 +1,15 @@
 // Keywords
 
-"let", "const", "static", "mutable_specifier", "ref", "move", "dyn",
+"let", "const", "static", "mut", "ref", "move", "dyn",
 "fn", "struct", "enum", "trait", "impl", "type",
 "pub", "mod", "crate", "use", "super", "where",
-"if", "else", "match", "loop", "for", "while", "return", "in" {
+"if", "else", "match", "loop", "for", "while", "return", "in",
+"async" {
   color: purple;
+}
+
+"unsafe" {
+  color: red;
 }
 
 closure_parameters > "|" {
@@ -31,49 +36,16 @@ scoped_identifier identifier {
 
 // Operators
 
-self_parameter > "&",
-reference_type > "&",
-reference_expression > "&",
-unary_expression > "*",
-unary_expression > "!",
-unary_expression > "~",
-binary_expression > "+",
-binary_expression > "-",
-binary_expression > "*",
-binary_expression > "/",
-binary_expression > "%",
-binary_expression > ">",
-binary_expression > "<",
-binary_expression > "<=",
-binary_expression > ">=",
-binary_expression > "==",
-binary_expression > "!=",
-binary_expression > "<<",
-binary_expression > ">>",
-binary_expression > "&&",
-binary_expression > "||",
-binary_expression > "&",
-binary_expression > "|",
-binary_expression > "^",
-assignment_expression > "=",
-assignment_expression > "+=",
-assignment_expression > "-=",
-assignment_expression > "*=",
-assignment_expression > "/=",
-assignment_expression > "%=",
-assignment_expression > "|=",
-assignment_expression > "&=",
-assignment_expression > "^=",
-assignment_expression > "<<=",
-assignment_expression > ">>=",
-range_expression > "..",
-range_expression > "..=",
-try_expression > "?",
+"&", "|", "^",
+unary_expression > "!", "~", "+", "-", "*", "/", "%",
+">", "<", "<=", ">=", "==", "!=",
+"<<", ">>",
+"&&", "||",
+"=", "+=", "-=", "*=", "/=", "%=", "|=", "&=", "^=", "<<=", ">>=",
+"..", "..=",
+"?",
 index_expression > "[",
-index_expression > "]",
-let_declaration > "=",
-if_let_declaration > "=",
-while_let_declaration > "=" {
+index_expression > "]", {
   color: purple;
 }
 
@@ -130,14 +102,46 @@ call_expression > generic_function > field_expression > field_identifier {
 
 // Macro invocation
 
+"macro_rules!",
+macro_definition > identifier,
 macro_invocation > identifier,
 macro_invocation > "!" {
   color: cyan;
 }
 
+inner_attribute_item,
 attribute_item {
   color: yellow;
   dim: true;
+}
+
+// Macro rules
+
+token_repetition > "$",
+token_repetition > "(",
+token_repetition > ")",
+token_repetition > "*",
+token_repetition > "+",
+token_repetition > "?",
+token_repetition_pattern > "$",
+token_repetition_pattern > "(",
+token_repetition_pattern > ")",
+token_repetition_pattern > "*",
+token_repetition_pattern > "+",
+token_repetition_pattern > "?", {
+  color: purple;
+}
+
+macro_rule > "=>" {
+  color: purple;
+}
+
+metavariable {
+  color: red;
+}
+
+fragment_specifier {
+  color: yellow;
 }
 
 // Comments
@@ -149,20 +153,20 @@ line_comment, block_comment {
 
 // Specific word overrides
 
-identifier "Ok", identifier "Err", identifier "Some", identifier "None" {
+"Ok", "Err", "Some", "None" {
   color: cyan;
 }
 
-identifier "Self",
-type_identifier "Self",
-type_identifier "Fn",
-type_identifier "FnOnce",
-type_identifier "FnMut",
+"Self",
+"Self",
+"Fn",
+"FnOnce",
+"FnMut",
 "_" {
   color: purple;
 }
 
-self "self" {
+"self" {
   color: red;
 }
 
