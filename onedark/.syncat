@@ -1,5 +1,6 @@
 line_ending {
   color: 15;
+  dim: true;
   content: "¬";
 }
 
