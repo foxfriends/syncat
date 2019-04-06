@@ -58,6 +58,10 @@ pub struct Opts {
     #[structopt(short, long)]
     pub language: Option<String>,
 
+    /// Soft-wrap lines at a fixed width
+    #[structopt(short, long)]
+    pub wrap: Option<usize>,
+
     /// Files to parse and print
     #[structopt(name="FILE", parse(from_os_str))]
     pub files: Vec<PathBuf>,
@@ -133,7 +137,7 @@ where
                     let lines = line_numbers(lines);
                     let lines = filter::frame_header((i, count), opts.as_ref(), lines, path.as_ref(), &meta_style);
                     for line in &lines {
-                        print!("{}", line.to_string(&meta_style));
+                        print!("{}", line.to_string(&meta_style, opts.wrap));
                     }
                     let _ = filter::frame_footer((i, count), opts.as_ref(), lines, path.as_ref(), &meta_style);
                 }
