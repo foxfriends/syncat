@@ -59,3 +59,16 @@ impl Stylesheet {
         Stylesheet::parse(&source, tree)
     }
 }
+
+impl std::str::FromStr for Stylesheet {
+    type Err = BoxedError;
+
+    fn from_str(input: &str) -> Result<Stylesheet, BoxedError> {
+        let mut parser = Parser::new();
+        unsafe {
+            parser.set_language(tree_sitter_syncat_stylesheet()).unwrap();
+        }
+        let tree = parser.parse(input, None).unwrap();
+        Stylesheet::parse(input, tree)
+    }
+}
