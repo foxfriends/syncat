@@ -119,6 +119,10 @@ impl<'a> Context<'a> {
 }
 
 impl Stylesheet {
+    pub fn resolve_basic(&self, scopes: &[&str], token: Option<&str>) -> StyleBuilder {
+        self.resolve(&Context::default(), &scopes.into_iter().enumerate().map(|(u, s)| (*s, u)).collect::<Vec<_>>()[..], token)
+    }
+    
     pub fn resolve(&self, context: &Context, scopes: &[(&str, usize)], token: Option<&str>) -> StyleBuilder {
         self.scopes.iter()
             .fold(self.style.clone(), |style, (selector_segment, stylesheet)| match selector_segment {
