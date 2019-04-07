@@ -1,5 +1,4 @@
 pub use ansi_term::{Style, Colour};
-use crate::language::Lang;
 
 #[derive(Copy, Clone, Debug)]
 pub enum Setting<T, P: Copy + Ord = (usize, usize)> {
@@ -69,7 +68,7 @@ impl<T, P: Copy + Ord> Setting<T, P> {
 
 #[derive(Clone, Default, Debug)]
 pub struct StyleBuilder {
-    pub language:         Setting<Lang>,
+    pub language:         Setting<String>,
     pub foreground:       Setting<Colour>,
     pub background:       Setting<Colour>,
     pub is_italic:        Setting<bool>,
@@ -84,8 +83,8 @@ pub struct StyleBuilder {
 }
 
 impl StyleBuilder {
-    pub fn language(&self) -> Option<Lang> {
-        self.language.optional()
+    pub fn language(&self) -> Option<&String> {
+        self.language.as_ref().optional()
     }
 
     pub fn content(&self) -> Option<&str> {
@@ -123,7 +122,7 @@ impl StyleBuilder {
     }
 
     pub fn merge_with(mut self, other: &StyleBuilder) -> Self {
-        self.language         = other.language.or(self.language);
+        self.language         = other.language.cloned_or(self.language);
         self.foreground       = other.foreground.or(self.foreground);
         self.background       = other.background.or(self.background);
         self.is_italic        = other.is_italic.or(self.is_italic);

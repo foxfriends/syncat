@@ -1,5 +1,6 @@
 use tree_sitter::{Tree, Node, Parser};
-use crate::stylesheet::{Stylesheet, Context};
+use syncat_stylesheet::{Stylesheet, Context};
+use crate::language::Lang;
 
 mod source;
 mod tree;

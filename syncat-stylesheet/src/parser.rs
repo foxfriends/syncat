@@ -76,8 +76,8 @@ impl Stylesheet {
             ("hidden", "false") => { stylebuilder.is_hidden = Setting::Set(score, false); }
 
             ("language", lang) => {
-                let language = Stylesheet::parse_string(lang).parse::<Lang>()?;
-                stylebuilder.language = Setting::Set(score, language);
+                let language = Stylesheet::parse_string(lang);
+                stylebuilder.language = Setting::Set(score, language.to_string());
             }
 
             ("content", content) => {

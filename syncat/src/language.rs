@@ -1,6 +1,6 @@
 use tree_sitter::{Language, Parser};
 use std::fs;
-use crate::stylesheet::Stylesheet;
+use syncat_stylesheet::Stylesheet;
 use crate::dirs::config;
 use crate::error::Error;
 

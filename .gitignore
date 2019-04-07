@@ -1,4 +1,5 @@
-/target
+target
+
 **/*.rs.bk
 tree-sitter-syncat-stylesheet/node_modules
 

@@ -4,8 +4,8 @@ use ansi_term::ANSIGenericString;
 
 use crate::language::Lang;
 use crate::dirs::config;
-use crate::stylesheet::{Stylesheet, Context};
-use crate::style::{Setting, StyleBuilder, Colour, Style};
+use syncat_stylesheet::{Stylesheet, Context};
+use syncat_stylesheet::{Setting, StyleBuilder, Colour, Style};
 
 macro_rules! component {
     ($name:ident) => {

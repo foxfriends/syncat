@@ -13,8 +13,6 @@ mod filter;
 mod language;
 mod line;
 mod meta;
-mod style;
-mod stylesheet;
 
 use self::language::Lang;
 use self::line::Line;

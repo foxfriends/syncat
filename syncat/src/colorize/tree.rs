@@ -16,7 +16,7 @@ fn colorize_node_sexp<'a>(
             scope.push((node.kind(), index));
         }
         let style = stylesheet.resolve(context, scope, Some(token));
-        if let Some(language) = style.language() {
+        if let Some(language) = style.language().and_then(|lang| lang.parse::<Lang>().ok()) {
             let mut parser = Parser::new();
             parser.set_language(language.parser()).unwrap();
             let tree = parser.parse(token, None).unwrap();
@@ -42,7 +42,7 @@ fn colorize_node_sexp<'a>(
         scope.push((node.kind(), index));
         let style = stylesheet.resolve(context, scope, None);
 
-        if let Some(language) = style.language() {
+        if let Some(language) = style.language().and_then(|lang| lang.parse::<Lang>().ok()) {
             let token = &source[node.start_byte()..node.end_byte()];
             *pos = node.end_byte();
             let mut parser = Parser::new();
