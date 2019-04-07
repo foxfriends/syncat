@@ -1,7 +1,7 @@
 pub use ansi_term::{Style, Colour};
 
 #[derive(Copy, Clone, Debug)]
-pub enum Setting<T, P: Copy + Ord = (usize, usize)> {
+pub enum Setting<T, P: Copy + Ord = (usize, usize, usize)> {
     Unset,
     Set(P, T),
 }
@@ -106,7 +106,7 @@ impl StyleBuilder {
         }
     }
 
-    pub fn set_priorities(&mut self, priority: (usize, usize)) {
+    pub fn set_priorities(&mut self, priority: (usize, usize, usize)) {
         self.language.set_priority(priority);
         self.foreground.set_priority(priority);
         self.background.set_priority(priority);

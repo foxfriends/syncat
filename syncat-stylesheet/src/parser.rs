@@ -32,7 +32,7 @@ impl Stylesheet {
         }
     }
 
-    fn parse_style(source: &str, stylebuilder: &mut StyleBuilder, node: Node, score: (usize, usize)) -> Result<(), crate::BoxedError> {
+    fn parse_style(source: &str, stylebuilder: &mut StyleBuilder, node: Node, score: (usize, usize, usize)) -> Result<(), crate::BoxedError> {
         let mut style = None;
         let mut value = None;
         for child in node.children().filter(Node::is_named) {
@@ -135,12 +135,12 @@ impl Stylesheet {
         Ok(selector)
     }
 
-    fn handle_selector(&mut self, selector: Vec<SelectorSegment>, mut stylebuilder: StyleBuilder) -> Result<(), crate::BoxedError> {
+    fn handle_selector(&mut self, selector: Vec<SelectorSegment>, mut stylebuilder: StyleBuilder, index: usize) -> Result<(), crate::BoxedError> {
         let mut scope: &mut Stylesheet = self;
         let selector_score = selector
             .iter()
             .map(SelectorSegment::score)
-            .fold((0, 0), |(a, b), (c, d)| (a + c, b + d));
+            .fold((0, 0, index), |(a, b, i), (c, d)| (a + c, b + d, i));
         for segment in selector {
             scope = scope.scopes
                 .entry(segment)
@@ -151,7 +151,7 @@ impl Stylesheet {
         Ok(())
     }
 
-    fn parse_styles(source: &str, stylebuilder: &mut StyleBuilder, node: Node, score: (usize, usize)) -> Result<(), crate::BoxedError> {
+    fn parse_styles(source: &str, stylebuilder: &mut StyleBuilder, node: Node, score: (usize, usize, usize)) -> Result<(), crate::BoxedError> {
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
                 "style" => Stylesheet::parse_style(source, stylebuilder, child, score)?,
@@ -161,31 +161,34 @@ impl Stylesheet {
         Ok(())
     }
 
-    fn parse_rule(&mut self, source: &str, node: Node) -> Result<(), crate::BoxedError> {
+    fn parse_rule(&mut self, source: &str, node: Node, index: usize) -> Result<(), crate::BoxedError> {
         let mut selectors = vec![];
         let mut stylebuilder = StyleBuilder::default();
         for child in node.children().filter(Node::is_named) {
             match child.kind() {
                 "selector" => selectors.push(Stylesheet::parse_selector(source, child)?),
-                "important_styles" => Stylesheet::parse_styles(source, &mut stylebuilder, child, (usize::max_value(), usize::max_value()))?,
-                "styles" => Stylesheet::parse_styles(source, &mut stylebuilder, child, (0, 0))?,
+                "important_styles" => Stylesheet::parse_styles(source, &mut stylebuilder, child, (usize::max_value(), usize::max_value(), usize::max_value()))?,
+                "styles" => Stylesheet::parse_styles(source, &mut stylebuilder, child, (0, 0, index))?,
                 kind => return Err(Box::new(Error(format!("Invalid state {} while parsing rule", kind)))),
             }
         }
         for selector in selectors.into_iter() {
-            self.handle_selector(selector, stylebuilder.clone())?;
+            self.handle_selector(selector, stylebuilder.clone(), index)?;
         }
         Ok(())
     }
 
-    fn parse_node(&mut self, source: &str, node: Node) -> Result<(), crate::BoxedError> {
+    fn parse_node(&mut self, source: &str, node: Node, rule_index: &mut usize) -> Result<(), crate::BoxedError> {
         match node.kind() {
             "stylesheet" => {
                 for child in node.children().filter(Node::is_named) {
-                    self.parse_node(source, child)?;
+                    self.parse_node(source, child, rule_index)?;
                 }
             },
-            "rule" => self.parse_rule(source, node)?,
+            "rule" => {
+                *rule_index += 1;
+                self.parse_rule(source, node, *rule_index)?
+            }
             "comment" => {},
             kind => return Err(Box::new(Error(format!("Invalid state {} while parsing node", kind)))),
         }
@@ -198,7 +201,7 @@ impl Stylesheet {
             style: StyleBuilder::default(),
             scopes: BTreeMap::default(),
         };
-        stylesheet.parse_node(source, root)?;
+        stylesheet.parse_node(source, root, &mut 0)?;
         Ok(stylesheet)
     }
 }

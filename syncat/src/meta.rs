@@ -100,7 +100,7 @@ pub struct MetaStylesheet {
 
 impl Default for MetaStylesheet {
     fn default() -> MetaStylesheet {
-        let pri = (0, 0);
+        let pri = (0, 0, 0);
         MetaStylesheet {
             line_ending: StyleBuilder {
                 content: Setting::Set(pri, "$".to_string()),
