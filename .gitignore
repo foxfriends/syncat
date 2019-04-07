@@ -2,13 +2,13 @@
 **/*.rs.bk
 tree-sitter-syncat-stylesheet/node_modules
 
-node_modules/*
-!node_modules/tree-sitter-*
-node_modules/tree-sitter-*/*
-!node_modules/tree-sitter-*/src
+syncat/node_modules/*
+!syncat/node_modules/tree-sitter-*
+syncat/node_modules/tree-sitter-*/*
+!syncat/node_modules/tree-sitter-*/src
 
-!node_modules/@dicy
-node_modules/@dicy/*
-!node_modules/@dicy/tree-sitter-*
-node_modules/@dicy/tree-sitter-*/*
-!node_modules/@dicy/tree-sitter-*/src
+!syncat/node_modules/@dicy
+syncat/node_modules/@dicy/*
+!syncat/node_modules/@dicy/tree-sitter-*
+syncat/node_modules/@dicy/tree-sitter-*/*
+!syncat/node_modules/@dicy/tree-sitter-*/src

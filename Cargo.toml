@@ -1,25 +1,6 @@
-[package]
-authors = ["Cameron Eldridge <cameldridge+git@gmail.com>"]
-edition = "2018"
-name = "syncat"
-version = "0.1.0"
+[workspace]
 
-[build-dependencies]
-cc = "1.0"
-serde_json = "1.0"
-
-[build-dependencies.serde]
-features = ["derive"]
-version = "1.0"
-
-[dependencies]
-ansi_term = "0.11"
-directories = "1.0"
-git2 = "0.8"
-hex = "0.3"
-lazy_static = "1.3"
-regex = "1.1"
-structopt = "0.2"
-terminal_size = "0.1"
-tree-sitter = "0.3"
-console = "0.7"
+members = [
+  "syncat",
+  "syncat-stylesheet",
+]
