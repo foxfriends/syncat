@@ -26,7 +26,7 @@ fn main() {
     println!("cargo:rerun-if-changed=package.json");
     println!("cargo:rerun-if-changed=package-lock.json");
     println!("cargo:rerun-if-changed=node_modules");
-    println!("cargo:rerun-if-changed=tree-sitter-syncat-stylesheet");
+    println!("cargo:rerun-if-changed=../tree-sitter-syncat-stylesheet");
 
     let out_dir = env::var("OUT_DIR").unwrap();
     let languages_path = Path::new(&out_dir).join("languages.rs");
@@ -34,7 +34,7 @@ fn main() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let package_json = Path::new(&manifest_dir).join("package.json");
     let node_modules = Path::new(&manifest_dir).join("node_modules");
-    let stylesheet_syntax = Path::new(&manifest_dir).join("tree-sitter-syncat-stylesheet/src");
+    let stylesheet_syntax = Path::new(&manifest_dir).join("../tree-sitter-syncat-stylesheet/src");
 
     let data = fs::read_to_string(&package_json).expect("The package.json cannot be read");
     let package = serde_json::from_str::<Package>(&data).expect("The package.json is invalid.");

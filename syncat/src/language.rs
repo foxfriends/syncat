@@ -1,5 +1,5 @@
-use tree_sitter::{Language, Parser};
-use std::fs;
+use tree_sitter::Language;
+use std::fs::File;
 use syncat_stylesheet::Stylesheet;
 use crate::dirs::config;
 use crate::error::Error;
@@ -145,14 +145,15 @@ impl Lang {
     }
 
     pub fn style(&self) -> Result<Stylesheet, crate::BoxedError> {
-        let mut parser = Parser::new();
-        parser.set_language(Lang::Syncat.parser()).unwrap();
         let style_file = config().join("style/active").join(self.ext()).with_extension("syncat");
         if !style_file.exists() {
             return Ok(Stylesheet::default());
         }
-        let style_def = fs::read_to_string(&style_file).map_err(Box::new)?;
-        let tree = parser.parse(&style_def, None).ok_or(Box::new(Error(format!("Could not parse stylesheet at file {:?}", &style_file))))?;
-        Stylesheet::parse(&style_def, tree)
+        let mut file = File::open(&style_file)
+            .map_err(|err| Box::new(Error(format!("Could not open file {:?}: {}", style_file, err))))?;
+        Ok(
+            Stylesheet::from_reader(&mut file)
+                .map_err(|err| Box::new(Error(format!("Could not parse stylesheet at file {:?}: {}", &style_file, err))))?
+        )
     }
 }

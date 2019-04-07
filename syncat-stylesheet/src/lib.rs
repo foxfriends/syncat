@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
+use std::io::Read;
 
-use tree_sitter::{Tree, Node};
+use tree_sitter::{Parser, Language, Tree, Node};
 use regex::Regex;
 
 mod error;
@@ -11,6 +12,10 @@ mod style;
 use crate::error::{BoxedError, Error};
 pub use crate::style::{Style, Colour, StyleBuilder, Setting};
 pub use resolver::Context;
+
+extern "C" { 
+    fn tree_sitter_syncat_stylesheet() -> Language;
+}
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 enum SelectorSegment {
@@ -40,4 +45,17 @@ impl SelectorSegment {
 pub struct Stylesheet {
     style: StyleBuilder,
     scopes: BTreeMap<SelectorSegment, Stylesheet>,
+}
+
+impl Stylesheet {
+    pub fn from_reader<R: Read>(input: &mut R) -> Result<Stylesheet, BoxedError> {
+        let mut parser = Parser::new();
+        unsafe {
+            parser.set_language(tree_sitter_syncat_stylesheet()).unwrap();
+        }
+        let mut source = String::new();
+        input.read_to_string(&mut source).map_err(Box::new)?;
+        let tree = parser.parse(&source, None).unwrap();
+        Stylesheet::parse(&source, tree)
+    }
 }
