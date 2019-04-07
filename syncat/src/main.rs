@@ -96,7 +96,9 @@ fn transform(
             .map(|line| Line::new(line.to_owned()))
             .collect::<Vec<_>>();
         if !contents.ends_with("\n") {
-            lines.last_mut().unwrap().no_newline = true;
+            if let Some(line) = lines.last_mut() {
+                line.no_newline = true;
+            }
         }
 
         let lines = filter::git(opts, lines, path);
