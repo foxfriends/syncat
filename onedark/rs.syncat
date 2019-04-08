@@ -2,7 +2,7 @@
 
 "let", "const", "static", "mut", "ref", "move", "dyn",
 "fn", "struct", "enum", "trait", "impl", "type",
-"pub", "mod", "crate", "use", "super", "where",
+"pub", "mod", "extern", "crate", "use", "super", "where",
 "if", "else", "match", "loop", "for", "while", "return", "in",
 "async" {
   color: purple;
