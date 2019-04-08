@@ -1,6 +1,8 @@
 [package]
 description = "Syntax aware cat"
 repository = "https://github.com/oinkiguana/syncat"
+keywords = ["cli", "syntax", "cat", "tool", "syncat", "highlighting"]
+readme = "../README.md"
 license = "MIT"
 homepage = "https://github.com/oinkiguana/syncat"
 authors = ["Cameron Eldridge <cameldridge+git@gmail.com>"]
