@@ -1,5 +1,6 @@
 [Tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [syncat-themes]: https://github.com/oinkiguana/syncat-themes
+[crates.io]: https://crates.io
 
 # Syncat
 
@@ -8,15 +9,15 @@ Syntax aware cat utility. Provides syntax highlighting to files printed on the c
 
 ## Installation
 
-Once development has reached a reasonably complete state, it will be made available via Crates.io.
-
-Until then, if you would like to try the development version, then follow these steps:
+Install from [crates.io][] using Cargo:
 
 ```bash
-cd <somewhere>
-git clone https://github.com/oinkiguana/syncat
-cd syncat/syncat
-cargo install --path .
+cargo install syncat
+```
+
+You will then also want to set up the stylesheets (otherwise nothing will be highlighted).
+
+```bash
 mkdir ~/.config/syncat
 cd ~/.config/syncat
 git clone https://github.com/oinkiguana/syncat-themes theme
@@ -31,9 +32,9 @@ You can override this by passing a comma separated list of languages to enable v
 
 ```bash
 # only enable Rust and JavaScript
-syncat_languages=rust cargo install --path .
+syncat_languages=rust cargo install syncat
 # only enable Rust and JavaScript
-syncat_languages=rust,javascript cargo install --path .
+syncat_languages=rust,javascript cargo install syncat
 ```
 
 If in future you would like to add new languages, just reinstall with your updated language list
