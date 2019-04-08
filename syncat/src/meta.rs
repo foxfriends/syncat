@@ -1,8 +1,6 @@
-use std::fs;
-use tree_sitter::Parser;
+use std::fs::File;
 use ansi_term::ANSIGenericString;
 
-use crate::language::Lang;
 use crate::dirs::config;
 use syncat_stylesheet::{Stylesheet, Context};
 use syncat_stylesheet::{Setting, StyleBuilder, Colour, Style};
@@ -190,30 +188,26 @@ pub fn load_meta_stylesheet() -> MetaStylesheet {
         if !style_file.exists() {
             Stylesheet::default()
         } else {
-            let style_def = fs::read_to_string(&style_file).map_err(Box::new).expect(&format!("Cannot read meta stylesheet {:?}", style_file));
-            let mut parser = Parser::new();
-            parser.set_language(Lang::Syncat.parser()).unwrap();
-            let tree = parser.parse(&style_def, None).expect(&format!("Could not parse stylesheet at file {:?}", &style_file));
-            Stylesheet::parse(&style_def, tree).expect(&format!("Meta stylesheet {:?} is invalid", style_file))
+            Stylesheet::from_reader(&mut File::open(&style_file).unwrap()).expect(&format!("Meta stylesheet {:?} is invalid", style_file))
         }
     };
 
     let mut meta_stylesheet = MetaStylesheet::default();
     meta_stylesheet.line_ending = meta_stylesheet.line_ending
-        .merge_with(&stylesheet.resolve(&Context::default(), &[("line_ending", 0)], None));
+        .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "line_ending")], None));
     meta_stylesheet.line_number = meta_stylesheet.line_number
-        .merge_with(&stylesheet.resolve(&Context::default(), &[("line_number", 0)], None));
+        .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "line_number")], None));
     meta_stylesheet.vcs_addition = meta_stylesheet.vcs_addition
-        .merge_with(&stylesheet.resolve(&Context::default(), &[("vcs_addition", 0)], None));
+        .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "vcs_addition")], None));
     meta_stylesheet.vcs_modification = meta_stylesheet.vcs_modification
-        .merge_with(&stylesheet.resolve(&Context::default(), &[("vcs_modification", 0)], None));
+        .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "vcs_modification")], None));
     meta_stylesheet.vcs_deletion_above = meta_stylesheet.vcs_deletion_above
-        .merge_with(&stylesheet.resolve(&Context::default(), &[("vcs_deletion_above", 0)], None));
+        .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "vcs_deletion_above")], None));
     meta_stylesheet.vcs_deletion_below = meta_stylesheet.vcs_deletion_below
-        .merge_with(&stylesheet.resolve(&Context::default(), &[("vcs_deletion_below", 0)], None));
+        .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "vcs_deletion_below")], None));
     meta_stylesheet.margin = meta_stylesheet.margin
-        .merge_with(&stylesheet.resolve(&Context::default(), &[("margin", 0)], None));
+        .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "margin")], None));
     meta_stylesheet.title = meta_stylesheet.title
-        .merge_with(&stylesheet.resolve(&Context::default(), &[("title", 0)], None));
+        .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "title")], None));
     meta_stylesheet
 }

@@ -41,6 +41,7 @@ impl SelectorSegment {
     }
 }
 
+/// A Stylesheet
 #[derive(Default, Debug)]
 pub struct Stylesheet {
     style: StyleBuilder,
@@ -48,6 +49,7 @@ pub struct Stylesheet {
 }
 
 impl Stylesheet {
+    /// Creates a new Stylesheet by parsing the provided stream.
     pub fn from_reader<R: Read>(input: &mut R) -> Result<Stylesheet, BoxedError> {
         let mut parser = Parser::new();
         unsafe {

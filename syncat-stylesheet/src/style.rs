@@ -1,5 +1,6 @@
 pub use ansi_term::{Style, Colour};
 
+/// An assignment of a value to a style, with a priority, or Unset if the value is not set.
 #[derive(Copy, Clone, Debug)]
 pub enum Setting<T, P: Copy + Ord = (usize, usize, usize)> {
     Unset,
@@ -66,6 +67,7 @@ impl<T, P: Copy + Ord> Setting<T, P> {
     }
 }
 
+/// Constructs a style, allowing customization of a few extra relevant properties.
 #[derive(Clone, Default, Debug)]
 pub struct StyleBuilder {
     pub language:         Setting<String>,
@@ -83,14 +85,17 @@ pub struct StyleBuilder {
 }
 
 impl StyleBuilder {
+    /// The language value for this style
     pub fn language(&self) -> Option<&String> {
         self.language.as_ref().optional()
     }
 
+    /// The content value for this style
     pub fn content(&self) -> Option<&str> {
         self.content.as_ref().optional().map(|string| string.as_str())
     }
 
+    /// Constructs the actual Style object
     pub fn build(&self) -> Style {
         Style {
             foreground:       self.foreground.optional(),
@@ -106,6 +111,7 @@ impl StyleBuilder {
         }
     }
 
+    /// Overrides all the priorities of the styles currently set
     pub fn set_priorities(&mut self, priority: (usize, usize, usize)) {
         self.language.set_priority(priority);
         self.foreground.set_priority(priority);
@@ -121,6 +127,7 @@ impl StyleBuilder {
         self.content.set_priority(priority);
     }
 
+    /// Merges this `StyleBuilder` with another, taking the highest priority settings of each.
     pub fn merge_with(mut self, other: &StyleBuilder) -> Self {
         self.language         = other.language.cloned_or(self.language);
         self.foreground       = other.foreground.or(self.foreground);

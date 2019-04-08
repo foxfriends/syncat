@@ -6,7 +6,7 @@ fn colorize_node<'a>(
     stylesheet: &Stylesheet,
     pos: &mut usize,
     context: &mut Context<'a>,
-    scope: &mut Vec<(&'a str, usize)>,
+    scope: &mut Vec<(usize, &'a str)>,
     output: &mut String,
 ) -> Result<(), crate::BoxedError> {
     // put any leading characters into the result text
@@ -19,7 +19,7 @@ fn colorize_node<'a>(
         // print a child node
         let token = &source[node.start_byte()..node.end_byte()];
         if node.is_named() {
-            scope.push((node.kind(), index));
+            scope.push((index, node.kind()));
         }
         let style = stylesheet.resolve(context, scope, Some(token));
         if let Some(language) = style.language().and_then(|lang| lang.parse::<Lang>().ok()) {
@@ -38,7 +38,7 @@ fn colorize_node<'a>(
 
     } else {
         // recurse for a middle node
-        scope.push((node.kind(), index));
+        scope.push((index, node.kind()));
         // put any leading characters into the result text
         let style = stylesheet.resolve(context, scope, None);
 

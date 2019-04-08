@@ -66,21 +66,22 @@ impl<'a> ContextNode<'a> {
         }
     }
 
-    fn add_child(&mut self, scope: &[(&'a str, usize)], token: &'a str) {
+    fn add_child(&mut self, scope: &[(usize, &'a str)], token: &'a str) {
         match self {
             ContextNode::Node(.., child_context) => child_context.add_child(scope, token),
             ContextNode::Leaf(..) => unreachable!(),
         }
     }
 
-    fn from_scope(scope: &[(&'a str, usize)], token: &'a str) -> Self {
+    fn from_scope(scope: &[(usize, &'a str)], token: &'a str) -> Self {
         match scope.first() {
-            Some((name, ..)) => ContextNode::Node(name, Context::with_child(ContextNode::from_scope(&scope[1..], token))),
+            Some((.., name)) => ContextNode::Node(name, Context::with_child(ContextNode::from_scope(&scope[1..], token))),
             None => ContextNode::Leaf(token),
         }
     }
 }
 
+/// The Context tracks the state of the nodes previously parsed, which enables branch checking.
 #[derive(Debug, Default)]
 pub struct Context<'a> {
     children: Vec<ContextNode<'a>>,
@@ -93,9 +94,10 @@ impl<'a> Context<'a> {
         }
     }
 
-    pub fn add_child(&mut self, scope: &[(&'a str, usize)], token: &'a str) {
+    /// Adds a node to the context
+    pub fn add_child(&mut self, scope: &[(usize, &'a str)], token: &'a str) {
         match scope.first() {
-            Some((.., index)) if *index < self.children.len() => self.children[*index].add_child(&scope[1..], token),
+            Some((index, ..)) if *index < self.children.len() => self.children[*index].add_child(&scope[1..], token),
             Some(..) => self.children.push(ContextNode::from_scope(scope, token)),
             None => self.children.push(ContextNode::Leaf(token)),
         }
@@ -119,16 +121,19 @@ impl<'a> Context<'a> {
 }
 
 impl Stylesheet {
+    /// Resolves a style without context or indexed scopes
     pub fn resolve_basic(&self, scopes: &[&str], token: Option<&str>) -> StyleBuilder {
-        self.resolve(&Context::default(), &scopes.into_iter().enumerate().map(|(u, s)| (*s, u)).collect::<Vec<_>>()[..], token)
+        self.resolve(&Context::default(), &scopes.into_iter().map(|s| (0, *s)).collect::<Vec<_>>()[..], token)
     }
-    
-    pub fn resolve(&self, context: &Context, scopes: &[(&str, usize)], token: Option<&str>) -> StyleBuilder {
+
+    /// Resolves a style, using the provided Context, and indexed scopes. The index is the index of
+    /// the node within its parent.
+    pub fn resolve(&self, context: &Context, scopes: &[(usize, &str)], token: Option<&str>) -> StyleBuilder {
         self.scopes.iter()
             .fold(self.style.clone(), |style, (selector_segment, stylesheet)| match selector_segment {
                 SelectorSegment::Kind(name) => (0..scopes.len()).rev()
                     .fold(style, |style, i| {
-                        if scopes[i].0 == name {
+                        if scopes[i].1 == name {
                             style.merge_with(&stylesheet.resolve(context.child(i+1).unwrap_or(&Context::default()), &scopes[i+1..], token))
                         } else {
                             style
@@ -157,7 +162,7 @@ impl Stylesheet {
                 }
                 SelectorSegment::NoChildren(segment) => match segment.as_ref() {
                     SelectorSegment::Kind(name) => {
-                        if scopes.last().map(|x| x.0) == Some(name) {
+                        if scopes.last().map(|x| x.1) == Some(name) {
                             style.merge_with(&stylesheet.style)
                         } else {
                             style
@@ -171,7 +176,7 @@ impl Stylesheet {
                 }
                 SelectorSegment::DirectChild(segment) => match segment.as_ref() {
                     SelectorSegment::Kind(name) => {
-                        if scopes.first().map(|x| x.0) == Some(name) {
+                        if scopes.first().map(|x| x.1) == Some(name) {
                             style.merge_with(&stylesheet.resolve(context.child(1).unwrap_or(&Context::default()), &scopes[1..], token))
                         } else {
                             style
@@ -193,7 +198,7 @@ impl Stylesheet {
                     }
                     SelectorSegment::NoChildren(segment) => match segment.as_ref() {
                         SelectorSegment::Kind(name) => {
-                            if scopes.len() == 1 && scopes[0].0 == name {
+                            if scopes.len() == 1 && scopes[0].1 == name {
                                 style.merge_with(&stylesheet.style)
                             } else {
                                 style

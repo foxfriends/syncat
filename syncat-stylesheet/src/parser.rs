@@ -195,7 +195,7 @@ impl Stylesheet {
         Ok(())
     }
 
-    pub fn parse(source: &str, tree: Tree) -> Result<Self, crate::BoxedError> {
+    pub(crate) fn parse(source: &str, tree: Tree) -> Result<Self, crate::BoxedError> {
         let root = tree.root_node();
         let mut stylesheet = Stylesheet {
             style: StyleBuilder::default(),
