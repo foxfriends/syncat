@@ -15,7 +15,7 @@ Until then, if you would like to try the development version, then follow these 
 ```bash
 cd <somewhere>
 git clone https://github.com/oinkiguana/syncat
-cd syncat
+cd syncat/syncat
 cargo install --path .
 mkdir ~/.config/syncat
 cd ~/.config/syncat
@@ -23,6 +23,49 @@ git clone https://github.com/oinkiguana/syncat-themes theme
 cd theme
 ln -s onedark active
 ```
+
+By default syncat will be installed with all languages enabled. As each language's parser is
+statically linked to the resulting executable, this can get quite large and take a very long time.
+You can override this by passing a comma separated list of languages to enable via the
+`syncat_languages` environment variable. For example:
+
+```bash
+# only enable Rust and JavaScript
+syncat_languages=rust cargo install --path .
+# only enable Rust and JavaScript
+syncat_languages=rust,javascript cargo install --path .
+```
+
+If in future you would like to add new languages, just reinstall with your updated language list
+(cargo will ask for the `--force` flag).
+
+These are the languages you can pick from:
+*   `latex`
+*   `agda`
+*   `bash`
+*   `c`
+*   `c-sharp`
+*   `clojure`
+*   `cpp`
+*   `css`
+*   `embedded-template`
+*   `go`
+*   `haskell`
+*   `html`
+*   `java`
+*   `javascript`
+*   `json`
+*   `lua`
+*   `ocaml`
+*   `php`
+*   `python`
+*   `regex`
+*   `ruby`
+*   `rust`
+*   `scala`
+*   `syncat-stylesheet`
+*   `test`
+*   `typescript`
 
 ## Configuration
 

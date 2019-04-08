@@ -4,6 +4,10 @@ edition = "2018"
 name = "syncat"
 version = "0.1.0"
 
+[features]
+lang_all = []
+lang_rust = []
+
 [build-dependencies]
 cc = "1.0"
 serde_json = "1.0"

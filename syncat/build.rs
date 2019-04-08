@@ -27,6 +27,22 @@ fn main() {
     println!("cargo:rerun-if-changed=package-lock.json");
     println!("cargo:rerun-if-changed=node_modules");
     println!("cargo:rerun-if-changed=../tree-sitter-syncat-stylesheet");
+    println!("cargo:rerun-if-env-changed=syncat_languages");
+
+    let languages = env::var("syncat_languages").ok()
+        .map(|languages| languages
+            .split(",")
+            .map(|lang| format!("{}", lang))
+            .collect::<Vec<_>>()
+        );
+
+    if let Some(languages) = &languages {
+        for language in languages {
+            println!("cargo:rustc-cfg=lang_{}", language.replace("_", "-"));
+        }
+    } else {
+        println!("cargo:rustc-cfg=lang_all");
+    }
 
     let out_dir = env::var("OUT_DIR").unwrap();
     let languages_path = Path::new(&out_dir).join("languages.rs");
@@ -46,9 +62,13 @@ fn main() {
         .map(|(package_name, _)| package_name)
         .map(|package_name| (Path::new(&node_modules).join(&format!("{}/src", package_name)), clean(package_name)))
         .chain(vec![(stylesheet_syntax, "tree-sitter-syncat-stylesheet".to_string())])
+        .filter(|(_, package)| languages
+            .as_ref()
+            .map(|languages| languages.iter().any(|lang| package.ends_with(lang)))
+            .unwrap_or(true) // defaults to all languages
+        )
         .for_each(move |(path, package)| {
             writeln!(output_list, "extern \"C\" {{ fn {}() -> Language; }}", package.replace("-", "_")).unwrap();
-
             for file in fs::read_dir(&path).expect(&format!("Package {} is not found at {:?}", package, path)) {
                 // each file is meant to be built individually and linked
                 let mut build = cc::Build::new();
