@@ -1,12 +1,12 @@
 [package]
+description = "Syntax aware cat"
+repository = "https://github.com/oinkiguana/syncat"
+license = "MIT"
+homepage = "https://github.com/oinkiguana/syncat"
 authors = ["Cameron Eldridge <cameldridge+git@gmail.com>"]
 edition = "2018"
 name = "syncat"
 version = "0.1.0"
-
-[features]
-lang_all = []
-lang_rust = []
 
 [build-dependencies]
 cc = "1.0"
