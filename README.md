@@ -9,13 +9,18 @@ Syntax aware cat utility. Provides syntax highlighting to files printed on the c
 
 ## Installation
 
-Install from [crates.io][] using Cargo:
+Unfortunately, Syncat's compiled binary is too large to be published on [crates.io], so you have
+to install from source.
 
 ```bash
-cargo install syncat
+git clone https://github.com/oinkiguana/syncat
+cd syncat/syncat
+cargo install --path .
 ```
 
-You will then also want to set up the stylesheets (otherwise nothing will be highlighted).
+You will then also want to set up the stylesheets (otherwise nothing will be highlighted). Feel
+free to modify these themes, and make new ones that are more to your taste. Pull requests with
+new themes are greatly appreciated!
 
 ```bash
 mkdir ~/.config/syncat
@@ -32,9 +37,10 @@ You can override this by passing a comma separated list of languages to enable v
 
 ```bash
 # only enable Rust and JavaScript
-syncat_languages=rust cargo install syncat
+syncat_languages=rust cargo install --path .
+
 # only enable Rust and JavaScript
-syncat_languages=rust,javascript cargo install syncat
+syncat_languages=rust,javascript cargo install --path .
 ```
 
 If in future you would like to add new languages, just reinstall with your updated language list
