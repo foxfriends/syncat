@@ -3,6 +3,11 @@ target
 **/*.rs.bk
 tree-sitter-syncat-stylesheet/node_modules
 
+syncat-stylesheet/node_modules/*
+!syncat-stylesheet/node_modules/tree-sitter-*
+syncat-stylesheet/node_modules/tree-sitter-*/*
+!syncat-stylesheet/node_modules/tree-sitter-*/src
+
 syncat/node_modules/*
 !syncat/node_modules/tree-sitter-*
 syncat/node_modules/tree-sitter-*/*

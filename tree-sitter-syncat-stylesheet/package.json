@@ -8,6 +8,11 @@
     "test": "tree-sitter test"
   },
   "author": "Cameron Eldridge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oinkiguana/syncat.git",
+    "directory": "tree-sitter-syncat-stylesheet"
+  },
   "license": "ISC",
   "devDependencies": {
     "tree-sitter-cli": "^0.14.4"

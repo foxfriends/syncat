@@ -4,10 +4,10 @@ use std::ffi::OsString;
 use std::env;
 
 fn main() {
-    println!("cargo:rerun-if-changed=../tree-sitter-syncat-stylesheet");
+    println!("cargo:rerun-if-changed=./node_modules/tree-sitter-syncat-stylesheet");
 
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let path = Path::new(&manifest_dir).join("../tree-sitter-syncat-stylesheet/src");
+    let path = Path::new(&manifest_dir).join("./node_modules/tree-sitter-syncat-stylesheet/src");
     let package = "tree-sitter-syncat-stylesheet".to_string();
 
     for file in fs::read_dir(&path).expect(&format!("Package {} is not found at {:?}", package, path)) {

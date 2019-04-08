@@ -26,7 +26,6 @@ fn main() {
     println!("cargo:rerun-if-changed=package.json");
     println!("cargo:rerun-if-changed=package-lock.json");
     println!("cargo:rerun-if-changed=node_modules");
-    println!("cargo:rerun-if-changed=../tree-sitter-syncat-stylesheet");
     println!("cargo:rerun-if-env-changed=syncat_languages");
 
     let languages = env::var("syncat_languages").ok()
@@ -50,7 +49,6 @@ fn main() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let package_json = Path::new(&manifest_dir).join("package.json");
     let node_modules = Path::new(&manifest_dir).join("node_modules");
-    let stylesheet_syntax = Path::new(&manifest_dir).join("../tree-sitter-syncat-stylesheet/src");
 
     let data = fs::read_to_string(&package_json).expect("The package.json cannot be read");
     let package = serde_json::from_str::<Package>(&data).expect("The package.json is invalid.");
@@ -61,7 +59,6 @@ fn main() {
         .into_iter()
         .map(|(package_name, _)| package_name)
         .map(|package_name| (Path::new(&node_modules).join(&format!("{}/src", package_name)), clean(package_name)))
-        .chain(vec![(stylesheet_syntax, "tree-sitter-syncat-stylesheet".to_string())])
         .filter(|(_, package)| languages
             .as_ref()
             .map(|languages| languages.iter().any(|lang| package.ends_with(lang)))

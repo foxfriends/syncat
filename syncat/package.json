@@ -43,6 +43,7 @@
     "tree-sitter-ruby": "^0.13.13",
     "tree-sitter-rust": "^0.13.5",
     "tree-sitter-scala": "^0.13.0",
+    "tree-sitter-syncat-stylesheet": "^1.0.0",
     "tree-sitter-test": "^0.1.0",
     "tree-sitter-typescript": "^0.13.6"
   }
