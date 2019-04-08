@@ -25,8 +25,8 @@ new themes are greatly appreciated!
 ```bash
 mkdir ~/.config/syncat
 cd ~/.config/syncat
-git clone https://github.com/oinkiguana/syncat-themes theme
-cd theme
+git clone https://github.com/oinkiguana/syncat-themes style
+cd style
 ln -s onedark active
 ```
 
