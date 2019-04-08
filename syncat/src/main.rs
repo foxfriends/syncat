@@ -23,6 +23,7 @@ use self::error::BoxedError;
 #[derive(StructOpt, Debug)]
 #[structopt(name = "syncat")]
 #[structopt(rename_all = "kebab-case")]
+#[structopt(raw(setting = "structopt::clap::AppSettings::ColoredHelp"))]
 pub struct Opts {
     /// Level of framing around each file. Repeat for bigger frame
     #[structopt(short, long, parse(from_occurrences))]
