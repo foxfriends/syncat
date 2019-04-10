@@ -36,10 +36,10 @@ You can override this by passing a comma separated list of languages to enable v
 `syncat_languages` environment variable. For example:
 
 ```bash
-# only enable Rust and JavaScript
+# only enable Rust
 syncat_languages=rust cargo install --path .
 
-# only enable Rust and JavaScript
+# enable Rust and JavaScript
 syncat_languages=rust,javascript cargo install --path .
 ```
 
