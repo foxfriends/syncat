@@ -66,8 +66,8 @@ h6 {
 }
 
 code {
-  background-color: black;
-  color: white;
+  background-color: #9ba2af;
+  color: black;
 }
 
 footnote-def, footnote-ref {
