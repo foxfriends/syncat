@@ -93,6 +93,7 @@ impl Stylesheet {
     fn parse_selector_segment(source: &str, node: Node) -> Result<SelectorSegment, crate::BoxedError> {
         use SelectorSegment::*;
         match node.kind() {
+            "any" => Ok(Any),
             "node_kind" => {
                 let name = &source[node.start_byte()..node.end_byte()];
                 Ok(Kind(name.to_string()))

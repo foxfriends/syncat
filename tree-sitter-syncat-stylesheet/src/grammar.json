@@ -148,6 +148,10 @@
         {
           "type": "SYMBOL",
           "name": "token_pattern"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "any"
         }
       ]
     },
@@ -179,6 +183,10 @@
         {
           "type": "SYMBOL",
           "name": "node_kind"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "any"
         }
       ]
     },
@@ -220,6 +228,10 @@
           ]
         }
       ]
+    },
+    "any": {
+      "type": "STRING",
+      "value": "*"
     },
     "no_children": {
       "type": "SEQ",

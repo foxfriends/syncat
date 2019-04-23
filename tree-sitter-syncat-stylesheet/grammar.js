@@ -37,6 +37,7 @@ module.exports = grammar({
       $.node_kind,
       $.token,
       $.token_pattern,
+      $.any,
     ),
 
     _complex_terminal: $ => choice(
@@ -47,6 +48,7 @@ module.exports = grammar({
     _simple_node: $ => choice(
       $.branch_check,
       $.node_kind,
+      $.any,
     ),
 
     _complex_node: $ => $.direct_child,
@@ -54,6 +56,7 @@ module.exports = grammar({
     direct_child: $ => seq('>', $._simple_node),
     direct_terminal: $ => seq('>', choice($.no_children, $._simple_terminal)),
 
+    any: $ => "*",
     no_children: $ => seq($.node_kind, "."),
 
     branch_check: $ => seq('[', $.selector, ']'),

@@ -14,6 +14,13 @@ impl<T, P: Copy + Ord> Default for Setting<T, P> {
 }
 
 impl<T, P: Copy + Ord> Setting<T, P> {
+    fn map<U, F: Fn(&T) -> U>(&self, f: F) -> Setting<U, P> {
+        match self {
+            &Setting::Unset => Setting::Unset,
+            &Setting::Set(priority, ref value) => Setting::Set(priority, f(value)),
+        }
+    }
+
     fn or(self, other: Self) -> Self {
         use Setting::*;
         match (&self, &other) {
@@ -142,5 +149,37 @@ impl StyleBuilder {
         self.is_reverse       = other.is_reverse.or(self.is_reverse);
         self.content          = other.content.cloned_or(self.content);
         self
+    }
+
+    /// Interpolates some matches into applicable fields.
+    /// 
+    /// When the selector for this style contains a regular expression (or multiple), the capture
+    /// groups (including the full match) will be passed to this function as `matches`. Selectors
+    /// for these capture groups, such as `{1}` will be replaced with the match at that index.
+    ///
+    /// When there are multiple regular expressions in one selector, the capture lists are
+    /// appended in the order they appear in the selector.
+    ///
+    /// For now, this behaviour is only supported in string properties (`content` and `language`)
+    pub fn interpolate(&self, matches: &[Option<&str>]) -> Self {
+        let language = self.language
+            .map(|lang| matches
+                .iter()
+                .enumerate()
+                .filter(|(_, m)| m.is_some())
+                .fold(lang.to_string(), |lang, (i, m)| lang.replace(&format!("{{{}}}", i), m.unwrap()))
+            );
+        let content = self.content
+            .map(|content| matches
+                .iter()
+                .enumerate()
+                .filter(|(_, m)| m.is_some())
+                .fold(content.to_string(), |content, (i, m)| content.replace(&format!("{{{}}}", i), m.unwrap()))
+            );
+        StyleBuilder {
+            language,
+            content,
+            ..self.clone()
+        }
     }
 }

@@ -1,0 +1,18 @@
+==================
+Any child selector
+==================
+
+root * hello,
+root hello *, {
+  color: red;
+}
+
+---
+
+(stylesheet
+  (rule
+    (selector (node_kind) (any) (node_kind))
+    (selector (node_kind) (node_kind) (any))
+    (styles
+      (style (style_name) (style_value)))))
+

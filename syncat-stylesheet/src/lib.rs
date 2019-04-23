@@ -19,6 +19,7 @@ extern "C" {
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 enum SelectorSegment {
+    Any,
     Kind(String),
     Token(String),
     TokenPattern(String),
@@ -31,6 +32,7 @@ impl SelectorSegment {
     pub fn score(&self) -> (usize, usize) {
         use SelectorSegment::*;
         match self {
+            Any => (0, 0),
             Kind(..) => (0, 1),
             Token(..) => (1, 0),
             TokenPattern(..) => (1, 0),

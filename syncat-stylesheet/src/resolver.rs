@@ -23,46 +23,66 @@ fn regex(name: &str) -> Regex {
 }
 
 impl<'a> ContextNode<'a> {
-    fn satisfies_selector(&self, selector: &[SelectorSegment]) -> bool {
+    fn satisfies_selector(&self, selector: &[SelectorSegment]) -> Option<Vec<Option<&str>>> {
         match &selector[0] {
+            SelectorSegment::Any => match self {
+                ContextNode::Node(.., context) => context.satisfies_selector(&selector[1..]).or_else(|| context.satisfies_selector(selector)),
+                _ => Some(vec![]),
+            }
             SelectorSegment::Kind(name) => match self {
-                ContextNode::Node(kind, context) if kind == name => context.satisfies_selector(&selector[1..]) || context.satisfies_selector(selector),
+                ContextNode::Node(kind, context) if kind == name => context.satisfies_selector(&selector[1..]).or_else(|| context.satisfies_selector(selector)),
                 ContextNode::Node(.., context) => context.satisfies_selector(selector),
-                _ => false,
+                _ => None,
             }
             SelectorSegment::Token(name) => match self {
                 ContextNode::Node(.., context) => context.satisfies_selector(selector),
-                ContextNode::Leaf(token) => token == name,
+                ContextNode::Leaf(token) => if token == name { Some(vec![]) } else { None },
             }
             SelectorSegment::TokenPattern(pattern) => {
-                let pattern = regex(pattern);
                 match self {
                     ContextNode::Node(.., context) => context.satisfies_selector(selector),
-                    ContextNode::Leaf(token) => pattern.is_match(token),
+                    ContextNode::Leaf(token) => {
+                        let pattern = regex(pattern);
+                        let captures = pattern.captures(token)?;
+                        Some(captures
+                            .iter()
+                            .map(|m| m.map(|m| m.as_str()))
+                            .collect())
+                    }
                 }
             }
             SelectorSegment::NoChildren(..) => unimplemented!(". cannot be used in a branch check"),
             SelectorSegment::DirectChild(child) => match child.as_ref() {
+                SelectorSegment::Any => match self {
+                    ContextNode::Node(.., context) => context.satisfies_selector(&selector[1..]),
+                    _ => Some(vec![]),
+                }
                 SelectorSegment::Kind(name) => match self {
                     ContextNode::Node(kind, context) if kind == name => context.satisfies_selector(&selector[1..]),
-                    _ => false,
+                    _ => None,
                 }
                 SelectorSegment::Token(name) => match self {
-                    ContextNode::Node(..) => false,
-                    ContextNode::Leaf(token) => token == name,
+                    ContextNode::Node(..) => None,
+                    ContextNode::Leaf(token) => if token == name { Some(vec![]) } else { None },
                 }
                 SelectorSegment::TokenPattern(pattern) => {
-                    let pattern = regex(pattern);
                     match self {
-                        ContextNode::Node(..) => false,
-                        ContextNode::Leaf(token) => pattern.is_match(token),
+                        ContextNode::Node(..) => None,
+                        ContextNode::Leaf(token) => {
+                            let pattern = regex(pattern);
+                            let captures = pattern.captures(token)?;
+                            Some(captures
+                                 .iter()
+                                 .map(|m| m.map(|m| m.as_str()))
+                                 .collect())
+                        }
                     }
                 }
                 SelectorSegment::NoChildren(..) => unimplemented!(". cannot be used in a branch check"),
                 SelectorSegment::BranchCheck(..) => unimplemented!("Consider using `[> selector]` instead of `> [selector]` for the same effect"),
                 SelectorSegment::DirectChild(..) => unreachable!(),
             }
-            SelectorSegment::BranchCheck(sub_selector) => self.satisfies_selector(&sub_selector) && self.satisfies_selector(&selector[1..]),
+            SelectorSegment::BranchCheck(..) => unreachable!("This should be handled at the Context level"),
         }
     }
 
@@ -81,7 +101,8 @@ impl<'a> ContextNode<'a> {
     }
 }
 
-/// The Context tracks the state of the nodes previously parsed, which enables branch checking.
+/// The Context tracks the state of the nodes previously parsed, which enables branch checking and
+/// regular expression match interpolation.
 #[derive(Debug, Default)]
 pub struct Context<'a> {
     children: Vec<ContextNode<'a>>,
@@ -103,9 +124,25 @@ impl<'a> Context<'a> {
         }
     }
 
-    fn satisfies_selector(&self, selector: &[SelectorSegment]) -> bool {
-        if selector.is_empty() { return true }
-        self.children.iter().any(|node| node.satisfies_selector(selector))
+    fn satisfies_selector_from_child(&self, selector: &[SelectorSegment], min_child: usize) -> Option<(usize, Vec<Option<&str>>)> {
+        if selector.is_empty() { return Some((min_child, vec![])); }
+        match &selector[0] {
+            SelectorSegment::BranchCheck(sub_selector) => self.satisfies_selector_from_child(&sub_selector, min_child)
+                .and_then(|(child, mut matches)| {
+                    let (end_child, mut later) = self.satisfies_selector_from_child(&selector[1..], child + 1)?;
+                    matches.append(&mut later);
+                    Some((end_child, matches))
+                }),
+            _ => self.children
+                .iter()
+                .enumerate()
+                .skip(min_child)
+                .find_map(|(index, node)| node.satisfies_selector(selector).map(|result| (index, result))),
+        }
+    }
+
+    fn satisfies_selector(&self, selector: &[SelectorSegment]) -> Option<Vec<Option<&str>>> {
+        self.satisfies_selector_from_child(selector, 0).map(|(_, result)| result)
     }
 
     fn child(&self, depth: usize) -> Option<&Self> {
@@ -129,33 +166,49 @@ impl Stylesheet {
     /// Resolves a style, using the provided Context, and indexed scopes. The index is the index of
     /// the node within its parent.
     pub fn resolve(&self, context: &Context, scopes: &[(usize, &str)], token: Option<&str>) -> StyleBuilder {
+        self.resolve_with_matches(context, scopes, token, &[])
+    }
+
+    fn resolve_with_matches<'a>(&self, context: &'a Context, scopes: &[(usize, &str)], token: Option<&str>, matches: &[Option<&'a str>]) -> StyleBuilder {
         self.scopes.iter()
-            .fold(self.style.clone(), |style, (selector_segment, stylesheet)| match selector_segment {
+            .fold(self.style.interpolate(matches), move |style, (selector_segment, stylesheet)| match selector_segment {
+                SelectorSegment::Any => (0..scopes.len()).rev()
+                    .fold(style, |style, i| {
+                        style.merge_with(&stylesheet.resolve_with_matches(context.child(i+1).unwrap_or(&Context::default()), &scopes[i+1..], token, matches))
+                    }),
                 SelectorSegment::Kind(name) => (0..scopes.len()).rev()
                     .fold(style, |style, i| {
                         if scopes[i].1 == name {
-                            style.merge_with(&stylesheet.resolve(context.child(i+1).unwrap_or(&Context::default()), &scopes[i+1..], token))
+                            style.merge_with(&stylesheet.resolve_with_matches(context.child(i+1).unwrap_or(&Context::default()), &scopes[i+1..], token, matches))
                         } else {
                             style
                         }
                     }),
                 SelectorSegment::Token(name) => {
                     if token == Some(name) {
-                        style.merge_with(&stylesheet.style)
+                        style.merge_with(&stylesheet.style.interpolate(matches))
                     } else {
                         style
                     }
                 }
                 SelectorSegment::TokenPattern(name) => {
-                    if token.map(|token| regex(name).is_match(token)).unwrap_or(false) {
-                        style.merge_with(&stylesheet.style)
+                    if let Some(mut sub_matches) = token.and_then(|token| Some(regex(name).captures(token)?.iter().map(|m| m.map(|m| m.as_str())).collect())) {
+                        let mut matches = matches.to_vec();
+                        matches.append(&mut sub_matches);
+                        style.merge_with(&stylesheet.style.interpolate(&matches))
                     } else {
                         style
                     }
                 }
                 SelectorSegment::BranchCheck(selector) => {
-                    if context.satisfies_selector(&selector) {
-                        style.merge_with(&stylesheet.resolve(context, scopes, token))
+                    if token.map(|s| s.len()).unwrap_or(0) > 15 {
+                        if let Some(mut sub_matches) = context.satisfies_selector(&selector) {
+                            let mut matches = matches.to_vec();
+                            matches.append(&mut sub_matches);
+                            style.merge_with(&stylesheet.resolve_with_matches(context, scopes, token, &matches))
+                        } else {
+                            style
+                        }
                     } else {
                         style
                     }
@@ -163,11 +216,12 @@ impl Stylesheet {
                 SelectorSegment::NoChildren(segment) => match segment.as_ref() {
                     SelectorSegment::Kind(name) => {
                         if scopes.last().map(|x| x.1) == Some(name) {
-                            style.merge_with(&stylesheet.style)
+                            style.merge_with(&stylesheet.style.interpolate(matches))
                         } else {
                             style
                         }
                     }
+                    SelectorSegment::Any => style.merge_with(&stylesheet.style.interpolate(matches)),
                     SelectorSegment::Token(..) => unreachable!(),
                     SelectorSegment::TokenPattern(..) => unreachable!(),
                     SelectorSegment::NoChildren(..) => unreachable!(),
@@ -175,23 +229,27 @@ impl Stylesheet {
                     SelectorSegment::DirectChild(..) => unreachable!(),
                 }
                 SelectorSegment::DirectChild(segment) => match segment.as_ref() {
+                    SelectorSegment::Any => style
+                        .merge_with(&stylesheet.resolve_with_matches(context.child(1).unwrap_or(&Context::default()), &scopes[1..], token, matches)),
                     SelectorSegment::Kind(name) => {
                         if scopes.first().map(|x| x.1) == Some(name) {
-                            style.merge_with(&stylesheet.resolve(context.child(1).unwrap_or(&Context::default()), &scopes[1..], token))
+                            style.merge_with(&stylesheet.resolve_with_matches(context.child(1).unwrap_or(&Context::default()), &scopes[1..], token, matches))
                         } else {
                             style
                         }
                     }
                     SelectorSegment::Token(name) => {
                         if scopes.is_empty() && token == Some(name) {
-                            style.merge_with(&stylesheet.style)
+                            style.merge_with(&stylesheet.style.interpolate(matches))
                         } else {
                             style
                         }
                     }
                     SelectorSegment::TokenPattern(name) => {
-                        if scopes.is_empty() && token.map(|token| regex(name).is_match(token)).unwrap_or(false) {
-                            style.merge_with(&stylesheet.style)
+                        if let Some(mut sub_matches) = token.and_then(|token| Some(regex(name).captures(token)?.iter().map(|m| m.map(|m| m.as_str())).collect())) {
+                            let mut matches = matches.to_vec();
+                            matches.append(&mut sub_matches);
+                            style.merge_with(&stylesheet.style.interpolate(&matches))
                         } else {
                             style
                         }
@@ -199,11 +257,12 @@ impl Stylesheet {
                     SelectorSegment::NoChildren(segment) => match segment.as_ref() {
                         SelectorSegment::Kind(name) => {
                             if scopes.len() == 1 && scopes[0].1 == name {
-                                style.merge_with(&stylesheet.style)
+                                style.merge_with(&stylesheet.style.interpolate(matches))
                             } else {
                                 style
                             }
                         }
+                        SelectorSegment::Any => style.merge_with(&stylesheet.style.interpolate(matches)),
                         SelectorSegment::Token(..) => unreachable!(),
                         SelectorSegment::TokenPattern(..) => unreachable!(),
                         SelectorSegment::NoChildren(..) => unreachable!(),
