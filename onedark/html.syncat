@@ -27,6 +27,11 @@ comment {
   italic: true;
 }
 
+element [> start_tag [> tag_name "code"] attribute [> attribute_name "language"] attribute_value /.*/] text {
+  language: "{0}";
+  background-color: red;
+}
+
 raw_element [tag_name "style"] raw_text {
   language: css;
 }
