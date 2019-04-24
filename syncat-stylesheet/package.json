@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "tree-sitter-syncat-stylesheet": "file:../tree-sitter-syncat-stylesheet"
+    "tree-sitter-syncat-stylesheet": "1.1.0"
   }
 }
