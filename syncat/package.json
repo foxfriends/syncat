@@ -22,11 +22,11 @@
   "dependencies": {
     "@dicy/tree-sitter-latex": "^0.1.0",
     "tree-sitter-agda": "^1.0.16",
-    "tree-sitter-bash": "^0.13.7",
-    "tree-sitter-c": "^0.13.10",
+    "tree-sitter-bash": "^0.13.8",
+    "tree-sitter-c": "^0.13.12",
     "tree-sitter-c-sharp": "^0.13.0",
     "tree-sitter-clojure": "^0.4.0",
-    "tree-sitter-cpp": "^0.13.11",
+    "tree-sitter-cpp": "^0.13.14",
     "tree-sitter-css": "^0.13.7",
     "tree-sitter-embedded-template": "^0.13.0",
     "tree-sitter-go": "^0.13.3",
@@ -41,9 +41,9 @@
     "tree-sitter-python": "^0.13.6",
     "tree-sitter-regex": "^0.13.1",
     "tree-sitter-ruby": "^0.13.13",
-    "tree-sitter-rust": "^0.13.5",
+    "tree-sitter-rust": "^0.13.7",
     "tree-sitter-scala": "^0.13.0",
-    "tree-sitter-syncat-stylesheet": "file:../tree-sitter-syncat-stylesheet",
+    "tree-sitter-syncat-stylesheet": "^1.1.0",
     "tree-sitter-test": "^0.1.0",
     "tree-sitter-typescript": "^0.13.6"
   }
