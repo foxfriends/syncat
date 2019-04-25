@@ -123,9 +123,6 @@ impl Line {
         if self.line_ending && !self.no_newline {
             output = format!("{}{}", output, meta_style.line_ending());
         }
-        if let Some(wrap) = wrap {
-            output += &" ".repeat(wrap - last_line_length)
-        }
         if !self.no_newline {
             output = format!("{}\n", output);
         }
@@ -150,6 +147,7 @@ fn wrap_ansi_str(s: &str, width: usize) -> String {
     let mut iter = AnsiCodeIterator::new(s);
     let mut length = 0;
     let mut rv = String::new();
+    let mut style: &str = "";
 
     while let Some(item) = iter.next() {
         match item {
@@ -158,6 +156,7 @@ fn wrap_ansi_str(s: &str, width: usize) -> String {
                     let len = width - length;
                     rv.push_str(&s[..len]);
                     rv.push('\n');
+                    rv.push_str(style);
                     s = &s[len..];
                     length = 0;
                 }
@@ -165,6 +164,7 @@ fn wrap_ansi_str(s: &str, width: usize) -> String {
                 length += s.len();
             }
             (s, true) => {
+                style = s;
                 rv.push_str(s);
             }
         }
