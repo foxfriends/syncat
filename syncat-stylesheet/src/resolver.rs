@@ -201,14 +201,10 @@ impl Stylesheet {
                     }
                 }
                 SelectorSegment::BranchCheck(selector) => {
-                    if token.map(|s| s.len()).unwrap_or(0) > 15 {
-                        if let Some(mut sub_matches) = context.satisfies_selector(&selector) {
-                            let mut matches = matches.to_vec();
-                            matches.append(&mut sub_matches);
-                            style.merge_with(&stylesheet.resolve_with_matches(context, scopes, token, &matches))
-                        } else {
-                            style
-                        }
+                    if let Some(mut sub_matches) = context.satisfies_selector(&selector) {
+                        let mut matches = matches.to_vec();
+                        matches.append(&mut sub_matches);
+                        style.merge_with(&stylesheet.resolve_with_matches(context, scopes, token, &matches))
                     } else {
                         style
                     }
