@@ -579,14 +579,14 @@ dependencies = [
  "serde 1.0.90 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
  "structopt 0.2.15 (registry+https://github.com/rust-lang/crates.io-index)",
- "syncat-stylesheet 0.2.0",
+ "syncat-stylesheet 0.2.1",
  "terminal_size 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "tree-sitter 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "syncat-stylesheet"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "ansi_term 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cc 1.0.35 (registry+https://github.com/rust-lang/crates.io-index)",
