@@ -16,12 +16,15 @@ pub enum Lang {
     #[cfg(any(lang_all, lang_c_sharp))]            CSharp,
     #[cfg(any(lang_all, lang_css))]                Css,
     #[cfg(any(lang_all, lang_embedded_template))]  EmbeddedTemplate,
+    #[cfg(any(lang_all, lang_fluent))]             Fluent,
     #[cfg(any(lang_all, lang_go))]                 Go,
     #[cfg(any(lang_all, lang_haskell))]            Haskell,
     #[cfg(any(lang_all, lang_html))]               Html,
     #[cfg(any(lang_all, lang_java))]               Java,
     #[cfg(any(lang_all, lang_javascript))]         JavaScript,
+    #[cfg(any(lang_all, lang_jsdoc))]              Jsdoc,
     #[cfg(any(lang_all, lang_json))]               Json,
+    #[cfg(any(lang_all, lang_julia))]              Julia,
     #[cfg(any(lang_all, lang_lua))]                Lua,
     #[cfg(any(lang_all, lang_ocaml))]              OCaml,
     #[cfg(any(lang_all, lang_php))]                Php,
@@ -34,6 +37,7 @@ pub enum Lang {
     #[cfg(any(lang_all, lang_latex))]              Tex,
     #[cfg(any(lang_all, lang_test))]               TreeSitterCorpus,
     #[cfg(any(lang_all, lang_typescript))]         TypeScript,
+    #[cfg(any(lang_all, lang_verilog))]            Verilog,
 }
 
 impl std::str::FromStr for Lang {
@@ -56,12 +60,15 @@ impl std::str::FromStr for Lang {
             #[cfg(any(lang_all, lang_c_sharp))]            "cs" | "csharp" | "c#"              => Ok(CSharp),
             #[cfg(any(lang_all, lang_css))]                "css"                               => Ok(Css),
             #[cfg(any(lang_all, lang_embedded_template))]  "erb" | "ejs"                       => Ok(EmbeddedTemplate),
+            #[cfg(any(lang_all, lang_fluent))]             "ftl" | "fluent"                    => Ok(Fluent),
             #[cfg(any(lang_all, lang_go))]                 "go"                                => Ok(Go),
             #[cfg(any(lang_all, lang_haskell))]            "hs" | "lhs" | "haskell"            => Ok(Haskell),
             #[cfg(any(lang_all, lang_html))]               "html" | "htm"                      => Ok(Html),
             #[cfg(any(lang_all, lang_java))]               "java"                              => Ok(Java),
             #[cfg(any(lang_all, lang_javascript))]         "js" | "jsx" | "javascript"         => Ok(JavaScript),
+            #[cfg(any(lang_all, lang_jsdoc))]              "jsdoc"                             => Ok(Jsdoc),
             #[cfg(any(lang_all, lang_json))]               "json"                              => Ok(Json),
+            #[cfg(any(lang_all, lang_julia))]              "jl" | "julia"                      => Ok(Julia),
             #[cfg(any(lang_all, lang_lua))]                "lua"                               => Ok(Lua),
             #[cfg(any(lang_all, lang_ocaml))]              "ml" | "mli" | "ocaml"              => Ok(OCaml),
             #[cfg(any(lang_all, lang_php))]                "php"                               => Ok(Php),
@@ -74,6 +81,7 @@ impl std::str::FromStr for Lang {
             #[cfg(any(lang_all, lang_latex))]              "tex" | "latex" | "xetex"           => Ok(Tex),
             #[cfg(any(lang_all, lang_test))]               "corpus"                            => Ok(TreeSitterCorpus),
             #[cfg(any(lang_all, lang_typescript))]         "ts" | "tsx" | "typescript"         => Ok(TypeScript),
+            #[cfg(any(lang_all, lang_verilog))]            "v" | "verilog"                     => Ok(Verilog),
             _ => Err(Box::new(Error(format!("Unknown language {}", name)))),
         }
     }
@@ -93,11 +101,14 @@ impl Lang {
                 #[cfg(any(lang_all, lang_css))]                Css              => tree_sitter_css(),
                 #[cfg(any(lang_all, lang_embedded_template))]  EmbeddedTemplate => tree_sitter_embedded_template(),
                 #[cfg(any(lang_all, lang_go))]                 Go               => tree_sitter_go(),
+                #[cfg(any(lang_all, lang_fluent))]             Fluent           => tree_sitter_fluent(),
                 #[cfg(any(lang_all, lang_haskell))]            Haskell          => tree_sitter_haskell(),
                 #[cfg(any(lang_all, lang_html))]               Html             => tree_sitter_html(),
                 #[cfg(any(lang_all, lang_java))]               Java             => tree_sitter_java(),
                 #[cfg(any(lang_all, lang_javascript))]         JavaScript       => tree_sitter_javascript(),
+                #[cfg(any(lang_all, lang_jsdoc))]              Jsdoc            => tree_sitter_jsdoc(),
                 #[cfg(any(lang_all, lang_json))]               Json             => tree_sitter_json(),
+                #[cfg(any(lang_all, lang_julia))]              Julia            => tree_sitter_julia(),
                 #[cfg(any(lang_all, lang_lua))]                Lua              => tree_sitter_lua(),
                 #[cfg(any(lang_all, lang_ocaml))]              OCaml            => tree_sitter_ocaml(),
                 #[cfg(any(lang_all, lang_php))]                Php              => tree_sitter_php(),
@@ -110,6 +121,7 @@ impl Lang {
                 #[cfg(any(lang_all, lang_latex))]              Tex              => tree_sitter_latex(),
                 #[cfg(any(lang_all, lang_test))]               TreeSitterCorpus => tree_sitter_test(),
                 #[cfg(any(lang_all, lang_typescript))]         TypeScript       => tree_sitter_typescript(),
+                #[cfg(any(lang_all, lang_verilog))]            Verilog          => tree_sitter_verilog(),
             }
         }
     }
@@ -125,12 +137,15 @@ impl Lang {
             #[cfg(any(lang_all, lang_c_sharp))]            CSharp           => "cs",
             #[cfg(any(lang_all, lang_css))]                Css              => "css",
             #[cfg(any(lang_all, lang_embedded_template))]  EmbeddedTemplate => "template",
+            #[cfg(any(lang_all, lang_fluent))]             Fluent           => "ftl",
             #[cfg(any(lang_all, lang_go))]                 Go               => "go",
             #[cfg(any(lang_all, lang_haskell))]            Haskell          => "hs",
             #[cfg(any(lang_all, lang_html))]               Html             => "html",
             #[cfg(any(lang_all, lang_java))]               Java             => "java",
             #[cfg(any(lang_all, lang_javascript))]         JavaScript       => "js",
+            #[cfg(any(lang_all, lang_jsdoc))]              Jsdoc            => "jsdoc",
             #[cfg(any(lang_all, lang_json))]               Json             => "json",
+            #[cfg(any(lang_all, lang_julia))]              Julia            => "julia",
             #[cfg(any(lang_all, lang_lua))]                Lua              => "lua",
             #[cfg(any(lang_all, lang_ocaml))]              OCaml            => "ml",
             #[cfg(any(lang_all, lang_php))]                Php              => "php",
@@ -143,6 +158,7 @@ impl Lang {
             #[cfg(any(lang_all, lang_latex))]              Tex              => "tex",
             #[cfg(any(lang_all, lang_test))]               TreeSitterCorpus => "corpus",
             #[cfg(any(lang_all, lang_typescript))]         TypeScript       => "ts",
+            #[cfg(any(lang_all, lang_verilog))]            Verilog          => "v",
         }
     }
 
