@@ -37,7 +37,7 @@ fn main() {
 
     if let Some(languages) = &languages {
         for language in languages {
-            println!("cargo:rustc-cfg=lang_{}", language.replace("_", "-"));
+            println!("cargo:rustc-cfg=lang_{}", language.replace("-", "_"));
         }
     } else {
         println!("cargo:rustc-cfg=lang_all");
