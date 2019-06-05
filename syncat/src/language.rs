@@ -154,7 +154,7 @@ impl Lang {
             #[cfg(any(lang_all, lang_ruby))]               Ruby             => "rb",
             #[cfg(any(lang_all, lang_rust))]               Rust             => "rs",
             #[cfg(any(lang_all, lang_scala))]              Scala            => "scala",
-            #[cfg(any(lang_all, lang_syncat_styleseet))]   Syncat           => "syncat",
+            #[cfg(any(lang_all, lang_syncat_stylesheet))]  Syncat           => "syncat",
             #[cfg(any(lang_all, lang_latex))]              Tex              => "tex",
             #[cfg(any(lang_all, lang_test))]               TreeSitterCorpus => "corpus",
             #[cfg(any(lang_all, lang_typescript))]         TypeScript       => "ts",
