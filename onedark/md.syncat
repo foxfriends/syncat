@@ -75,14 +75,22 @@ footnote-def, footnote-ref {
   dim: true;
 }
 
-codeblock,
-codeblock "prefix",
-codeblock "suffix", {
+codeblock *,
+codeblock * "prefix",
+codeblock * "suffix", {
   background-color: black;
   color: white;
 }
 
-codeblock "lang-tag" {
+codeblock * "lang-tag" {
   color: white;
   dim: true;
+}
+
+codeblock txt,
+codeblock txt "prefix",
+codeblock txt "suffix",
+codeblock txt "lang-tag", {
+  background-color: #9ba2af;
+  color: black;
 }
