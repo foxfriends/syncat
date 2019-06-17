@@ -11,15 +11,7 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 #[serde(rename_all="camelCase")]
 struct Package {
-    dependencies: BTreeMap<String, String>,
-}
-
-fn clean(mut string: String) -> String {
-    if string.starts_with("@") {
-        string = string.split('/').nth(1).unwrap().to_string()
-    }
-
-    string
+    languages: BTreeMap<String, String>,
 }
 
 fn main() {
@@ -55,17 +47,16 @@ fn main() {
 
     let mut output_list = File::create(&languages_path).unwrap();
     package
-        .dependencies
+        .languages
         .into_iter()
-        .map(|(package_name, _)| package_name)
-        .map(|package_name| (Path::new(&node_modules).join(&format!("{}/src", package_name)), clean(package_name)))
-        .filter(|(_, package)| languages
+        .map(|(path, name)| (Path::new(&node_modules).join(&format!("{}/src", path)), name))
+        .filter(|(_, name)| languages
             .as_ref()
-            .map(|languages| languages.iter().any(|lang| package.ends_with(lang)))
+            .map(|languages| languages.iter().any(|lang| name == lang))
             .unwrap_or(true) // defaults to all languages
         )
         .for_each(move |(path, package)| {
-            writeln!(output_list, "extern \"C\" {{ fn {}() -> Language; }}", package.replace("-", "_")).unwrap();
+            writeln!(output_list, "extern \"C\" {{ fn tree_sitter_{}() -> Language; }}", package.replace("-", "_")).unwrap();
             for file in fs::read_dir(&path).expect(&format!("Package {} is not found at {:?}", package, path)) {
                 // each file is meant to be built individually and linked
                 let mut build = cc::Build::new();
@@ -88,7 +79,7 @@ fn main() {
                         build
                             .include(&path)
                             .warnings(false)
-                            .compile(&format!("{}-{}", package, file.path().file_stem().unwrap().to_str().unwrap()));
+                            .compile(&format!("tree-sitter-{}-{}", package, file.path().file_stem().unwrap().to_str().unwrap()));
                     }
                     Err(..) => {}
                 }

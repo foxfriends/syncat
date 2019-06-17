@@ -36,6 +36,7 @@ pub enum Lang {
     #[cfg(any(lang_all, lang_syncat_stylesheet))]  Syncat,
     #[cfg(any(lang_all, lang_latex))]              Tex,
     #[cfg(any(lang_all, lang_test))]               TreeSitterCorpus,
+    #[cfg(any(lang_all, lang_tsx))]                Tsx,
     #[cfg(any(lang_all, lang_typescript))]         TypeScript,
     #[cfg(any(lang_all, lang_verilog))]            Verilog,
 }
@@ -80,7 +81,8 @@ impl std::str::FromStr for Lang {
             #[cfg(any(lang_all, lang_syncat_stylesheet))]  "syncat"                            => Ok(Syncat),
             #[cfg(any(lang_all, lang_latex))]              "tex" | "latex" | "xetex"           => Ok(Tex),
             #[cfg(any(lang_all, lang_test))]               "corpus"                            => Ok(TreeSitterCorpus),
-            #[cfg(any(lang_all, lang_typescript))]         "ts" | "tsx" | "typescript"         => Ok(TypeScript),
+            #[cfg(any(lang_all, lang_tsx))]                "tsx"                               => Ok(Tsx),
+            #[cfg(any(lang_all, lang_typescript))]         "ts" | "typescript"                 => Ok(TypeScript),
             #[cfg(any(lang_all, lang_verilog))]            "v" | "verilog"                     => Ok(Verilog),
             _ => Err(Box::new(Error(format!("Unknown language {}", name)))),
         }
@@ -120,6 +122,7 @@ impl Lang {
                 #[cfg(any(lang_all, lang_syncat_stylesheet))]  Syncat           => tree_sitter_syncat_stylesheet(),
                 #[cfg(any(lang_all, lang_latex))]              Tex              => tree_sitter_latex(),
                 #[cfg(any(lang_all, lang_test))]               TreeSitterCorpus => tree_sitter_test(),
+                #[cfg(any(lang_all, lang_tsx))]                Tsx              => tree_sitter_tsx(),
                 #[cfg(any(lang_all, lang_typescript))]         TypeScript       => tree_sitter_typescript(),
                 #[cfg(any(lang_all, lang_verilog))]            Verilog          => tree_sitter_verilog(),
             }
@@ -157,6 +160,7 @@ impl Lang {
             #[cfg(any(lang_all, lang_syncat_stylesheet))]  Syncat           => "syncat",
             #[cfg(any(lang_all, lang_latex))]              Tex              => "tex",
             #[cfg(any(lang_all, lang_test))]               TreeSitterCorpus => "corpus",
+            #[cfg(any(lang_all, lang_tsx))]                Tsx              => "tsx",
             #[cfg(any(lang_all, lang_typescript))]         TypeScript       => "ts",
             #[cfg(any(lang_all, lang_verilog))]            Verilog          => "v",
         }
