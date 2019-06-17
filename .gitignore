@@ -12,6 +12,17 @@ syncat/node_modules/*
 !syncat/node_modules/tree-sitter-*
 syncat/node_modules/tree-sitter-*/*
 !syncat/node_modules/tree-sitter-*/src
+syncat/node_modules/tree-sitter-*/src/*.json
+
+!syncat/node_modules/tree-sitter-typescript/typescript
+syncat/node_modules/tree-sitter-typescript/typescript/*
+!syncat/node_modules/tree-sitter-typescript/typescript/src
+syncat/node_modules/tree-sitter-typescript/typescript/src/*.json
+
+!syncat/node_modules/tree-sitter-typescript/tsx
+syncat/node_modules/tree-sitter-typescript/tsx/*
+!syncat/node_modules/tree-sitter-typescript/tsx/src
+syncat/node_modules/tree-sitter-typescript/tsx/src/*.json
 
 !syncat/node_modules/@dicy
 syncat/node_modules/@dicy/*
