@@ -2,6 +2,7 @@ use std::fs;
 use std::io::{self, Read};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, mpsc::channel};
+use std::collections::BTreeMap;
 
 use structopt::StructOpt;
 use tree_sitter::Parser;
@@ -14,6 +15,7 @@ mod language;
 mod line;
 mod meta;
 
+use crate::dirs::config;
 use self::language::Lang;
 use self::line::Line;
 use self::meta::load_meta_stylesheet;
@@ -72,8 +74,14 @@ fn transform(
     contents: String,
     path: Option<&PathBuf>, 
 ) -> Result<Vec<Line>, BoxedError> {
+    let lang_map: BTreeMap<String, String> = match fs::read_to_string(config().join("languages.toml")) {
+        Ok(string) => toml::from_str(&string)?,
+        Err(..) => BTreeMap::default(),
+    };
+
     let source: String = opts.language.as_ref()
         .or(lang)
+        .map(|lang| lang_map.get(lang).unwrap_or(lang))
         .and_then(|lang| lang.parse::<Lang>().ok())
         .and_then(|lang| {
             let mut parser = Parser::new();
