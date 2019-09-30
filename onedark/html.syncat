@@ -32,10 +32,10 @@ element [> start_tag [> tag_name "code"] attribute [> attribute_name "language"]
   background-color: red;
 }
 
-raw_element [tag_name "style"] raw_text {
+style_element raw_text {
   language: css;
 }
 
-raw_element [tag_name "script"] raw_text {
+script_element raw_text {
   language: js;
 }
