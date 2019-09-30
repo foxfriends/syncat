@@ -47,13 +47,12 @@ If in future you would like to add new languages, just reinstall with your updat
 (cargo will ask for the `--force` flag).
 
 These are the languages you can pick from:
-*   `latex`
 *   `agda`
 *   `bash`
 *   `c`
-*   `c-sharp`
 *   `clojure`
 *   `cpp`
+*   `c-sharp`
 *   `css`
 *   `embedded-template`
 *   `go`
@@ -61,7 +60,10 @@ These are the languages you can pick from:
 *   `html`
 *   `java`
 *   `javascript`
+*   `jsdoc`
 *   `json`
+*   `julia`
+*   `latex`
 *   `lua`
 *   `ocaml`
 *   `php`
@@ -73,8 +75,33 @@ These are the languages you can pick from:
 *   `syncat-stylesheet`
 *   `test`
 *   `typescript`
+*   `tsx`
+*   `verilog`
 
 ## Configuration
+
+Syncat looks for configuration in the default configuration locations for your operating system:
+*   Linux: `$HOME/.config/syncat/`
+*   Mac: `$HOME/Library/Preferences/com.cameldridge.syncat/`
+*   Windows: Not officially supported
+
+The supported configurations are:
+*   Language Map; and
+*   Stylesheets
+
+### Language Map
+
+The language map is a simple TOML file named `languages.toml`, located in the root of the configuration
+folder as listed above. The keys of this file denote the extension to support, and the value is the 
+language that files with that extension should be parsed as.
+
+For example, to have `.svelte` files parsed as HTML, you would include this entry:
+
+```toml
+svelte = "html"
+```
+
+### Stylesheets
 
 In order for Syncat to know what colours to set, you must provide a stylesheet for each language. A
 number of pre-made themes are provided in the [syncat-themes][] repository.
