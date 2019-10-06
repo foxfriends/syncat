@@ -68,7 +68,7 @@ fn do_git_transform(source: &[Line], repo: Repository, path: &PathBuf) -> Option
     Some(source
         .iter()
         .enumerate()
-        .map(move |(i, line)| line.clone().with_status(line_changes.remove(&(i as u32)).unwrap_or_default()))
+        .map(move |(i, line)| line.clone().with_status(line_changes.remove(&(i as u32 + 1)).unwrap_or_default()))
         .collect())
 }
 

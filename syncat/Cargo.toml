@@ -19,15 +19,15 @@ features = ["derive"]
 version = "1.0"
 
 [dependencies]
-ansi_term = "0.11"
-directories = "1.0"
-git2 = "0.8"
-hex = "0.3"
-lazy_static = "1.3"
-regex = "1.1"
-structopt = "0.2"
+ansi_term = "0.12"
+directories = "2.0"
+git2 = "0.10"
+hex = "0.4"
+lazy_static = "1.4"
+regex = "1.3"
+structopt = "0.3"
 terminal_size = "0.1"
 tree-sitter = "0.3"
-console = "0.7"
+console = "0.9"
 syncat-stylesheet = { path = "../syncat-stylesheet" }
 toml = "0.5"

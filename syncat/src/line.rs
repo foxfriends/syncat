@@ -104,17 +104,13 @@ impl Line {
                 }
                 if let Some(status) = self.git_status {
                     use LineChange::*;
-                    if i == 0 {
-                        output = format!("  {}", output);
-                    } else {
-                        output = match status {
-                            Unchanged => format!("  {}", output),
-                            Added => format!("{} {}", meta_style.added(), output),
-                            Modified => format!("{} {}", meta_style.modified(), output),
-                            RemovedAbove => format!("{} {}", meta_style.removed_above(), output),
-                            RemovedBelow => format!("{} {}", meta_style.removed_below(), output),
-                        };
-                    }
+                    output = match status {
+                        Unchanged => format!("  {}", output),
+                        Added => format!("{} {}", meta_style.added(), output),
+                        Modified => format!("{} {}", meta_style.modified(), output),
+                        RemovedAbove => format!("{} {}", meta_style.removed_above(), output),
+                        RemovedBelow => format!("{} {}", meta_style.removed_below(), output),
+                    };
                 }
                 output
             })

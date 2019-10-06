@@ -85,6 +85,7 @@ impl Margin {
     component!(cross);
 }
 
+#[derive(Debug)]
 pub struct MetaStylesheet {
     pub line_ending: StyleBuilder,
     pub line_number: StyleBuilder,
