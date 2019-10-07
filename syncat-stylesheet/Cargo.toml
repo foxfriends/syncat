@@ -1,8 +1,8 @@
 [package]
 name = "syncat-stylesheet"
 description = "Parser for Syncat Stylesheets."
-homepage = "https://github.com/oinkiguana/syncat"
-repository = "https://github.com/oinkiguana/syncat"
+homepage = "https://github.com/foxfriends/syncat"
+repository = "https://github.com/foxfriends/syncat"
 version = "0.2.1"
 authors = ["Cameron Eldridge <cameldridge+git@gmail.com>"]
 license = "MIT"

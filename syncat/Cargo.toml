@@ -1,10 +1,10 @@
 [package]
 description = "Syntax aware cat"
-repository = "https://github.com/oinkiguana/syncat"
+repository = "https://github.com/foxfriends/syncat"
 keywords = ["cli", "syntax", "cat", "highlighting"]
 readme = "../README.md"
 license = "MIT"
-homepage = "https://github.com/oinkiguana/syncat"
+homepage = "https://github.com/foxfriends/syncat"
 authors = ["Cameron Eldridge <cameldridge+git@gmail.com>"]
 edition = "2018"
 name = "syncat"
