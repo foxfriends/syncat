@@ -10,7 +10,7 @@
   "author": "Cameron Eldridge",
   "repository": {
     "type": "git",
-    "url": "https://github.com/oinkiguana/syncat.git",
+    "url": "https://github.com/foxfriends/syncat.git",
     "directory": "tree-sitter-syncat-stylesheet"
   },
   "license": "ISC",
