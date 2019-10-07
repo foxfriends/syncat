@@ -1,4 +1,4 @@
-[Syncat]: https://github.com/oinkiguana/syncat
+[Syncat]: https://github.com/foxfriends/syncat
 
 # Syncat Themes
 
