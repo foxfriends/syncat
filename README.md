@@ -1,5 +1,5 @@
 [Tree-sitter]: https://github.com/tree-sitter/tree-sitter
-[syncat-themes]: https://github.com/oinkiguana/syncat-themes
+[syncat-themes]: https://github.com/foxfriends/syncat-themes
 [crates.io]: https://crates.io
 
 # Syncat
@@ -13,7 +13,7 @@ Unfortunately, Syncat's compiled binary is too large to be published on [crates.
 to install from source.
 
 ```bash
-git clone https://github.com/oinkiguana/syncat
+git clone https://github.com/foxfriends/syncat
 cd syncat/syncat
 cargo install --path .
 ```
@@ -25,7 +25,7 @@ new themes are greatly appreciated!
 ```bash
 mkdir ~/.config/syncat
 cd ~/.config/syncat
-git clone https://github.com/oinkiguana/syncat-themes style
+git clone https://github.com/foxfriends/syncat-themes style
 cd style
 ln -s onedark active
 ```
