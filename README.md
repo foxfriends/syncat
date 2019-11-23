@@ -30,8 +30,8 @@ cd style
 # the theme files are loaded from the 'active' directory, so link your favourite theme here
 ln -s onedark active
 
-# alternatively, you can set the syncat_active_style environment variable to the path to your style directory
-env syncat_active_style=~/.config/syncat/style/onelight syncat main.rs
+# alternatively, you can set the syncat_active_style environment variable to the name of a style
+env syncat_active_style=onelight syncat main.rs
 ```
 
 By default syncat will be installed with all languages enabled. As each language's parser is
