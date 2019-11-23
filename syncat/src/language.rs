@@ -1,7 +1,7 @@
 use tree_sitter::Language;
 use std::fs::File;
 use syncat_stylesheet::Stylesheet;
-use crate::dirs::config;
+use crate::dirs::active_color;
 use crate::error::Error;
 
 include!(concat!(env!("OUT_DIR"), "/languages.rs"));
@@ -167,7 +167,7 @@ impl Lang {
     }
 
     pub fn style(&self) -> Result<Stylesheet, crate::BoxedError> {
-        let style_file = config().join("style/active").join(self.ext()).with_extension("syncat");
+        let style_file = active_color().join(self.ext()).with_extension("syncat");
         if !style_file.exists() {
             return Ok(Stylesheet::default());
         }

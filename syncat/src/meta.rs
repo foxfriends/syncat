@@ -1,7 +1,7 @@
 use std::fs::File;
 use ansi_term::ANSIGenericString;
 
-use crate::dirs::config;
+use crate::dirs::active_color;
 use syncat_stylesheet::{Stylesheet, Context};
 use syncat_stylesheet::{Setting, StyleBuilder, Colour, Style};
 
@@ -185,7 +185,7 @@ impl MetaStylesheet {
 
 pub fn load_meta_stylesheet() -> MetaStylesheet {
     let stylesheet = {
-        let style_file = config().join("style/active/.syncat");
+        let style_file = active_color().join(".syncat");
         if !style_file.exists() {
             Stylesheet::default()
         } else {
