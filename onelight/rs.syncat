@@ -1,0 +1,172 @@
+// Keywords
+
+"let", "const", "static", "mut", "ref", "move", "dyn",
+"fn", "struct", "enum", "trait", "impl", "type",
+"pub", "mod", "extern", "crate", "use", "super", "where",
+"if", "else", "match", "loop", "for", "while", "return", "in",
+"async" {
+  color: purple;
+}
+
+"unsafe" {
+  color: red;
+}
+
+closure_parameters > "|" {
+  color: purple;
+}
+
+remaining_field_pattern > "..",
+match_arm > "=>",
+match_pattern > "|" {
+  color: purple;
+}
+
+// Imports
+
+use_wildcard "*" {
+  color: purple;
+}
+
+use_wildcard identifier,
+scoped_use_list identifier,
+scoped_identifier identifier {
+  color: blue;
+}
+
+// Operators
+
+"&", "|", "^",
+unary_expression > "!", "~", "+", "-", "*", "/", "%",
+">", "<", "<=", ">=", "==", "!=",
+"<<", ">>",
+"&&", "||",
+"=", "+=", "-=", "*=", "/=", "%=", "|=", "&=", "^=", "<<=", ">>=",
+"..", "..=",
+"?",
+index_expression > "[",
+index_expression > "]", {
+  color: purple;
+}
+
+// Types
+
+type_identifier,
+primitive_type {
+  color: yellow;
+}
+
+// Values
+
+lifetime {
+  color: cyan;
+}
+
+boolean_literal, integer_literal, float_literal {|
+  color: 11;
+|}
+
+string_literal,
+char_literal,
+string_literal {|
+  color: green;
+  dim: false;
+|}
+
+enum_variant > identifier {
+  color: 11;
+}
+
+// Function declaration
+
+function_item > identifier {
+  color: blue;
+}
+
+function_item > "->",
+function_type > "->",
+type_arguments > "<",
+type_arguments > ">",
+type_parameters > "<",
+type_parameters > ">" {
+  color: purple;
+}
+
+// Function call
+
+call_expression > identifier,
+call_expression > field_expression > field_identifier,
+call_expression > generic_function > field_expression > field_identifier {
+  color: blue;
+}
+
+// Macro invocation
+
+"macro_rules!",
+macro_definition > identifier,
+macro_invocation > identifier,
+macro_invocation > "!" {
+  color: cyan;
+}
+
+inner_attribute_item,
+attribute_item {
+  color: yellow;
+  dim: true;
+}
+
+// Macro rules
+
+token_repetition > "$",
+token_repetition > "(",
+token_repetition > ")",
+token_repetition > "*",
+token_repetition > "+",
+token_repetition > "?",
+token_repetition_pattern > "$",
+token_repetition_pattern > "(",
+token_repetition_pattern > ")",
+token_repetition_pattern > "*",
+token_repetition_pattern > "+",
+token_repetition_pattern > "?", {
+  color: purple;
+}
+
+macro_rule > "=>" {
+  color: purple;
+}
+
+metavariable {
+  color: red;
+}
+
+fragment_specifier {
+  color: yellow;
+}
+
+// Comments
+
+line_comment, block_comment {
+  color: 8;
+  italic: true;
+}
+
+// Specific word overrides
+
+"Ok", "Err", "Some", "None" {
+  color: cyan;
+}
+
+"Self",
+"Self",
+"Fn",
+"FnOnce",
+"FnMut",
+"_" {
+  color: purple;
+}
+
+"self" {
+  color: red;
+}
+

@@ -1,0 +1,11 @@
+eq_divider, dash_divider {
+  color: purple;
+}
+
+heading_name {
+  color: green;
+}
+
+identifier {
+  color: blue;
+}

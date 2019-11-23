@@ -52,4 +52,4 @@ integer, float, char,
     color: 11;
 }
 
-comment { color: 8 }
+comment { color: 8; }

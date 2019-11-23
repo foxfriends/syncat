@@ -23,7 +23,7 @@ attribute_value {
 }
 
 comment {
-  color: 15;
+  color: 8;
   italic: true;
 }
 

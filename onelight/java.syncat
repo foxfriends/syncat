@@ -1,0 +1,93 @@
+"package", "import", "module",
+"class", "enum", "interface",
+"extends", "implements",
+"new", "synchronized",
+"switch", "case", "default",
+"if", "else",
+"for", "do", "while",
+"try", "catch", "finally",
+"throw", "throws", "assert",
+"return", "break", "continue",
+"var",
+wildcard > "?",
+modifier {
+  color: purple;
+}
+
+"goto", "const" {
+  color: black;
+  background-color: 9;
+}
+
+"super", "this" {
+  color: red;
+}
+
+"=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "++", "--",
+"+", "-", "*", "/", "%", "&", "|", "^", "~", "<<", ">>",
+"<", "<=", ">", ">=", "==", "!=",
+"&&", "||", "!",
+"instanceof",
+ternary_expression > "?",
+ternary_expression > ":",
+lambda_expression > "->" {
+  color: purple;
+}
+
+package_declaration > identifier,
+import_declaration > identifier {
+  color: blue;
+}
+
+import_declaration asterisk {
+  color: purple;
+}
+
+void_type,
+integral_type,
+floating_point_type,
+boolean_type,
+character_type,
+type_identifier,
+type_parameter > identifier,
+constructor_declarator > identifier,
+class_declaration > identifier {
+  color: yellow;
+}
+
+generic_type > "<>",
+generic_type > ">",
+generic_type > "<",
+array_type dims > "[",
+array_type dims > "]" {
+  color: purple;
+}
+
+method_declarator > identifier,
+method_invocation > identifier {
+  color: blue;
+}
+
+labeled_statement > identifier,
+labeled_statement > ":",
+continue_statement > identifier,
+break_statement > identifier {|
+  color: cyan;
+|}
+
+identifier /^[A-Z_]+$/,
+null_literal,
+boolean_literal,
+floating_point_literal,
+integer_literal {
+  color: 11;
+}
+
+string_literal, character_literal {
+  color: green;
+}
+
+comment {|
+  color: 8;
+  italic: true;
+|}

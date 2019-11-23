@@ -1,0 +1,38 @@
+"@import", "@keyframes" {
+  color: purple;
+}
+
+function_name {
+  color: cyan;
+}
+
+import_statement plain_value, string_value {|
+  color: green;
+|}
+
+color_value, float_value, integer_value, plain_value {
+  color: 11;
+}
+
+property_name /^\-\-/,
+call_expression [function_name "var"] arguments plain_value /^\-\-/ {|
+  color: red;
+|}
+
+pseudo_class_selector > ":",
+pseudo_class_selector > class_name {
+  color: purple;
+}
+
+property_name {
+  color: blue;
+}
+
+tag_name { color: red; }
+class_selector { color: yellow; }
+id_selector { color: blue; }
+
+comment { 
+  color: 8;
+  italic: true;
+}
