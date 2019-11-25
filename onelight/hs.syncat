@@ -1,4 +1,4 @@
-"module", "import", "qualified", "as", "where", "let", "in", "newtype", "data", "deriving", "class", "instance",
+"module", "import", "hiding", "qualified", "as", "where", "let", "in", "newtype", "data", "deriving", "class", "instance",
 "case", "of", "otherwise", "do",
 {
     color: purple;
