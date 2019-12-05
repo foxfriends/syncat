@@ -1,0 +1,41 @@
+line_ending {
+  color: 15;
+  dim: true;
+  content: "¬";
+}
+
+line_number {
+  color: 15;
+}
+
+margin {
+  color: 15;
+  content: unicode;
+}
+
+title {
+  bold: true;
+  color: white;
+}
+
+vcs_addition {
+  color: green;
+  content: "+";
+}
+
+vcs_modification {
+  color: yellow;
+  content: "~";
+}
+
+vcs_deletion_above, vcs_deletion_below {
+  color: red;
+}
+
+vcs_deletion_above {
+  content: "‾";
+}
+
+vcs_deletion_below {
+  content: "_";
+}

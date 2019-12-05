@@ -1,8 +1,8 @@
-# One Light for Syncat
+# Panda for Syncat
 
 The following 16-colour mappings are assumed
 
-```conf
+```
 # black
 color0   #2A2C2D
 color8   #31353A
