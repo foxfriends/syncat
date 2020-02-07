@@ -152,9 +152,9 @@ fn wrap_ansi_str(s: &str, width: usize) -> String {
     while let Some(item) = iter.next() {
         match item {
             (mut s, false) => {
-                while s.len() + length > width {
+                while s.chars().count() + length > width {
                     let len = width - length;
-                    rv.push_str(&s[..len]);
+                    rv.push_str(&s.chars().take(len).collect::<String>());
                     rv.push('\n');
                     rv.push_str(style);
                     s = &s[len..];
