@@ -53,3 +53,8 @@ string {
 string interpolation {
   color: red;
 }
+
+comment {|
+  color: 8;
+  italic: true;
+|}
