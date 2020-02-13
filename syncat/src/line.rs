@@ -70,8 +70,9 @@ impl Line {
     ) -> String {
         let (indent, source) = extract_indent(&self.source);
         let mut last_line_length = 0;
+        let indent_width = indent.chars().count();
         let mut lines = wrap
-            .map(|width| wrap_ansi_str(source, width - indent.chars().count()))
+            .map(|width| wrap_ansi_str(source, width.checked_sub(indent_width).unwrap_or(width)))
             .unwrap_or_else(|| source.to_string())
             .lines()
             .map(|line| line.to_string())
@@ -81,8 +82,10 @@ impl Line {
         }
         let mut output = lines
             .into_iter()
-            .map(|line| {
-                let line = format!("{}{}", indent, line);
+            .map(|mut line| {
+                if wrap.is_none() || wrap.unwrap() > indent_width {
+                    line = format!("{}{}", indent, line);
+                }
                 last_line_length = console::measure_text_width(&line);
                 line
             })
@@ -151,17 +154,19 @@ fn wrap_ansi_str(s: &str, width: usize) -> String {
 
     while let Some(item) = iter.next() {
         match item {
-            (mut s, false) => {
-                while s.chars().count() + length > width {
-                    let len = width - length;
-                    rv.push_str(&s.chars().take(len).collect::<String>());
-                    rv.push('\n');
-                    rv.push_str(style);
-                    s = &s[len..];
-                    length = 0;
+            (s, false) => {
+                for ch in s.chars() {
+                    if ch == '\n' || length == width {
+                        rv.push('\n');
+                        rv.push_str(style);
+                        length = 0;
+                        if ch == '\n' {
+                            continue;
+                        }
+                    }
+                    length += 1;
+                    rv.push(ch);
                 }
-                rv.push_str(s);
-                length += s.len();
             }
             (s, true) => {
                 style = s;

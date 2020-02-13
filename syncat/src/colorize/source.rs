@@ -18,6 +18,10 @@ fn colorize_node<'a>(
     if node.child_count() == 0 {
         // print a child node
         let token = &source[node.start_byte()..node.end_byte()];
+        let mut line_count = token.lines().count();
+        if !token.ends_with('\n') {
+            line_count -= 1;
+        }
         if node.is_named() {
             scope.push((index, node.kind()));
         }
@@ -28,7 +32,12 @@ fn colorize_node<'a>(
             let tree = parser.parse(token, None).unwrap();
             output.push_str(&print_source(token, tree, &language.style()?)?);
         } else {
-            output.push_str(&format!("{}", style.build().paint(token)));
+            for (index, line) in token.lines().enumerate() {
+                output.push_str(&format!("{}", style.build().paint(line)));
+                if index != line_count {
+                    output.push('\n');
+                }
+            }
         }
         *pos = node.end_byte();
         context.add_child(&scope, token);
