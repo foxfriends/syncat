@@ -58,7 +58,9 @@ These are the languages you can pick from:
 *   `cpp`
 *   `c-sharp`
 *   `css`
+*   `elm`
 *   `embedded-template`
+*   `eno`
 *   `go`
 *   `haskell`
 *   `html`
@@ -69,6 +71,7 @@ These are the languages you can pick from:
 *   `julia`
 *   `latex`
 *   `lua`
+*   `markdown`
 *   `ocaml`
 *   `php`
 *   `python`
@@ -76,11 +79,20 @@ These are the languages you can pick from:
 *   `ruby`
 *   `rust`
 *   `scala`
+*   `systemrdl`
 *   `syncat-stylesheet`
 *   `test`
+*   `toml`
 *   `typescript`
 *   `tsx`
 *   `verilog`
+*   `yaml`
+
+And here is that list as a string you can paste:
+
+```
+agda,bash,c,clojure,cpp,c-sharp,css,elm,embedded-template,eno,go,haskell,html,java,javascript,jsdoc,json,julia,latex,lua,markdown,ocaml,php,python,regex,ruby,rust,scala,syncat-stylesheet,systemrdl,test,toml,typescript,tsx,verilog,yaml
+```
 
 ## Configuration
 
@@ -96,7 +108,7 @@ The supported configurations are:
 ### Language Map
 
 The language map is a simple TOML file named `languages.toml`, located in the root of the configuration
-folder as listed above. The keys of this file denote the extension to support, and the value is the 
+folder as listed above. The keys of this file denote the extension to support, and the value is the
 language that files with that extension should be parsed as.
 
 For example, to have `.svelte` files parsed as HTML, you would include this entry:

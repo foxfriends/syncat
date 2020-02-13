@@ -28,7 +28,9 @@
     "tree-sitter-clojure": "*",
     "tree-sitter-cpp": "^0.15.1",
     "tree-sitter-css": "^0.16.0",
+    "tree-sitter-elm": "^2.7.5",
     "tree-sitter-embedded-template": "^0.16.0",
+    "tree-sitter-eno": "^0.1.3",
     "tree-sitter-fluent": "*",
     "tree-sitter-go": "^0.13.3",
     "tree-sitter-haskell": "*",
@@ -39,6 +41,7 @@
     "tree-sitter-json": "^0.14.0",
     "tree-sitter-julia": "*",
     "tree-sitter-lua": "^1.6.0",
+    "tree-sitter-markdown": "^0.3.0",
     "tree-sitter-ocaml": "^0.14.3",
     "tree-sitter-php": "^0.16.1",
     "tree-sitter-python": "^0.15.1",
@@ -47,9 +50,12 @@
     "tree-sitter-rust": "^0.15.2",
     "tree-sitter-scala": "*",
     "tree-sitter-syncat-stylesheet": "^1.1.1",
+    "tree-sitter-systemrdl": "^0.4.2",
     "tree-sitter-test": "*",
+    "tree-sitter-toml": "^0.2.0",
     "tree-sitter-typescript": "^0.14.0",
-    "tree-sitter-verilog": "^0.15.8"
+    "tree-sitter-verilog": "^0.15.8",
+    "tree-sitter-yaml": "^0.1.0"
   },
   "languages": {
     "@dicy/tree-sitter-latex": "latex",
@@ -60,7 +66,9 @@
     "tree-sitter-clojure": "clojure",
     "tree-sitter-cpp": "cpp",
     "tree-sitter-css": "css",
+    "tree-sitter-elm": "elm",
     "tree-sitter-embedded-template": "embedded-template",
+    "tree-sitter-eno": "eno",
     "tree-sitter-fluent": "fluent",
     "tree-sitter-go": "go",
     "tree-sitter-haskell": "haskell",
@@ -71,6 +79,7 @@
     "tree-sitter-json": "json",
     "tree-sitter-julia": "julia",
     "tree-sitter-lua": "lua",
+    "tree-sitter-markdown": "markdown",
     "tree-sitter-ocaml": "ocaml",
     "tree-sitter-php": "php",
     "tree-sitter-python": "python",
@@ -79,9 +88,12 @@
     "tree-sitter-rust": "rust",
     "tree-sitter-scala": "scala",
     "tree-sitter-syncat-stylesheet": "syncat-stylesheet",
+    "tree-sitter-systemrdl": "systemrdl",
     "tree-sitter-test": "test",
+    "tree-sitter-toml": "toml",
     "tree-sitter-typescript/typescript": "typescript",
     "tree-sitter-typescript/tsx": "tsx",
-    "tree-sitter-verilog": "verilog"
+    "tree-sitter-verilog": "verilog",
+    "tree-sitter-yaml": "yaml"
   }
 }
