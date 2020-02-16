@@ -7,7 +7,6 @@ root * hello { }
 ---
 
 (stylesheet
-  (item
-    (rule
-      (selectors (selector (scope (node (kind (name))) (node (any)) (node (kind (name))))))
-      (styles))))
+  (rule
+    (selectors (selector (scope (node (kind (name))) (node (any)) (node (kind (name))))))
+    (styles)))

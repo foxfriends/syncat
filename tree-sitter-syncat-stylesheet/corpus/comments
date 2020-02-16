@@ -15,11 +15,10 @@ test {
 
 (stylesheet
   (comment)
-  (item 
-    (rule
-      (selectors 
-        (selector (scope (node (kind (name))))))
-      (styles 
-        (comment) 
-        (style (name) (value (boolean))))))
+  (rule
+    (selectors 
+      (selector (scope (node (kind (name))))))
+    (styles 
+      (comment) 
+      (style (name) (value (boolean)))))
   (comment))

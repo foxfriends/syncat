@@ -5,14 +5,13 @@ module.exports = grammar({
     word: $ => $.name,
 
     rules: {
-        stylesheet: $ => repeat($.item),
-        item: $ => choice($.rule, $.declaration, $.import),
+        stylesheet: $ => repeat($._item),
+        _item: $ => choice($.rule, $.declaration, $.import),
 
         declaration: $ => seq($.variable, ':', $.value, ';'),
         variable: $ => /\$[a-zA_Z0-9-_]+/,
 
-        import: $ => seq('import', $.module, ';'),
-        module: $ => choice($.name, $.string),
+        import: $ => seq('import', $.string, ';'),
 
         rule: $ => seq($.selectors, $.styles),
 
@@ -22,8 +21,8 @@ module.exports = grammar({
             seq($.selector, optional(',')),
         ),
 
-        selector: $ => seq($.scope, optional($.selector_modifier)),
-        selector_modifier: $ => repeat1(choice($.no_inherit, $.exact)),
+        selector: $ => seq($.scope, repeat($.selector_modifier)),
+        selector_modifier: $ => choice($.no_inherit, $.exact),
         no_inherit: $ => '!',
         exact: $ => '.',
 

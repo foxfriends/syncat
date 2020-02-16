@@ -6,10 +6,10 @@
       "type": "REPEAT",
       "content": {
         "type": "SYMBOL",
-        "name": "item"
+        "name": "_item"
       }
     },
-    "item": {
+    "_item": {
       "type": "CHOICE",
       "members": [
         {

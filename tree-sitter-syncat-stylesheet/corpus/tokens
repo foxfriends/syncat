@@ -7,7 +7,6 @@ block "{" {}
 ---
 
 (stylesheet
-  (item
-    (rule 
-      (selectors (selector (scope (node (kind (name))) (node (token (string))))))
-      (styles))))
+  (rule 
+    (selectors (selector (scope (node (kind (name))) (node (token (string))))))
+    (styles)))

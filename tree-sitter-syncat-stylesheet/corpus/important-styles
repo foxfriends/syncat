@@ -9,8 +9,7 @@ root {
 ---
 
 (stylesheet
-  (item
-    (rule 
-      (selectors (selector (scope (node (kind (name))))))
-      (styles
-        (style (name) (value (color (named_color))) (style_modifier (important)))))))
+  (rule 
+    (selectors (selector (scope (node (kind (name))))))
+    (styles
+      (style (name) (value (color (named_color))) (style_modifier (important))))))

@@ -1,6 +1,6 @@
 {
   "name": "syncat-stylesheet",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "tree-sitter-syncat-stylesheet": "1.1.0"
+    "tree-sitter-syncat-stylesheet": "2.0.0"
   }
 }

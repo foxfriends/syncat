@@ -8,5 +8,5 @@ $variable: blue;
 ---
 
 (stylesheet
-  (item (declaration (variable) (value (string))))
-  (item (declaration (variable) (value (color (named_color))))))
+  (declaration (variable) (value (string)))
+  (declaration (variable) (value (color (named_color)))))

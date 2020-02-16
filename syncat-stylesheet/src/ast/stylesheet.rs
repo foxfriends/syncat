@@ -1,0 +1,47 @@
+use std::fs;
+use std::path::Path;
+use tree_sitter::TreeCursor;
+use super::{helper::*, Import, Declaration, Rule};
+
+#[derive(Clone, Debug, Default)]
+pub struct Stylesheet {
+    pub(crate) imports: Vec<Import>,
+    pub(crate) variables: Vec<Declaration>,
+    pub(crate) rules: Vec<Rule>,
+}
+
+impl Stylesheet {
+    pub(crate) fn from_file<P: AsRef<Path>>(path: P) -> crate::Result<Self> {
+        let source = fs::read_to_string(path.as_ref())
+            .map_err(|e| crate::Error::missing_module(e, path.as_ref()))?;
+        let tree = crate::parser::parse(&source).unwrap();
+        let mut cursor = tree.walk();
+        Self::from_source(&mut cursor, source.as_ref())
+    }
+
+    pub(crate) fn merge(&mut self, mut other: Stylesheet) {
+        self.imports.append(&mut other.imports);
+        self.variables.append(&mut other.variables);
+        self.rules.append(&mut other.rules);
+    }
+}
+
+impl FromSource for Stylesheet {
+    fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
+        children!(tree, "stylesheet");
+        let mut stylesheet = Self::default();
+        while {
+            if !tree.node().is_extra() {
+                match tree.node().kind() {
+                    "import" => stylesheet.imports.push(Import::from_source(tree, source)?),
+                    "declaration" => stylesheet.variables.push(Declaration::from_source(tree, source)?),
+                    "rule" => stylesheet.rules.push(Rule::from_source(tree, source)?),
+                    _ => return Err(crate::Error::invalid()),
+                }
+            }
+            tree.goto_next_sibling()
+        } {}
+        tree.goto_parent();
+        Ok(stylesheet)
+    }
+}

@@ -2,11 +2,9 @@
 Imports
 =======
 
-import test-module;
-import "../test-file.syncat";
+import "test-file.syncat";
 
 ---
 
 (stylesheet
-  (item (import (module (name))))
-  (item (import (module (string)))))
+  (import (string)))

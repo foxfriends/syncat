@@ -7,9 +7,8 @@ hello world, second selector {}
 ---
 
 (stylesheet
-  (item
-    (rule 
-      (selectors
-        (selector (scope (node (kind (name))) (node (kind (name)))))
-        (selector (scope (node (kind (name))) (node (kind (name))))))
-      (styles))))
+  (rule 
+    (selectors
+      (selector (scope (node (kind (name))) (node (kind (name)))))
+      (selector (scope (node (kind (name))) (node (kind (name))))))
+    (styles)))

@@ -16,16 +16,15 @@ styles {
 ---
 
 (stylesheet
-  (item
-    (rule 
-      (selectors (selector (scope (node (kind (name))))))
-      (styles
-        (style (name) (value (boolean)))
-        (style (name) (value (boolean)))
-        (style (name) (value (string)))
-        (style (name) (value (name)))
-        (style (name) (value (color (named_color))))
-        (style (name) (value (color (hex_color))))
-        (style (name) (value (number)))
-        (style (name) (value (variable)))
-        (style (name) (value (capture (variable) (number))))))))
+  (rule 
+    (selectors (selector (scope (node (kind (name))))))
+    (styles
+      (style (name) (value (boolean)))
+      (style (name) (value (boolean)))
+      (style (name) (value (string)))
+      (style (name) (value (name)))
+      (style (name) (value (color (named_color))))
+      (style (name) (value (color (hex_color))))
+      (style (name) (value (number)))
+      (style (name) (value (variable)))
+      (style (name) (value (capture (variable) (number)))))))

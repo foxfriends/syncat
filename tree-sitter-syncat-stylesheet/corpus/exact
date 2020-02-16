@@ -7,8 +7,7 @@ parent child . {}
 ---
 
 (stylesheet
-  (item
-    (rule
-      (selectors 
-        (selector (scope (node (kind (name))) (node (kind (name)))) (selector_modifier (exact))))
-      (styles))))
+  (rule
+    (selectors 
+      (selector (scope (node (kind (name))) (node (kind (name)))) (selector_modifier (exact))))
+    (styles)))
