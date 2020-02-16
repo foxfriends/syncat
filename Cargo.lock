@@ -511,7 +511,7 @@ dependencies = [
 
 [[package]]
 name = "syncat"
-version = "0.3.0"
+version = "2.0.0"
 dependencies = [
  "ansi_term 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "cc 1.0.50 (registry+https://github.com/rust-lang/crates.io-index)",
