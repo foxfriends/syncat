@@ -7,7 +7,6 @@ use hex::FromHexError;
 
 #[derive(Debug)]
 pub enum ErrorKind {
-    Language,
     Invalid,
     Module,
     Format,
@@ -25,14 +24,6 @@ impl Error {
         Self {
             kind: ErrorKind::Invalid,
             message: String::from("attempted to interpret an invalid parse tree"),
-            source: None,
-        }
-    }
-
-    pub(super) fn wrong_language() -> Self {
-        Self {
-            kind: ErrorKind::Language,
-            message: String::from("parse tree was not created from the correct language (syncat_stylesheet)"),
             source: None,
         }
     }

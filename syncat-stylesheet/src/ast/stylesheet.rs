@@ -11,18 +11,12 @@ pub struct Stylesheet {
 }
 
 impl Stylesheet {
-    pub(crate) fn from_file<P: AsRef<Path>>(path: P) -> crate::Result<Self> {
+    pub(crate) fn from_file(path: impl AsRef<Path>) -> crate::Result<Self> {
         let source = fs::read_to_string(path.as_ref())
             .map_err(|e| crate::Error::missing_module(e, path.as_ref()))?;
         let tree = crate::parser::parse(&source).unwrap();
         let mut cursor = tree.walk();
         Self::from_source(&mut cursor, source.as_ref())
-    }
-
-    pub(crate) fn merge(&mut self, mut other: Stylesheet) {
-        self.imports.append(&mut other.imports);
-        self.variables.append(&mut other.variables);
-        self.rules.append(&mut other.rules);
     }
 }
 
