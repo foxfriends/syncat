@@ -1,124 +1,87 @@
 module.exports = grammar({
-  name: 'syncat_stylesheet',
+    name: 'syncat_stylesheet',
 
-  extras: $ => [/\s/, $.comment],
+    extras: $ => [/\s/, $.comment],
+    word: $ => $.name,
 
-  rules: {
-    stylesheet: $ => repeat($.rule),
+    rules: {
+        stylesheet: $ => repeat($.item),
+        item: $ => choice($.rule, $.declaration, $.import),
 
-    rule: $ => seq($._selectors, $._style_block),
+        declaration: $ => seq($.variable, ':', $.value, ';'),
+        variable: $ => /\$[a-zA_Z0-9-_]+/,
 
-    _selectors: $ => choice(
-      seq($.selector, ',', $._selectors), 
-      seq($.selector, optional(',')),
-    ),
+        import: $ => seq('import', $.module, ';'),
+        module: $ => choice($.name, $.string),
 
-    selector: $ => choice(
-      $._terminal_selector,
-      seq($._selector_scope, $._terminal_selector),
-    ),
+        rule: $ => seq($.selectors, $.styles),
 
-    _terminal_selector: $ => choice(
-      $._simple_terminal,
-      $._complex_terminal,
-    ),
+        selectors: $ => $._selectors,
+        _selectors: $ => choice(
+            seq($.selector, ',', $._selectors),
+            seq($.selector, optional(',')),
+        ),
 
-    _selector_scope: $ => choice(
-      $._selector_node,
-      seq($._selector_scope, $._selector_node),
-    ),
+        selector: $ => seq($.scope, optional($.selector_modifier)),
+        selector_modifier: $ => repeat1(choice($.no_inherit, $.exact)),
+        no_inherit: $ => '!',
+        exact: $ => '.',
 
-    _selector_node: $ => choice(
-      $._complex_node,
-      $._simple_node,
-    ),
+        scope: $ => repeat1(seq($.node, optional($.node_modifier))),
 
-    _simple_terminal: $ => choice(
-      $.node_kind,
-      $.token,
-      $.token_pattern,
-      $.any,
-    ),
+        node_modifier: $ => choice(
+            $.direct,
+            $.sibling,
+            $.direct_sibling,
+        ),
+        direct: $ => '>',
+        direct_sibling: $ => '+',
+        sibling: $ => '~',
 
-    _complex_terminal: $ => choice(
-      alias($.direct_terminal, $.direct_child),
-      $.no_children,
-    ),
+        node: $ => choice(
+            $.group,
+            $.kind,
+            $.token,
+            $.any,
+        ),
+        group: $ => seq('(', optional($.group_name), $.scope, ')'),
+        group_name: $ => seq('<', $.name, '>'),
+        kind: $ => $.name,
+        token: $ => choice(
+            $.string,
+            $.regex,
+        ),
+        any: $ => "*",
 
-    _simple_node: $ => choice(
-      $.branch_check,
-      $.node_kind,
-      $.any,
-    ),
+        styles: $ => seq('{', repeat($.style), '}'),
+        style: $ => seq($.name, ':', $.value, optional($.style_modifier), ';'),
+        style_modifier: $ => choice(
+            $.important,
+        ),
+        important: $ => '!',
 
-    _complex_node: $ => $.direct_child,
+        value: $ => choice(
+            $.color,
+            $.boolean,
+            $.string,
+            $.variable,
+            $.name,
+            $.number,
+            $.capture,
+        ),
+        capture: $ => seq($.variable, '.', $.number),
 
-    direct_child: $ => seq('>', $._simple_node),
-    direct_terminal: $ => seq('>', choice($.no_children, $._simple_terminal)),
-
-    any: $ => "*",
-    no_children: $ => seq($.node_kind, "."),
-
-    branch_check: $ => seq('[', $.selector, ']'),
-    node_kind: $ => $._unquoted_string,
-    token: $ => $._quoted_string,
-    token_pattern: $ => $.regex,
-
-    _style_block: $ => choice(
-      $.important_styles,
-      $.styles,
-    ),
-
-    styles: $ => seq('{', $._style_list, '}'),
-    important_styles: $ => seq('{|', $._style_list, '|}'),
-
-    _style_list: $ => choice(
-      seq($.style, optional(';')),
-      seq($.style, ';', $._style_list),
-    ),
-
-    style: $ => choice(
-      seq(alias($._color_style, $.style_name), ':', alias($._color_value, $.style_value)),
-      seq(alias($._boolean_style, $.style_name), ':', alias($._boolean_value, $.style_value)),
-      seq(alias($._string_style, $.style_name), ':', alias($._string_value, $.style_value)),
-    ),
-
-    _color_style: $ => choice(
-      'colour', 'color',
-      'background-colour', 'background-color',
-    ),
-
-    _color_value: $ => choice($._color_literal, $._color_index, $._rgb_color),
-    _color_literal: $ => choice('red', 'blue', 'green', 'purple', 'yellow', 'black', 'white', 'cyan'),
-    _color_index: $ => /#[a-fA-F0-9]{6}/,
-    _rgb_color: $ => /2[0-4][0-9]|25[0-5]|1?[0-9]{1,2}/,
-
-    _boolean_style: $ => choice(
-      'italic',
-      'bold',
-      'underline',
-      'strikethrough',
-      'hidden',
-      'blink',
-      'dim',
-      'reverse',
-    ),
-
-    _boolean_value: $ => choice('true', 'false'),
-    _string_style: $ => choice('language', 'content'),
-    _string_value: $ => choice($._unquoted_string, $._quoted_string),
-
-    comment: $ => token(choice(
-      seq('//', /.*/),
-      seq(
-        '/*',
-        /[^*]*\*+([^/*][^*]*\*+)*/,
-        '/'
-      )
-    )),
-
-    regex: $ => /\/([^\/\\]|\\.)+\/i?/,
-    _unquoted_string: $ => /[A-Za-z0-9-_]+/,
-    _quoted_string: $ => /"(?:[^"\\]|\\.)+"/,
-  },
+        color: $ => choice($.named_color, $.hex_color),
+        named_color: $ => choice(
+            'red', 'blue', 'green', 'purple', 'yellow', 'black', 'white', 'cyan',
+            'brred', 'brblue', 'brgreen', 'brpurple', 'bryellow', 'brblack', 'brwhite', 'brcyan',
+        ),
+        hex_color: $ => /#[a-fA-F0-9]{6}/,
+        boolean: $ => choice('true', 'false'),
+        number: $ => /[0-9]+/,
+        regex: $ => /\/([^\/\\]|\\.)+\/i?/,
+        string: $ => /"(?:[^"\\]|\\.)+"/,
+        name: $ => /[A-Za-z0-9-_]*[A-Za-z-_][A-Za-z0-9-_]*/,
+        comment: $ => token(seq('//', /.*/)),
+    },
 });

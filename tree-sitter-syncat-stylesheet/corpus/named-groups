@@ -1,0 +1,19 @@
+============
+Named groups
+============
+
+root (<cap> group "code") + hello {}
+
+---
+
+(stylesheet
+  (item
+    (rule
+      (selectors
+        (selector 
+          (scope 
+            (node (kind (name))) 
+            (node (group (group_name (name)) (scope (node (kind (name))) (node (token (string)))))) 
+            (node_modifier (direct_sibling))
+            (node (kind (name))))))
+       (styles))))

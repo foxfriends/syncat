@@ -2,49 +2,30 @@
 Style types
 ===========
 
-color_types {
-  color: red;
-  background-color: blue;
-  colour: 133;
-  background-colour: #112233;
+styles {
+  boolean-t: true;
+  boolean-f: false;
+  string: "hello";
+  name: hello;
+  color-named: red;
+  color-hex: #fbb200;
+  number: 3;
+  variable: $hello;
+  capture: $capture.3;
 }
-
-boolean_types {
-  bold: false;
-  italic: true;
-  underline: false;
-  strikethrough: true;
-  dim: false;
-  blink: true;
-  hidden: false;
-  reverse: true;
-}
-
-string_types { language: rs; language: "hello world" }
-
 ---
 
 (stylesheet
-  (rule 
-    (selector (node_kind))
-    (styles
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))))
-  (rule 
-    (selector (node_kind))
-    (styles
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))
-      (style (style_name) (style_value))))
-  (rule 
-    (selector (node_kind))
-    (styles
-      (style (style_name) (style_value))
-      (style (style_name) (style_value)))))
+  (item
+    (rule 
+      (selectors (selector (scope (node (kind (name))))))
+      (styles
+        (style (name) (value (boolean)))
+        (style (name) (value (boolean)))
+        (style (name) (value (string)))
+        (style (name) (value (name)))
+        (style (name) (value (color (named_color))))
+        (style (name) (value (color (hex_color))))
+        (style (name) (value (number)))
+        (style (name) (value (variable)))
+        (style (name) (value (capture (variable) (number))))))))

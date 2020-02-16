@@ -1,0 +1,13 @@
+=======================
+Direct sibling modifier
+=======================
+
+node child + sibling {}
+
+---
+
+(stylesheet
+  (item
+    (rule
+      (selectors (selector (scope (node (kind (name))) (node (kind (name))) (node_modifier (direct_sibling)) (node (kind (name))))))
+      (styles))))

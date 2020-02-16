@@ -1,0 +1,13 @@
+================
+Sibling Modifier
+================
+
+node first ~ second {}
+
+---
+
+(stylesheet
+  (item
+    (rule
+      (selectors (selector (scope (node (kind (name))) (node (kind (name))) (node_modifier (sibling)) (node (kind (name))))))
+      (styles))))

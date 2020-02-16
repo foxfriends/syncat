@@ -9,16 +9,17 @@ test {
   italic: true;
 }
 
-/* hello
-world */
+// hello world
 
 ---
 
 (stylesheet
   (comment)
-  (rule
-    (selector (node_kind))
-    (styles 
-      (comment) 
-      (style (style_name) (style_value))))
+  (item 
+    (rule
+      (selectors 
+        (selector (scope (node (kind (name))))))
+      (styles 
+        (comment) 
+        (style (name) (value (boolean))))))
   (comment))

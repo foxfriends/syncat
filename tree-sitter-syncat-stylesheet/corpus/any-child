@@ -2,17 +2,12 @@
 Any child selector
 ==================
 
-root * hello,
-root hello *, {
-  color: red;
-}
+root * hello { }
 
 ---
 
 (stylesheet
-  (rule
-    (selector (node_kind) (any) (node_kind))
-    (selector (node_kind) (node_kind) (any))
-    (styles
-      (style (style_name) (style_value)))))
-
+  (item
+    (rule
+      (selectors (selector (scope (node (kind (name))) (node (any)) (node (kind (name))))))
+      (styles))))

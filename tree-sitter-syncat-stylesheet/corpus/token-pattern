@@ -9,8 +9,10 @@ block /hello_.*/i {
 ---
 
 (stylesheet
-  (rule 
-    (selector (node_kind) (token_pattern (regex)))
-    (styles
-      (style (style_name) (style_value)))))
+  (item
+    (rule 
+      (selectors
+        (selector (scope (node (kind (name))) (node (token (regex))))))
+      (styles
+        (style (name) (value (color (named_color))))))))
 

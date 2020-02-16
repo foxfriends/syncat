@@ -2,14 +2,15 @@
 Important styles
 ================
 
-root test {|
-  color: blue;
-|}
+root {
+  color: blue !;
+}
 
 ---
 
 (stylesheet
-  (rule
-    (selector (node_kind) (node_kind))
-    (important_styles
-      (style (style_name) (style_value)))))
+  (item
+    (rule 
+      (selectors (selector (scope (node (kind (name))))))
+      (styles
+        (style (name) (value (color (named_color))) (style_modifier (important)))))))

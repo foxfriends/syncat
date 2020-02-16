@@ -1,0 +1,12 @@
+=========
+Variables
+=========
+
+$variable: "hello";
+$variable: blue;
+
+---
+
+(stylesheet
+  (item (declaration (variable) (value (string))))
+  (item (declaration (variable) (value (color (named_color))))))

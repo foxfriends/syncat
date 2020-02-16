@@ -2,14 +2,12 @@
 Tokens
 ======
 
-block "{" {
-  color: white;
-}
+block "{" {}
 
 ---
 
 (stylesheet
-  (rule 
-    (selector (node_kind) (token))
-    (styles
-      (style (style_name) (style_value)))))
+  (item
+    (rule 
+      (selectors (selector (scope (node (kind (name))) (node (token (string))))))
+      (styles))))

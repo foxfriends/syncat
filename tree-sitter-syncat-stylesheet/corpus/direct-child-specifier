@@ -4,16 +4,15 @@ Direct child specifier
 
 function_item > "fn",
 function_item > identifier,
-function_item > arguments identifier {
-  color: blue;
-}
+function_item > arguments identifier {}
 
 ---
 
 (stylesheet
-  (rule
-    (selector (node_kind) (direct_child (token)))
-    (selector (node_kind) (direct_child (node_kind)))
-    (selector (node_kind) (direct_child (node_kind)) (node_kind))
-    (styles
-      (style (style_name) (style_value)))))
+  (item
+    (rule
+      (selectors
+        (selector (scope (node (kind (name))) (node_modifier (direct)) (node (token (string)))))
+        (selector (scope (node (kind (name))) (node_modifier (direct)) (node (kind (name)))))
+        (selector (scope (node (kind (name))) (node_modifier (direct)) (node (kind (name))) (node (kind (name))))))
+      (styles))))
