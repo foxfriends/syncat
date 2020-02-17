@@ -9,10 +9,9 @@ root (group "code") + hello {}
 (stylesheet
   (rule
     (selectors
-      (selector 
-        (scope 
-          (node (kind (name))) 
-          (node (group (scope (node (kind (name))) (node (token (string)))))) 
-          (node_modifier (direct_sibling))
-          (node (kind (name))))))
+      (selector
+        (node (kind (name)))
+        (node (group (selector (node (kind (name))) (node (token (string))))))
+        (node_modifier (direct_sibling))
+        (node (kind (name)))))
      (styles)))

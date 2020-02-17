@@ -21,12 +21,7 @@ module.exports = grammar({
             seq($.selector, optional(',')),
         ),
 
-        selector: $ => seq($.scope, repeat($.selector_modifier)),
-        selector_modifier: $ => choice($.no_inherit, $.exact),
-        no_inherit: $ => '!',
-        exact: $ => '.',
-
-        scope: $ => repeat1(seq($.node, optional($.node_modifier))),
+        selector: $ => repeat1(seq($.node, optional($.node_modifier))),
 
         node_modifier: $ => choice(
             $.direct,
@@ -43,7 +38,7 @@ module.exports = grammar({
             $.token,
             $.any,
         ),
-        group: $ => seq('(', optional($.group_name), $.scope, ')'),
+        group: $ => seq('(', optional($.group_name), $.selector, ')'),
         group_name: $ => seq('<', $.name, '>'),
         kind: $ => $.name,
         token: $ => choice(

@@ -1,10 +1,25 @@
+use std::collections::BTreeMap;
 use tree_sitter::TreeCursor;
-use super::{helper::*, Selector, Style};
+use super::{helper::*, Selector, Style, Value};
+use crate::{Query, Matches};
 
 #[derive(Clone, Debug)]
 pub(crate) struct Rule {
     pub(crate) selectors: Vec<Selector>,
     pub(crate) styles: Vec<Style>,
+}
+
+impl Rule {
+    fn matches<'a>(&self, query: &'a Query<'a>) -> Option<Matches<'a>> {
+        self.selectors
+            .iter()
+            .find_map(|selector| selector.matches(query))
+    }
+
+    pub(crate) fn styles<'a>(&self, query: &'a Query<'a>, variables: &BTreeMap<String, Value>) -> Option<crate::Style> {
+        let matches = self.matches(query)?;
+        None
+    }
 }
 
 impl FromSource for Rule {

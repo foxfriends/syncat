@@ -1,9 +1,26 @@
-use tree_sitter::{Tree, Node, Parser};
-use syncat_stylesheet::{Stylesheet, Context};
-use crate::language::Lang;
+use std::fmt::{self, Display, Debug, Formatter};
+use tree_sitter::Tree;
+use syncat_stylesheet::Stylesheet;
 
-mod source;
-mod tree;
+// mod source;
+// mod sexp;
 
-pub use source::print_source;
-pub use tree::print_tree;
+pub(super) struct Colorizer<'a> {
+    source: &'a str,
+    tree: Tree,
+    stylesheet: Stylesheet,
+}
+
+impl Display for Colorizer {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        // print_source(self.source, self.tree, self.stylesheet, f)
+        Ok(())
+    }
+}
+
+impl Debug for Colorizer {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        // print_sexp(self.source, self.tree, self.stylesheet, f)
+        Ok(())
+    }
+}

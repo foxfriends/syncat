@@ -8,5 +8,5 @@ root * hello { }
 
 (stylesheet
   (rule
-    (selectors (selector (scope (node (kind (name))) (node (any)) (node (kind (name))))))
+    (selectors (selector (node (kind (name))) (node (any)) (node (kind (name)))))
     (styles)))

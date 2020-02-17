@@ -1,9 +1,7 @@
 use std::fs::File;
 use ansi_term::ANSIGenericString;
-
+use syncat_stylesheet::Stylesheet;
 use crate::dirs::active_color;
-use syncat_stylesheet::{Stylesheet, Context};
-use syncat_stylesheet::{Setting, StyleBuilder, Colour, Style};
 
 macro_rules! component {
     ($name:ident) => {
@@ -183,17 +181,14 @@ impl MetaStylesheet {
     }
 }
 
-pub fn load_meta_stylesheet() -> MetaStylesheet {
-    let stylesheet = {
-        let style_file = active_color().join(".syncat");
-        if !style_file.exists() {
-            Stylesheet::default()
-        } else {
-            Stylesheet::from_reader(&mut File::open(&style_file).unwrap()).expect(&format!("Meta stylesheet {:?} is invalid", style_file))
-        }
-    };
-
+pub fn load_meta_stylesheet() -> syncat_stylesheet::Result<MetaStylesheet> {
+    let style_file = active_color().join(".syncat");
+    if !style_file.exists() {
+        return MetaStylesheet::default();
+    }
+    let stylesheet = Stylesheet::from_file(style_file)?;
     let mut meta_stylesheet = MetaStylesheet::default();
+
     meta_stylesheet.line_ending = meta_stylesheet.line_ending
         .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "line_ending")], None));
     meta_stylesheet.line_number = meta_stylesheet.line_number

@@ -8,5 +8,5 @@ node child + sibling {}
 
 (stylesheet
   (rule
-    (selectors (selector (scope (node (kind (name))) (node (kind (name))) (node_modifier (direct_sibling)) (node (kind (name))))))
+    (selectors (selector (node (kind (name))) (node (kind (name))) (node_modifier (direct_sibling)) (node (kind (name)))))
     (styles)))

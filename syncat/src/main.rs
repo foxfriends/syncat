@@ -15,11 +15,12 @@ mod language;
 mod line;
 mod meta;
 
-use crate::dirs::config;
-use self::language::Lang;
-use self::line::Line;
-use self::meta::load_meta_stylesheet;
-use self::error::BoxedError;
+use language::Lang;
+use line::Line;
+use meta::load_meta_stylesheet;
+
+use colorize::Colorizer;
+use dirs::config;
 
 /// Syntax aware cat utility.
 #[derive(StructOpt, Debug)]
@@ -88,11 +89,12 @@ fn transform(
             parser.set_language(lang.parser()).ok()?;
             Some((parser.parse(contents.as_str(), None)?, lang))
         })
-        .map(|(tree, lang)| {
+        .map(|(tree, lang)| Colorizer { source: contents, tree, stylesheet: lang.style() })
+        .map(|printer| {
             if opts.dev {
-                colorize::print_tree(&contents, tree, &lang.style()?)
+                format!("{:?}", printer)
             } else {
-                colorize::print_source(&contents, tree, &lang.style()?)
+                format!("{}", printer)
             }
         })
         .unwrap_or_else(|| Ok(contents.clone()))?;
@@ -162,9 +164,8 @@ where
     }
 }
 
-fn main() {
-    let opts = Opts::from_args();
-
+#[paw::main]
+fn main(opts: Opts) {
     if opts.files.is_empty() {
         let mut stdin = io::stdin();
         if opts.language.is_some() {

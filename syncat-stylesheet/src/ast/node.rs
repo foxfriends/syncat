@@ -7,6 +7,17 @@ pub(crate) struct Node {
     pub(crate) modifier: NodeModifier,
 }
 
+impl Node {
+    pub(crate) fn can_try_again(&self) -> bool {
+        match self.modifier {
+            NodeModifier::Child => true,
+            NodeModifier::DirectChild => false,
+            NodeModifier::Sibling => true,
+            NodeModifier::DirectSibling => false,
+        }
+    }
+}
+
 impl FromSource for Node {
     fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
         let kind = NodeKind::from_source(tree, source)?;

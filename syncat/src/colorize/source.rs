@@ -78,7 +78,7 @@ fn colorize_node<'a>(
     Ok(())
 }
 
-pub fn print_source<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, crate::BoxedError> {
+pub fn print_source<I: AsRef<str>>(source: I, tree: Tree, stylesheet: Stylesheet) -> Result<String, crate::BoxedError> {
     let source = source.as_ref();
     let node = tree.root_node();
     let mut output = String::new();
@@ -86,7 +86,7 @@ pub fn print_source<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Styleshee
     colorize_node(
         source,
         (0, node),
-        stylesheet,
+        &stylesheet,
         &mut pos,
         &mut Context::default(),
         &mut vec![],

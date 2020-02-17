@@ -11,6 +11,6 @@ block /hello_.*/i {
 (stylesheet
   (rule 
     (selectors
-      (selector (scope (node (kind (name))) (node (token (regex))))))
+      (selector (node (kind (name))) (node (token (regex)))))
     (styles
       (style (name) (value (color (named_color)))))))

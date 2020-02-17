@@ -17,7 +17,7 @@ styles {
 
 (stylesheet
   (rule 
-    (selectors (selector (scope (node (kind (name))))))
+    (selectors (selector (node (kind (name)))))
     (styles
       (style (name) (value (boolean)))
       (style (name) (value (boolean)))

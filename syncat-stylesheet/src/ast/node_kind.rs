@@ -1,7 +1,7 @@
 use enquote::unquote;
 use regex::Regex;
 use tree_sitter::TreeCursor;
-use super::{helper::*, Scope};
+use super::{helper::*, Selector};
 
 #[derive(Clone, Debug)]
 pub(crate) enum NodeKind {
@@ -9,7 +9,7 @@ pub(crate) enum NodeKind {
     Kind(String),
     Token(String),
     TokenPattern(Regex),
-    Group(Option<String>, Scope),
+    Group(Option<String>, Selector),
 }
 
 impl FromSource for NodeKind {
@@ -46,8 +46,8 @@ impl FromSource for NodeKind {
                 } else {
                     None
                 };
-                let scope = Scope::from_source(tree, source)?;
-                NodeKind::Group(name, scope)
+                let selector = Selector::from_source(tree, source)?;
+                NodeKind::Group(name, selector)
             }
             _ => return Err(crate::Error::invalid()),
         };

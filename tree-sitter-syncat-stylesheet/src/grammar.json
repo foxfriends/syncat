@@ -60,24 +60,11 @@
         },
         {
           "type": "SYMBOL",
-          "name": "module"
+          "name": "string"
         },
         {
           "type": "STRING",
           "value": ";"
-        }
-      ]
-    },
-    "module": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "name"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "string"
         }
       ]
     },
@@ -142,51 +129,6 @@
       ]
     },
     "selector": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "scope"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "selector_modifier"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        }
-      ]
-    },
-    "selector_modifier": {
-      "type": "REPEAT1",
-      "content": {
-        "type": "CHOICE",
-        "members": [
-          {
-            "type": "SYMBOL",
-            "name": "no_inherit"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "exact"
-          }
-        ]
-      }
-    },
-    "no_inherit": {
-      "type": "STRING",
-      "value": "!"
-    },
-    "exact": {
-      "type": "STRING",
-      "value": "."
-    },
-    "scope": {
       "type": "REPEAT1",
       "content": {
         "type": "SEQ",
@@ -281,7 +223,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "scope"
+          "name": "selector"
         },
         {
           "type": "STRING",

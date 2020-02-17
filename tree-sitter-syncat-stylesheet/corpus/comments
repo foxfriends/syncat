@@ -17,7 +17,7 @@ test {
   (comment)
   (rule
     (selectors 
-      (selector (scope (node (kind (name))))))
+      (selector (node (kind (name)))))
     (styles 
       (comment) 
       (style (name) (value (boolean)))))

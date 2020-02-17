@@ -1,5 +1,4 @@
 use tree_sitter::Language;
-use std::fs::File;
 use syncat_stylesheet::Stylesheet;
 use crate::dirs::active_color;
 use crate::error::Error;
@@ -190,16 +189,12 @@ impl Lang {
         }
     }
 
-    pub fn style(&self) -> Result<Stylesheet, crate::BoxedError> {
+    pub fn style(&self) -> syncat_stylesheet::Result<Stylesheet> {
         let style_file = active_color().join(self.ext()).with_extension("syncat");
-        if !style_file.exists() {
-            return Ok(Stylesheet::default());
+        if style_file.exists() {
+            Ok(Stylesheet::from_file(style_file)?)
+        } else {
+            Ok(Stylesheet::default())
         }
-        let mut file = File::open(&style_file)
-            .map_err(|err| Box::new(Error(format!("Could not open file {:?}: {}", style_file, err))))?;
-        Ok(
-            Stylesheet::from_reader(&mut file)
-                .map_err(|err| Box::new(Error(format!("Could not parse stylesheet at file {:?}: {}", &style_file, err))))?
-        )
     }
 }

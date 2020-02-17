@@ -9,6 +9,7 @@ impl std::error::Error for Error {
         &self.0
     }
 }
+
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         writeln!(f, "{}", self.0)

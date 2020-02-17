@@ -1,11 +1,7 @@
-use super::*;
-
 fn colorize_node_sexp<'a>(
     source: &'a str,
-    (index, node): (usize, Node),
     stylesheet: &Stylesheet,
     pos: &mut usize,
-    context: &mut Context<'a>,
     scope: &mut Vec<(usize, &'a str)>,
     output: &mut String,
 ) -> Result<(), crate::BoxedError> {
@@ -74,15 +70,12 @@ fn colorize_node_sexp<'a>(
     Ok(())
 }
 
-pub fn print_tree<I: AsRef<str>>(source: I, tree: Tree, stylesheet: &Stylesheet) -> Result<String, crate::BoxedError> {
-    let source = source.as_ref();
-    let node = tree.root_node();
-    let mut output = String::new();
+pub fn print_sexp(source: &str, tree: Tree, stylesheet: Stylesheet, f: &mut Formatter) -> syncat_stylesheet::Result<String> {
     let mut pos = 0;
     colorize_node_sexp(
         source,
         (0, node),
-        stylesheet,
+        &stylesheet,
         &mut pos,
         &mut Context::default(),
         &mut vec![],

@@ -4,7 +4,7 @@ use tree_sitter::TreeCursor;
 use super::helper::*;
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-pub(crate) enum Color {
+pub enum Color {
     Red,
     Green,
     Blue,
