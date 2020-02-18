@@ -1,7 +1,6 @@
 use tree_sitter::Language;
 use syncat_stylesheet::Stylesheet;
 use crate::dirs::active_color;
-use crate::error::Error;
 
 include!(concat!(env!("OUT_DIR"), "/languages.rs"));
 
@@ -46,8 +45,11 @@ pub enum Lang {
     #[cfg(any(lang_all, lang_yaml))]               Yaml,
 }
 
+#[derive(Debug)]
+pub struct ParseLangError;
+
 impl std::str::FromStr for Lang {
-    type Err = crate::BoxedError;
+    type Err = ParseLangError;
 
     fn from_str(name: &str) -> Result<Lang, Self::Err> {
         use Lang::*;
@@ -95,7 +97,7 @@ impl std::str::FromStr for Lang {
             #[cfg(any(lang_all, lang_typescript))]         "ts" | "typescript"                 => Ok(TypeScript),
             #[cfg(any(lang_all, lang_verilog))]            "v" | "verilog"                     => Ok(Verilog),
             #[cfg(any(lang_all, lang_yaml))]               "yaml" | "yml"                      => Ok(Yaml),
-            _ => Err(Box::new(Error(format!("Unknown language {}", name)))),
+            _ => Err(ParseLangError),
         }
     }
 }

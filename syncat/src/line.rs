@@ -1,4 +1,4 @@
-use crate::meta::MetaStylesheet;
+use crate::meta_stylesheet::MetaStylesheet;
 use console::{self, AnsiCodeIterator};
 
 #[derive(Copy, Clone, Debug)]
@@ -97,7 +97,7 @@ impl Line {
                 if let Some(number) = self.number {
                     if i == 0 {
                         if let Some(number) = number {
-                            output = format!("{}{}", meta_style.line_number.build().paint(format!("{: >6}", number)), output);
+                            output = format!("{}{}", meta_style.line_number().paint(format!("{: >6}", number)), output);
                         } else {
                             output = format!("      {}", output);
                         }

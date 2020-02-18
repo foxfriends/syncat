@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::collections::HashMap;
 use std::fs;
 use git2::{DiffOptions, IntoCString, Repository};
@@ -6,7 +6,7 @@ use crate::Opts;
 use crate::line::{Line, LineChange};
 
 /// This code is pretty much taken straight from [Bat](https://github.com/sharkdp/bat/blob/master/src/diff.rs)
-fn do_git_transform(source: &[Line], repo: Repository, path: &PathBuf) -> Option<Vec<Line>> {
+fn do_git_transform(source: &[Line], repo: Repository, path: &Path) -> Option<Vec<Line>> {
     let repo_path_absolute = fs::canonicalize(repo.workdir()?).ok()?;
     let filepath_absolute = fs::canonicalize(path).ok()?;
     let filepath_relative_to_repo = filepath_absolute.strip_prefix(&repo_path_absolute).ok()?;
@@ -75,7 +75,7 @@ fn do_git_transform(source: &[Line], repo: Repository, path: &PathBuf) -> Option
 pub fn git(
     &Opts { git, .. }: &Opts, 
     source: Vec<Line>,
-    filename: Option<&PathBuf>,
+    filename: Option<&Path>,
 ) -> Vec<Line> {
     let path = match filename {
         Some(path) => path,

@@ -32,3 +32,4 @@ console = "0.9"
 syncat-stylesheet = { path = "../syncat-stylesheet" }
 toml = "0.5"
 paw = "1.0"
+rayon = "1.3"

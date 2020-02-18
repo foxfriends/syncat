@@ -1,7 +1,6 @@
 use std::fs;
 use std::io::{self, Read};
-use std::path::PathBuf;
-use std::sync::{Arc, Mutex, mpsc::channel};
+use std::path::{Path, PathBuf};
 use std::collections::BTreeMap;
 
 use structopt::StructOpt;
@@ -13,11 +12,11 @@ mod error;
 mod filter;
 mod language;
 mod line;
-mod meta;
+mod meta_stylesheet;
 
 use language::Lang;
 use line::Line;
-use meta::load_meta_stylesheet;
+use meta_stylesheet::MetaStylesheet;
 
 use colorize::Colorizer;
 use dirs::config;
@@ -71,33 +70,33 @@ pub struct Opts {
 
 fn transform(
     opts: &Opts,
-    lang: Option<&String>, 
-    contents: String,
-    path: Option<&PathBuf>, 
-) -> Result<Vec<Line>, BoxedError> {
+    language: Option<&String>,
+    source: String,
+    path: Option<&Path>,
+) -> Result<Vec<Line>, Box<dyn std::error::Error>> {
     let lang_map: BTreeMap<String, String> = match fs::read_to_string(config().join("languages.toml")) {
         Ok(string) => toml::from_str(&string)?,
         Err(..) => BTreeMap::default(),
     };
 
-    let source: String = opts.language.as_ref()
-        .or(lang)
-        .map(|lang| lang_map.get(lang).unwrap_or(lang))
-        .and_then(|lang| lang.parse::<Lang>().ok())
-        .and_then(|lang| {
-            let mut parser = Parser::new();
-            parser.set_language(lang.parser()).ok()?;
-            Some((parser.parse(contents.as_str(), None)?, lang))
-        })
-        .map(|(tree, lang)| Colorizer { source: contents, tree, stylesheet: lang.style() })
-        .map(|printer| {
-            if opts.dev {
-                format!("{:?}", printer)
-            } else {
-                format!("{}", printer)
-            }
-        })
-        .unwrap_or_else(|| Ok(contents.clone()))?;
+    let language = opts.language.as_ref()
+        .or(language)
+        .map(|language| lang_map.get(language).unwrap_or(language))
+        .and_then(|language| language.parse::<Lang>().ok());
+
+    let source = if let Some(language) = language {
+        let mut parser = Parser::new();
+        parser.set_language(language.parser()).unwrap();
+        let tree = parser.parse(&source, None).unwrap();
+        let colorizer = Colorizer { source: source.as_str(), tree, stylesheet: language.style()? };
+        if opts.dev {
+            format!("{:?}", colorizer)
+        } else {
+            format!("{}", colorizer)
+        }
+    } else {
+        source
+    };
 
     if opts.dev {
         Ok(vec![Line::new(source)])
@@ -106,7 +105,8 @@ fn transform(
             .lines()
             .map(|line| Line::new(line.to_owned()))
             .collect::<Vec<_>>();
-        if !contents.ends_with("\n") {
+
+        if !source.ends_with("\n") {
             if let Some(line) = lines.last_mut() {
                 line.no_newline = true;
             }
@@ -120,89 +120,76 @@ fn transform(
     }
 }
 
-fn print<I>(opts: Opts, sources: I, count: usize)
-where 
-    I: Iterator<Item = (Option<String>, Result<String, BoxedError>, Option<PathBuf>)>
-{
-    let opts = Arc::new(opts);
-    let meta_style = Arc::new(load_meta_stylesheet());
-    let line_numbers = Arc::new(Mutex::new(filter::line_numbers(opts.as_ref())));
-    let mut threads = vec![];
-    let mut prev_done = None;
-    for (i, (lang, contents, path)) in sources.enumerate() {
-        let (completed, next_done) = channel();
-        let wait_for = prev_done.take();
-        prev_done = Some(next_done);
-        let opts = opts.clone();
-        let meta_style = meta_style.clone();
-        let line_numbers = line_numbers.clone();
-        threads.push(std::thread::spawn(move || {
-            let lines = contents
-                .and_then(|source| transform(opts.as_ref(), lang.as_ref(), source, path.as_ref()));
-            if let Some(rx) = wait_for {
-                rx.recv().unwrap();
-            }
+struct Source<'a> {
+    language: Option<String>,
+    source: std::io::Result<String>,
+    path: Option<&'a Path>,
+}
+
+fn print<'a>(opts: &Opts, sources: impl IntoIterator<Item = Source<'a>>, count: usize) -> Result<(), Box<dyn std::error::Error>> {
+    let meta_style = MetaStylesheet::from_file()?;
+    let mut line_numbers = filter::line_numbers(opts);
+    sources
+        .into_iter()
+        .enumerate()
+        .for_each(move |(index, Source { language, source, path })| {
+            let lines = source
+                .map_err(|error| Box::new(error) as Box<dyn std::error::Error>)
+                .and_then(|source| transform(opts, language.as_ref(), source, path));
             match lines {
                 Ok(lines) => {
-                    let line_numbers = &mut *line_numbers.lock().unwrap();
                     let lines = line_numbers(lines);
-                    let lines = filter::frame_header((i, count), opts.as_ref(), lines, path.as_ref(), &meta_style);
+                    let lines = filter::frame_header((index, count), opts, lines, path, &meta_style);
                     for line in &lines {
                         print!("{}", line.to_string(&meta_style, opts.wrap));
                     }
-                    let _ = filter::frame_footer((i, count), opts.as_ref(), lines, path.as_ref(), &meta_style);
+                    let _ = filter::frame_footer((index, count), opts, lines, path, &meta_style);
                 }
                 Err(error) => {
                     eprint!("syncat: {}", error);
                 }
             }
-            completed.send(()).unwrap();
-        }));
-    }
-    if let Some(rx) = prev_done {
-        rx.recv().unwrap();
-    }
+        });
+    Ok(())
 }
 
 #[paw::main]
-fn main(opts: Opts) {
+fn main(opts: Opts) -> Result<(), Box<dyn std::error::Error>> {
     if opts.files.is_empty() {
         let mut stdin = io::stdin();
         if opts.language.is_some() {
+            // If a language is specified, read in the whole file and then attempt to print that
+            // at once using the specified language.
             let mut source = String::new();
-            match stdin.read_to_string(&mut source) {
-                Ok(..) => {
-                    let sources = vec![(None, Ok(source), None)];
-                    print(opts, sources.into_iter(), 1);
-                },
-                Err(error) => eprintln!("{}", error),
-            }
+            stdin.read_to_string(&mut source)?;
+            print(&opts, std::iter::once(Source {
+                language: None,
+                source: Ok(source),
+                path: None,
+            }), 1)
         } else {
-            // mimic the behaviour of standard cat, printing lines as they come
+            // Mimic the behaviour of standard cat, printing lines as they come.
+            // These lines cannot be syntax highlighted, as we do not know what the language is.
             loop {
                 let mut line = String::new();
-                match stdin.read_line(&mut line) {
-                    Ok(0) => return,
-                    Ok(..) => print!("{}", line),
-                    Err(error) => {
-                        eprintln!("{}", error);
-                        return
-                    }
-                }
+                if stdin.read_line(&mut line)? == 0 { return Ok(()); }
+                print!("{}", line);
             }
         }
     } else {
-        let sources = opts.files.clone()
-            .into_iter()
-            .map(|path| (
-                path.extension()
+        // Attempt to style each of the supplied files, detecting languages based on extension
+        // while respecting the override provided.
+        // TODO: Add detection for hashbang/vim modeline/etc.
+        let file_count = opts.files.len();
+        let sources = opts.files
+            .iter()
+            .map(|path| Source {
+                language: path.extension()
                     .and_then(|s| s.to_str())
                     .map(|s| s.to_string()),
-                fs::read_to_string(&path)
-                    .map_err(|error| Box::new(error::Error(format!("{:?}: {}", path, error))) as BoxedError),
-                Some(path.clone()),
-            ));
-        let file_count = opts.files.len();
-        print(opts, sources, file_count);
+                source: fs::read_to_string(&path),
+                path: Some(path.as_ref()),
+            });
+        print(&opts, sources, file_count)
     }
 }

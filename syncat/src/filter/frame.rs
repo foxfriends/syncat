@@ -1,14 +1,12 @@
-use std::path::PathBuf;
+use std::path::Path;
 use terminal_size::terminal_size;
-use crate::meta::MetaStylesheet;
-use crate::line::Line;
-use crate::Opts;
+use crate::{MetaStylesheet, Line, Opts};
 
 pub fn frame_header(
     (index, _count): (usize, usize),
     &Opts { frame, git, numbered, numbered_nonblank, .. }: &Opts,
     source: Vec<Line>,
-    path: Option<&PathBuf>,
+    path: Option<&Path>,
     style: &MetaStylesheet,
 ) -> Vec<Line> {
     let width = terminal_size().map(|x| (x.0).0).unwrap_or(80);
@@ -56,7 +54,7 @@ pub fn frame_header(
             if margin_start != 0 {
                 print!("{}", style.margin().left());
             }
-            println!("{}", style.title().paint(path.and_then(|path| path.to_str()).unwrap_or("Input")));
+            println!("{}", style.title().paint(path.map(|path| path.display().to_string()).unwrap_or(String::from("Input"))));
 
             for _ in 0..margin_start {
                 print!("{}", style.margin().top());
@@ -78,7 +76,7 @@ pub fn frame_footer(
     (index, count): (usize, usize),
     &Opts { frame, git, numbered, numbered_nonblank, .. }: &Opts,
     source: Vec<Line>,
-    _path: Option<&PathBuf>,
+    _path: Option<&Path>,
     style: &MetaStylesheet,
 ) -> Vec<Line> {
     let width = terminal_size().map(|x| (x.0).0).unwrap_or(80);

@@ -6,19 +6,19 @@ use syncat_stylesheet::Stylesheet;
 // mod sexp;
 
 pub(super) struct Colorizer<'a> {
-    source: &'a str,
-    tree: Tree,
-    stylesheet: Stylesheet,
+    pub(super) source: &'a str,
+    pub(super) tree: Tree,
+    pub(super) stylesheet: Stylesheet,
 }
 
-impl Display for Colorizer {
+impl Display for Colorizer<'_> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         // print_source(self.source, self.tree, self.stylesheet, f)
         Ok(())
     }
 }
 
-impl Debug for Colorizer {
+impl Debug for Colorizer<'_> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         // print_sexp(self.source, self.tree, self.stylesheet, f)
         Ok(())
