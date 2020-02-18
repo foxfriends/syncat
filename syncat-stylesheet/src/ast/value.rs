@@ -40,6 +40,7 @@ impl FromSource for Value {
             "color" => Value::Color(Color::from_source(tree, source)?),
             "number" => Value::Number(text!(tree, source, "number")?.parse()?),
             "string" => Value::String(unquote(text!(tree, source, "string")?)?),
+            "name" => Value::String(text!(tree, source, "name")?.to_string()),
             "boolean" => Value::Boolean(text!(tree, source, "boolean")?.parse()?),
             "variable" => Value::Variable(Variable::from_source(tree, source)?),
             "capture" => Value::Capture(text!(tree, source, "number")?[1..].parse()?),

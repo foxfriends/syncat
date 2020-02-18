@@ -2,7 +2,7 @@ use tree_sitter::TreeCursor;
 
 macro_rules! extras {
     ($tree:ident) => {
-        while $tree.node().is_extra() {
+        while $tree.node().is_extra() || !$tree.node().is_named() {
             if !$tree.goto_next_sibling() {
                 return Err($crate::Error::invalid("extras", "no more children"));
             }

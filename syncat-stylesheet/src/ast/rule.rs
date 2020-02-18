@@ -40,10 +40,11 @@ impl FromSource for Rule {
             tree.goto_next_sibling()
         } {}
         tree.goto_parent();
+        tree.goto_next_sibling();
         children!(tree, "styles");
         let mut styles = vec![];
         while {
-            if !tree.node().is_extra() {
+            if tree.node().is_named() && !tree.node().is_extra(){
                 styles.push(Style::from_source(tree, source)?);
             }
             tree.goto_next_sibling()

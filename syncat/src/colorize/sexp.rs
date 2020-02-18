@@ -95,10 +95,14 @@ fn write_node<'s>(f: &mut Formatter, query: &mut Query<'s>, index: &mut Vec<usiz
         write!(f, "])")?;
     } else if tree.node().child_count() == 0 {
         // leaf node: (kind "token")
-        write!(f, "({} \"{}\")",
-            style.paint(tree.node().kind()),
-            style.paint(tree.node().utf8_text(source.as_ref()).unwrap()),
-        )?;
+        if tree.node().is_named() {
+            write!(f, "({} \"{}\")",
+                style.paint(tree.node().kind()),
+                style.paint(tree.node().utf8_text(source.as_ref()).unwrap()),
+            )?;
+        } else {
+            write!(f, "(\"{}\")", style.paint(tree.node().utf8_text(source.as_ref()).unwrap()))?;
+        }
     } else {
         // inner node: (kind ...children)
         write!(f, "({}", style.paint(tree.node().kind()))?;
