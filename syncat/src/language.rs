@@ -1,5 +1,7 @@
+use std::convert::TryFrom;
+use std::str::FromStr;
 use tree_sitter::Language;
-use syncat_stylesheet::Stylesheet;
+use syncat_stylesheet::{Stylesheet, FromValueError, Value};
 use crate::dirs::active_color;
 
 include!(concat!(env!("OUT_DIR"), "/languages.rs"));
@@ -48,7 +50,7 @@ pub enum Lang {
 #[derive(Debug)]
 pub struct ParseLangError;
 
-impl std::str::FromStr for Lang {
+impl FromStr for Lang {
     type Err = ParseLangError;
 
     fn from_str(name: &str) -> Result<Lang, Self::Err> {
@@ -99,6 +101,14 @@ impl std::str::FromStr for Lang {
             #[cfg(any(lang_all, lang_yaml))]               "yaml" | "yml"                      => Ok(Yaml),
             _ => Err(ParseLangError),
         }
+    }
+}
+
+impl TryFrom<Value> for Lang {
+    type Error = FromValueError;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        Self::from_str(&String::try_from(value)?).map_err(|_| FromValueError)
     }
 }
 

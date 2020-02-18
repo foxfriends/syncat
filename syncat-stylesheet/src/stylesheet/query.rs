@@ -15,8 +15,8 @@ impl<'s> From<&'s str> for Query<'s> {
     }
 }
 
-impl<'s> From<(tree_sitter::Node<'_>, &'s str)> for Query<'s> {
-    fn from((node, source): (tree_sitter::Node, &'s str)) -> Self {
+impl<'s> From<(&tree_sitter::Node<'_>, &'s str)> for Query<'s> {
+    fn from((node, source): (&tree_sitter::Node, &'s str)) -> Self {
         Self {
             kind: node.kind(),
             text: node.utf8_text(source.as_ref()).unwrap(),

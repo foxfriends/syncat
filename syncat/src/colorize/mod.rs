@@ -3,7 +3,7 @@ use tree_sitter::Tree;
 use syncat_stylesheet::Stylesheet;
 
 // mod source;
-// mod sexp;
+mod sexp;
 
 pub(super) struct Colorizer<'a> {
     pub(super) source: &'a str,
@@ -20,7 +20,6 @@ impl Display for Colorizer<'_> {
 
 impl Debug for Colorizer<'_> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        // print_sexp(self.source, self.tree, self.stylesheet, f)
-        Ok(())
+        sexp::write(f, self.source, &self.tree, &self.stylesheet)
     }
 }
