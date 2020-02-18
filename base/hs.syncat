@@ -1,0 +1,41 @@
+import "../colours.syncat";
+
+"module", "import", "hiding", "qualified", "as", "where", "let", "in", "newtype", "data", "deriving", "class", "instance",
+"case", "of", "otherwise", "do",
+{
+    color: $keyword;
+}
+
+variable_symbol, wildcard, "->", "=", annotation, "<-",
+{
+    color: $operator;
+}
+
+module_identifier {
+    color: $name;
+    italic: true;
+}
+
+variable_identifier { color: $function; }
+
+constructor_pattern > variable_identifier,
+bind_pattern > variable_identifier,
+function_declaration > variable_identifier {
+    color: $name;
+}
+
+bind_pattern > * + variable_identifier { color: $function; }
+
+type_variable_identifier { color: $meta; }
+type_class_identifier { color: $constant; }
+
+type_constructor_identifier,
+constructor_identifier,
+{
+    color: $type;
+}
+
+unit_constructor, list_expression > "[", list_expression > "]" { color: $keyword; }
+string { color: $string; }
+integer, float, char { color: $value; }
+comment { color: $comment; }

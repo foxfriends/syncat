@@ -1,0 +1,78 @@
+import "../colours.syncat";
+
+"if", "then", "elsif", "else", "end",
+"unless", "until",
+"for", "while", "do",
+"break", "continue", "return", "yield",
+"when", "case",
+"module", "class",
+"include", "def" {
+  color: $keyword;
+}
+
+"=", "+=", "-=", "*=", "/=", "**=", "<<=", ">>=", "^=", "%=", "&=", "|=", "||=",
+"+", "-", "*", "/", "%", "**", "^", "~", "&", "|", "<<", ">>",
+"<", ">", "<=", ">=", "==", "!=", "===", "!==", "=~", "!~", "<=>",
+"not", "and", "or", "&&", "||", "!",
+"..", "...",
+element_reference > "[",
+element_reference > "]" {
+  color: $operator;
+}
+
+method > identifier,
+call > identifier,
+method_call > scope_resolution > identifier,
+method_call > identifier {
+  color: $function;
+}
+
+"defined?" {
+  color: $builtin;
+}
+
+subshell.,
+string. {
+  color: $string;
+}
+
+symbol,
+pair [> symbol] > ":" {
+  color: $meta;
+}
+
+constant /^[A-Z][a-zA-Z_]*$/ {
+  color: $type;
+}
+
+array > "[", array > "]",
+hash > "{", hash > "}",
+true, false,
+integer,
+nil {
+  color: $value;
+}
+
+constant /^[A-Z_]+$/ {
+  color: $constant;
+}
+
+interpolation > "#{",
+interpolation > "}" {
+  color: $interpolation;
+}
+
+global_variable,
+instance_variable,
+"self" {
+  color: $variable;
+}
+
+comment {
+  color: $comment;
+  italic: true;
+}
+
+regex {
+  language: regex;
+}

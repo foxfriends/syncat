@@ -1,0 +1,37 @@
+import "../colours.syncat";
+
+jsx_opening_element > "<",
+jsx_opening_element > ">",
+jsx_closing_element > "<",
+jsx_closing_element > "/",
+jsx_opening_element > "<",
+jsx_self_closing_element > "<",
+jsx_self_closing_element > "/",
+jsx_self_closing_element > ">" {
+  color: $operator;
+}
+
+jsx_opening_element > identifier /^[a-z]/,
+jsx_closing_element > identifier /^[a-z]/,
+jsx_self_closing_element > identifier /^[a-z]/ {
+  color: $name;
+}
+
+jsx_opening_element > identifier /^[A-Z]/,
+jsx_closing_element > identifier /^[A-Z]/,
+jsx_self_closing_element > identifier /^[A-Z]/ {
+  color: $type;
+}
+
+jsx_expression > "{",
+jsx_expression > "}" {
+  color: $interpolation;
+}
+
+jsx_attribute property_identifier {
+  color: $value;
+}
+
+jsx_text {
+  color: $string;
+}

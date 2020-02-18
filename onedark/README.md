@@ -1,6 +1,7 @@
 # One Dark for Syncat
 
-The following 16-colour mappings are assumed
+The following 16-colour mappings are assumed.
+
 
 ```
 # black

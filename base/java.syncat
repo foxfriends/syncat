@@ -1,0 +1,98 @@
+import "../colours.syncat";
+
+"package", "import", "module",
+"class", "enum", "interface",
+"extends", "implements",
+"new", "synchronized",
+"switch", "case", "default",
+"if", "else",
+"for", "do", "while",
+"try", "catch", "finally",
+"throw", "throws", "assert",
+"return", "break", "continue",
+"static", "final", "abstract",
+"public", "private", "protected",
+"volatile", "strictfp", "native",
+"var",
+wildcard > "?",
+modifier {
+  color: $keyword;
+}
+
+"goto", "const" {
+  color: $text;
+  background-color: $error;
+}
+
+"super", "this" {
+  color: $name;
+}
+
+"=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "++", "--",
+"+", "-", "*", "/", "%", "&", "|", "^", "~", "<<", ">>",
+"<", "<=", ">", ">=", "==", "!=",
+"&&", "||", "!",
+"instanceof",
+ternary_expression > "?",
+ternary_expression > ":",
+lambda_expression > "->" {
+  color: $operator;
+}
+
+package_declaration > identifier,
+import_declaration > identifier {
+  color: $function;
+}
+
+import_declaration asterisk {
+  color: $keyword;
+}
+
+void_type,
+integral_type,
+floating_point_type,
+boolean_type,
+character_type,
+type_identifier,
+type_parameter > identifier,
+constructor_declarator > identifier,
+class_declaration > identifier {
+  color: $type;
+}
+
+generic_type > "<>",
+generic_type > ">",
+generic_type > "<",
+array_type dims > "[",
+array_type dims > "]" {
+  color: $keyword;
+}
+
+method_declarator > identifier,
+method_invocation > identifier {
+  color: $function;
+}
+
+labeled_statement > identifier,
+labeled_statement > ":",
+continue_statement > identifier,
+break_statement > identifier {
+  color: $builtin;
+}
+
+identifier /^[A-Z_]+$/,
+null_literal,
+boolean_literal,
+floating_point_literal,
+integer_literal {
+  color: $value;
+}
+
+string_literal, character_literal {
+  color: $string;
+}
+
+comment {
+  color: $comment;
+  italic: true;
+}

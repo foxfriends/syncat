@@ -1,0 +1,42 @@
+import "../colours.syncat";
+
+doctype {
+  color: $meta;
+}
+
+start_tag > "<", start_tag > ">", 
+self_closing_tag > "<", self_closing_tag > "/>", 
+end_tag > "</", end_tag > ">",
+attribute > "=" {
+  color: $operator;
+}
+
+tag_name {
+  color: $name;
+}
+
+attribute_name {
+  color: $value;
+}
+
+quoted_attribute_value,
+attribute_value {
+  color: $string;
+}
+
+comment {
+  color: $comment;
+  italic: true;
+}
+
+element (start_tag (tag_name "code") ~ attribute (attribute_name "language") + attribute_value /.*/) + text {
+  language: $0;
+}
+
+style_element raw_text {
+  language: css;
+}
+
+script_element raw_text {
+  language: js;
+}
