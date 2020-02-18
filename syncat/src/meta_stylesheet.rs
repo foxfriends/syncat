@@ -85,7 +85,7 @@ impl TryFrom<Style<'_>> for MetaItem<Margin> {
             content: match style.get("content") {
                 Some(Value::String(string)) if string == "unicode" => Margin::UNICODE,
                 Some(Value::String(string)) if string == "ascii" => Margin::ASCII,
-                Some(..) => return Err(FromValueError),
+                Some(value) => return Err(FromValueError::new(value.clone(), "Margin")),
                 None => Margin::ASCII,
             },
             style: style.try_into()?,

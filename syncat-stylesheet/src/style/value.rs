@@ -14,13 +14,22 @@ pub enum Value {
 }
 
 #[derive(Debug)]
-pub struct FromValueError;
+pub struct FromValueError {
+    value: Value,
+    target: &'static str,
+}
+
+impl FromValueError {
+    pub fn new(value: Value, target: &'static str) -> Self {
+        Self { value, target }
+    }
+}
 
 impl Error for FromValueError {}
 
 impl Display for FromValueError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "failed conversion from stylesheet value")
+        write!(f, "failed conversion from stylesheet value {:?} to type {}", self.value, self.target)
     }
 }
 
@@ -29,7 +38,7 @@ impl TryFrom<Value> for String {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::String(value) => Ok(value),
-            _ => Err(FromValueError),
+            _ => Err(FromValueError::new(value, "String")),
         }
     }
 }
@@ -39,7 +48,7 @@ impl TryFrom<Value> for u32 {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::Number(value) => Ok(value),
-            _ => Err(FromValueError),
+            _ => Err(FromValueError::new(value, "u32")),
         }
     }
 }
@@ -49,7 +58,7 @@ impl TryFrom<Value> for bool {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::Boolean(value) => Ok(value),
-            _ => Err(FromValueError),
+            _ => Err(FromValueError::new(value, "bool")),
         }
     }
 }
@@ -59,7 +68,7 @@ impl TryFrom<Value> for Color {
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
             Value::Color(value) => Ok(value),
-            _ => Err(FromValueError),
+            _ => Err(FromValueError::new(value, "Color")),
         }
     }
 }
@@ -86,7 +95,7 @@ impl TryFrom<Value> for ANSIColor {
             Value::Color(Color::BrCyan) => Ok(ANSIColor::Fixed(14)),
             Value::Color(Color::BrWhite) => Ok(ANSIColor::Fixed(15)),
             Value::Color(Color::Hex(value)) => Ok(ANSIColor::RGB(((value >> 16) & 0xFF) as u8, ((value >> 8) & 0xFF) as u8, (value & 0xFF) as u8)),
-            _ => Err(FromValueError),
+            _ => Err(FromValueError::new(value, "ansi_term::Colour")),
         }
     }
 }

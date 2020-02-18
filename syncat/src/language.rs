@@ -108,7 +108,7 @@ impl TryFrom<Value> for Lang {
     type Error = FromValueError;
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
-        Self::from_str(&String::try_from(value)?).map_err(|_| FromValueError)
+        Self::from_str(&String::try_from(value.clone())?).map_err(|_| FromValueError::new(value, "Lang"))
     }
 }
 
