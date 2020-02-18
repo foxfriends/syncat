@@ -17,14 +17,14 @@ pub struct Stylesheet {
 
 impl Stylesheet {
     pub fn from_file(path: impl AsRef<Path>) -> crate::Result<Self> {
-        let ast = Ast::from_file(path)?;
+        let ast = Ast::from_file(path.as_ref())?;
         let stylesheet = Self {
             variables: ast.variables.into_iter().collect(),
             rules: ast.rules,
         };
         ast.imports
             .into_iter()
-            .map(|path| Self::from_file(path))
+            .map(|import| Self::from_file(path.as_ref().parent().unwrap().join(import)))
             .try_fold(stylesheet, |stylesheet, imported| {
                 Ok(stylesheet.merge(imported?))
             })

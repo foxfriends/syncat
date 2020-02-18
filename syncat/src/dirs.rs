@@ -1,5 +1,4 @@
 use directories::ProjectDirs;
-use std::env;
 use std::path::PathBuf;
 
 fn directories() -> ProjectDirs {
@@ -11,6 +10,5 @@ pub fn config() -> PathBuf {
 }
 
 pub fn active_color() -> PathBuf {
-    let active_style_name = env::var("syncat_active_style").unwrap_or("active".to_string());
-    config().join("style").join(active_style_name)
+    config().join("style").join("active")
 }

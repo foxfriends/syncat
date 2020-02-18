@@ -1,5 +1,6 @@
 use std::path::{PathBuf, Path};
 use tree_sitter::TreeCursor;
+use enquote::unquote;
 use super::helper::*;
 
 #[derive(Clone, Debug)]
@@ -16,7 +17,7 @@ impl AsRef<Path> for Import {
 impl FromSource for Import {
     fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
         children!(tree, "import");
-        let path = text!(tree, source, "string")?.into();
+        let path = unquote(text!(tree, source, "string")?)?.into();
         tree.goto_parent();
         Ok(Import { path })
     }
