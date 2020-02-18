@@ -30,7 +30,7 @@ impl FromSource for Stylesheet {
                     "import" => stylesheet.imports.push(Import::from_source(tree, source)?),
                     "declaration" => stylesheet.variables.push(Declaration::from_source(tree, source)?),
                     "rule" => stylesheet.rules.push(Rule::from_source(tree, source)?),
-                    _ => return Err(crate::Error::invalid()),
+                    name => return Err(crate::Error::invalid("stylesheet", name)),
                 }
             }
             tree.goto_next_sibling()

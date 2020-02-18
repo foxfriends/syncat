@@ -43,7 +43,7 @@ impl FromSource for Value {
             "boolean" => Value::Boolean(text!(tree, source, "boolean")?.parse()?),
             "variable" => Value::Variable(Variable::from_source(tree, source)?),
             "capture" => Value::Capture(text!(tree, source, "number")?[1..].parse()?),
-            _ => return Err(crate::Error::invalid()),
+            name => return Err(crate::Error::invalid("value", name)),
         };
 
         tree.goto_parent();

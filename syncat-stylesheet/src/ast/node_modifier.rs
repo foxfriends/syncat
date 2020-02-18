@@ -20,7 +20,7 @@ impl FromSource for NodeModifier {
             "direct" => Self::DirectChild,
             "direct_sibling" => Self::DirectSibling,
             "sibling" => Self::Sibling,
-            _ => return Err(crate::Error::invalid()),
+            name => return Err(crate::Error::invalid("node_modifier", name)),
         };
         tree.goto_parent();
         Ok(modifier)

@@ -20,10 +20,10 @@ pub struct Error {
 }
 
 impl Error {
-    pub(super) fn invalid() -> Self {
+    pub(super) fn invalid(source: &str, reason: &str) -> Self {
         Self {
             kind: ErrorKind::Invalid,
-            message: String::from("attempted to interpret an invalid parse tree"),
+            message: format!("attempted to interpret an invalid parse tree ({}, {})", source, reason),
             source: None,
         }
     }

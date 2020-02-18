@@ -29,7 +29,7 @@ impl FromSource for NodeKind {
                 let node = match tree.node().kind() {
                     "string" => NodeKind::Token(unquote(text!(tree, source, "string")?)?),
                     "regex" => NodeKind::TokenPattern(Regex::new(text!(tree, source, "regex")?)?),
-                    _ => return Err(crate::Error::invalid()),
+                    name => return Err(crate::Error::invalid("node_kind(token)", name)),
                 };
                 tree.goto_parent();
                 node
@@ -49,7 +49,7 @@ impl FromSource for NodeKind {
                 let selector = Selector::from_source(tree, source)?;
                 NodeKind::Group(name, selector)
             }
-            _ => return Err(crate::Error::invalid()),
+            name => return Err(crate::Error::invalid("node_kind", name)),
         };
         tree.goto_parent();
         Ok(kind)

@@ -4,7 +4,7 @@ macro_rules! extras {
     ($tree:ident) => {
         while $tree.node().is_extra() {
             if !$tree.goto_next_sibling() {
-                return Err($crate::Error::invalid());
+                return Err($crate::Error::invalid("extras", "no more children"));
             }
         }
     }
@@ -16,7 +16,7 @@ macro_rules! children {
         extras!($tree);
         match $tree.node().kind() {
             $name => $tree.goto_first_child(),
-            _ => return Err($crate::Error::invalid()),
+            name => return Err($crate::Error::invalid(concat!("children(", $name, ")"), name)),
         }
     }}
 }
@@ -27,7 +27,7 @@ macro_rules! text {
         extras!($tree);
         match $tree.node().kind() {
             $name => $tree.node().utf8_text($source),
-            _ => return Err($crate::Error::invalid()),
+            name => return Err($crate::Error::invalid(concat!("text(", $name, ")"), name)),
         }
     }}
 }
