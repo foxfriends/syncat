@@ -1,97 +1,72 @@
-use super::*;
+use std::convert::TryInto;
+use std::fmt::{self, Formatter};
+use ansi_term::Style;
+use tree_sitter::{Tree, TreeCursor, Parser};
+use syncat_stylesheet::{Stylesheet, Query};
+use crate::Lang;
 
-fn colorize_node<'a>(
-    source: &'a str,
-    (index, node): (usize, Node),
-    stylesheet: &Stylesheet,
-    pos: &mut usize,
-    context: &mut Context<'a>,
-    scope: &mut Vec<(usize, &'a str)>,
-    output: &mut String,
-) -> Result<(), crate::BoxedError> {
-    // put any leading characters into the result text
-    let outer_style = stylesheet.resolve(context, scope, None);
-
-    output.push_str(&format!("{}", outer_style.build().paint(&source[*pos..node.start_byte()])));
-    *pos = node.start_byte();
-
-    if node.child_count() == 0 {
-        // print a child node
-        let token = &source[node.start_byte()..node.end_byte()];
-        let mut line_count = token.lines().count();
-        if !token.ends_with('\n') {
-            line_count -= 1;
+fn write_token(f: &mut Formatter, token: &str, style: Style) -> fmt::Result {
+    let mut line_count = token.lines().count();
+    if !token.ends_with('\n') { line_count -= 1; }
+    for (index, line) in token.lines().enumerate() {
+        write!(f, "{}", style.paint(line))?;
+        if index != line_count {
+            writeln!(f)?;
         }
-        if node.is_named() {
-            scope.push((index, node.kind()));
-        }
-        let style = stylesheet.resolve(context, scope, Some(token));
-        if let Some(language) = style.language().and_then(|lang| lang.parse::<Lang>().ok()) {
-            let mut parser = Parser::new();
-            parser.set_language(language.parser()).unwrap();
-            let tree = parser.parse(token, None).unwrap();
-            output.push_str(&print_source(token, tree, &language.style()?)?);
-        } else {
-            for (index, line) in token.lines().enumerate() {
-                output.push_str(&format!("{}", style.build().paint(line)));
-                if index != line_count {
-                    output.push('\n');
-                }
-            }
-        }
-        *pos = node.end_byte();
-        context.add_child(&scope, token);
-        if node.is_named() {
-            scope.pop();
-        }
-
-    } else {
-        // recurse for a middle node
-        scope.push((index, node.kind()));
-        // put any leading characters into the result text
-        let style = stylesheet.resolve(context, scope, None);
-
-        if let Some(language) = style.language().and_then(|lang| lang.parse::<Lang>().ok()) {
-            let token = &source[node.start_byte()..node.end_byte()];
-            *pos = node.end_byte();
-            let mut parser = Parser::new();
-            parser.set_language(language.parser()).unwrap();
-            let tree = parser.parse(token, None).unwrap();
-            output.push_str(&print_source(token, tree, &language.style()?)?);
-            scope.pop();
-            return Ok(())
-        }
-
-        for child in node.children().enumerate() {
-            colorize_node(
-                source,
-                child,
-                stylesheet,
-                pos,
-                context,
-                scope,
-                output,
-            )?;
-        }
-        scope.pop();
     }
     Ok(())
 }
 
-pub fn print_source<I: AsRef<str>>(source: I, tree: Tree, stylesheet: Stylesheet) -> Result<String, crate::BoxedError> {
-    let source = source.as_ref();
-    let node = tree.root_node();
-    let mut output = String::new();
-    let mut pos = 0;
-    colorize_node(
-        source,
-        (0, node),
-        &stylesheet,
-        &mut pos,
-        &mut Context::default(),
-        &mut vec![],
-        &mut output,
-    )?;
-    output.push_str(&source[pos..]);
-    Ok(output)
+fn write_node<'s>(f: &mut Formatter, query: &mut Query<'s>, index: &mut Vec<usize>, tree: &mut TreeCursor, source: &'s str, stylesheet: &Stylesheet) -> fmt::Result {
+    let style = stylesheet.style(query).unwrap_or_default();
+    let language = style.try_get::<Lang>("language").map_err(|_| fmt::Error)?;
+    let style: Style = style.try_into().map_err(|_| fmt::Error)?;
+    let start_byte = tree.node().start_byte();
+    let end_byte = tree.node().end_byte();
+
+    if let Some(language) = language {
+        // this node should be printed in another language
+        let mut parser = Parser::new();
+        parser.set_language(language.parser()).unwrap();
+        let token = tree.node().utf8_text(source.as_ref()).unwrap();
+        let subtree = parser.parse(&token, None).unwrap();
+        write(f, &token, &subtree, &language.style().map_err(|_| fmt::Error)?)?;
+    } else if tree.node().child_count() == 0 {
+        // leaf node
+        let token = tree.node().utf8_text(source.as_ref()).unwrap();
+        write_token(f, token, style)?;
+    } else {
+        // inner node
+        tree.goto_first_child();
+        let mut previous_end_byte = start_byte;
+        let mut i = 0;
+        while {
+            // fill gaps between nodes
+            let child_start_byte = tree.node().start_byte();
+            if child_start_byte != previous_end_byte {
+                let token = &source[previous_end_byte..child_start_byte];
+                write_token(f, token, style)?;
+            }
+            previous_end_byte = tree.node().end_byte();
+
+            query[&index[..]].add_child((&tree.node(), source));
+            index.push(i);
+            write_node(f, query, index, tree, source, stylesheet)?;
+            index.pop();
+            tree.goto_next_sibling()
+        } { i += 1; }
+        if previous_end_byte != end_byte {
+            let token = &source[previous_end_byte..end_byte];
+            write_token(f, token, style)?;
+        }
+        tree.goto_parent();
+    }
+
+    Ok(())
+}
+
+pub(super) fn write(f: &mut Formatter, source: &str, tree: &Tree, stylesheet: &Stylesheet) -> fmt::Result {
+    let mut tree = tree.walk();
+    let mut query = Query::from((&tree.node(), source));
+    write_node(f, &mut query, &mut vec![], &mut tree, source, stylesheet)
 }
