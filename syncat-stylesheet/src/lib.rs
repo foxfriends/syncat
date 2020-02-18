@@ -8,7 +8,7 @@ mod stylesheet;
 
 pub use error::{Error, Result};
 pub use stylesheet::{Query, Stylesheet};
-pub use style::{Style, Value};
+pub use style::{Style, Value, FromValueError};
 pub use ast::Color;
 use stylesheet::{QuerySlice, Matches};
 

@@ -1,4 +1,4 @@
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 use crate::ast::{Node, NodeKind, NodeModifier};
 use super::Matches;
 
@@ -9,7 +9,31 @@ pub struct Query<'s> {
     children: Vec<Query<'s>>,
 }
 
+impl<'s> From<&'s str> for Query<'s> {
+    fn from(kind: &'s str) -> Self {
+        Self { kind, text: kind, children: vec![] }
+    }
+}
+
+impl<'s> From<(tree_sitter::Node<'_>, &'s str)> for Query<'s> {
+    fn from((node, source): (tree_sitter::Node, &'s str)) -> Self {
+        Self {
+            kind: node.kind(),
+            text: node.utf8_text(source.as_ref()).unwrap(),
+            children: vec![],
+        }
+    }
+}
+
 impl<'s> Query<'s> {
+    pub fn new(kind: &'s str, text: &'s str) -> Self {
+        Self { kind, text, children: vec![] }
+    }
+
+    pub fn add_child<Q: Into<Self>>(&mut self, child: Q) {
+        self.children.push(child.into())
+    }
+
     fn matches<'k, 'a: 's>(&'a self, node: &'k NodeKind) -> Option<Matches<'k, 's>> {
         match node {
             NodeKind::Any => Some(Matches::default()),
@@ -65,6 +89,16 @@ impl<'a> Index<&[usize]> for Query<'a> {
             self
         } else {
             &self.children[index[0]][&index[1..]]
+        }
+    }
+}
+
+impl<'a> IndexMut<&[usize]> for Query<'a> {
+    fn index_mut(&mut self, index: &[usize]) -> &mut Self::Output {
+        if index.is_empty() {
+            self
+        } else {
+            &mut self.children[index[0]][&index[1..]]
         }
     }
 }

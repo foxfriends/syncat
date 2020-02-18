@@ -1,5 +1,6 @@
-use ansi_term::{ANSIGenericString, Style, Colour};
-use syncat_stylesheet::Stylesheet;
+use ansi_term::{ANSIGenericString, Style as ANSIStyle, Colour};
+use syncat_stylesheet::{Style, Value, Stylesheet, FromValueError};
+use std::convert::{TryFrom, TryInto};
 use crate::dirs::active_color;
 
 pub struct Margin {
@@ -54,15 +55,50 @@ impl Margin {
 
 pub struct MetaItem<T> {
     content: T,
-    style: Style,
+    style: ANSIStyle,
+}
+
+impl TryFrom<Style<'_>> for MetaItem<String> {
+    type Error = FromValueError;
+    fn try_from(style: Style) -> Result<Self, Self::Error> {
+        Ok(Self {
+            content: style.get("content").cloned().map_or(Ok(String::default()), String::try_from)?,
+            style: style.try_into()?,
+        })
+    }
+}
+
+impl TryFrom<Style<'_>> for MetaItem<()> {
+    type Error = FromValueError;
+    fn try_from(style: Style) -> Result<Self, Self::Error> {
+        Ok(Self {
+            content: (),
+            style: style.try_into()?,
+        })
+    }
+}
+
+impl TryFrom<Style<'_>> for MetaItem<Margin> {
+    type Error = FromValueError;
+    fn try_from(style: Style) -> Result<Self, Self::Error> {
+        Ok(Self {
+            content: match style.get("content") {
+                Some(Value::String(string)) if string == "unicode" => Margin::UNICODE,
+                Some(Value::String(string)) if string == "ascii" => Margin::ASCII,
+                Some(..) => return Err(FromValueError),
+                None => Margin::ASCII,
+            },
+            style: style.try_into()?,
+        })
+    }
 }
 
 impl<T> MetaItem<T> {
     pub fn default(content: T) -> Self {
-        MetaItem { content, style: Style::default() }
+        MetaItem { content, style: ANSIStyle::default() }
     }
 
-    fn set_style(mut self, style: Style) -> Self {
+    fn set_style(mut self, style: ANSIStyle) -> Self {
         self.style = style;
         self
     }
@@ -115,38 +151,46 @@ impl Default for MetaStylesheet {
         MetaStylesheet {
             line_ending: MetaItem::default("$".to_string()),
             line_number: MetaItem::default(()),
-            vcs_addition: MetaItem::default("+".to_string()).set_style(Style::new().fg(Colour::Green)),
-            vcs_modification: MetaItem::default("~".to_string()).set_style(Style::new().fg(Colour::Yellow)),
-            vcs_deletion_above: MetaItem::default("-".to_string()).set_style(Style::new().fg(Colour::Red)),
-            vcs_deletion_below: MetaItem::default("_".to_string()).set_style(Style::new().fg(Colour::Red)),
+            vcs_addition: MetaItem::default("+".to_string()).set_style(ANSIStyle::new().fg(Colour::Green)),
+            vcs_modification: MetaItem::default("~".to_string()).set_style(ANSIStyle::new().fg(Colour::Yellow)),
+            vcs_deletion_above: MetaItem::default("-".to_string()).set_style(ANSIStyle::new().fg(Colour::Red)),
+            vcs_deletion_below: MetaItem::default("_".to_string()).set_style(ANSIStyle::new().fg(Colour::Red)),
             margin: MetaItem::default(Margin::ASCII),
-            title: MetaItem::default(()).set_style(Style::new().bold()),
+            title: MetaItem::default(()).set_style(ANSIStyle::new().bold()),
         }
     }
 }
 
 impl MetaStylesheet {
-    pub fn from_file() -> syncat_stylesheet::Result<MetaStylesheet> {
+    pub fn from_file() -> Result<MetaStylesheet, Box<dyn std::error::Error>> {
         let mut meta_stylesheet = MetaStylesheet::default();
         let style_file = active_color().join(".syncat");
         if style_file.exists() {
             let stylesheet = Stylesheet::from_file(style_file)?;
-            // meta_stylesheet.line_ending = meta_stylesheet.line_ending
-            //     .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "line_ending")], None));
-            // meta_stylesheet.line_number = meta_stylesheet.line_number
-            //     .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "line_number")], None));
-            // meta_stylesheet.vcs_addition = meta_stylesheet.vcs_addition
-            //     .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "vcs_addition")], None));
-            // meta_stylesheet.vcs_modification = meta_stylesheet.vcs_modification
-            //     .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "vcs_modification")], None));
-            // meta_stylesheet.vcs_deletion_above = meta_stylesheet.vcs_deletion_above
-            //     .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "vcs_deletion_above")], None));
-            // meta_stylesheet.vcs_deletion_below = meta_stylesheet.vcs_deletion_below
-            //     .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "vcs_deletion_below")], None));
-            // meta_stylesheet.margin = meta_stylesheet.margin
-            //     .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "margin")], None));
-            // meta_stylesheet.title = meta_stylesheet.title
-            //     .merge_with(&stylesheet.resolve(&Context::default(), &[(0, "title")], None));
+            if let Some(style) = stylesheet.style(&"line_ending".into()) {
+                meta_stylesheet.line_ending = style.try_into()?;
+            }
+            if let Some(style) = stylesheet.style(&"line_number".into()) {
+                meta_stylesheet.line_number = style.try_into()?;
+            }
+            if let Some(style) = stylesheet.style(&"vcs_addition".into()) {
+                meta_stylesheet.vcs_addition = style.try_into()?;
+            }
+            if let Some(style) = stylesheet.style(&"vcs_modification".into()) {
+                meta_stylesheet.vcs_modification = style.try_into()?;
+            }
+            if let Some(style) = stylesheet.style(&"vcs_deletion_above".into()) {
+                meta_stylesheet.vcs_deletion_above = style.try_into()?;
+            }
+            if let Some(style) = stylesheet.style(&"vcs_deletion_below".into()) {
+                meta_stylesheet.vcs_deletion_below = style.try_into()?;
+            }
+            if let Some(style) = stylesheet.style(&"margin".into()) {
+                meta_stylesheet.margin = style.try_into()?;
+            }
+            if let Some(style) = stylesheet.style(&"title".into()) {
+                meta_stylesheet.title = style.try_into()?;
+            }
         }
         Ok(meta_stylesheet)
     }
@@ -175,11 +219,11 @@ impl MetaStylesheet {
         self.line_ending.paint()
     }
 
-    pub fn line_number(&self) -> &Style {
+    pub fn line_number(&self) -> &ANSIStyle {
         &self.line_number.style
     }
 
-    pub fn title(&self) -> &Style {
+    pub fn title(&self) -> &ANSIStyle {
         &self.title.style
     }
 }

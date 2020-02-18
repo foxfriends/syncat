@@ -36,10 +36,10 @@ impl Stylesheet {
         self
     }
 
-    pub fn style(&self, query: &Query) -> Style {
+    pub fn style(&self, query: &Query) -> Option<Style> {
         self.rules
             .iter()
             .filter_map(|rule| rule.styles(query, &self.variables))
-            .collect()
+            .fold(None, |a, b| Some(a?.merge(b)))
     }
 }
