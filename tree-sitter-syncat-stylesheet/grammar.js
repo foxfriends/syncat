@@ -9,7 +9,7 @@ module.exports = grammar({
         _item: $ => choice($.rule, $.declaration, $.import),
 
         declaration: $ => seq($.variable, ':', $.value, ';'),
-        variable: $ => /\$[a-zA_Z0-9-_]+/,
+        variable: $ => /\$[A-Za-z0-9-_]*[A-Za-z-_][A-Za-z0-9-_]*/,
 
         import: $ => seq('import', $.string, ';'),
 
@@ -63,7 +63,7 @@ module.exports = grammar({
             $.number,
             $.capture,
         ),
-        capture: $ => seq($.variable, '.', $.number),
+        capture: $ => /\$[0-9]+/,
 
         color: $ => choice($.named_color, $.hex_color),
         named_color: $ => choice(

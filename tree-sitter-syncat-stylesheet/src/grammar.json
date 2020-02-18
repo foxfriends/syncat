@@ -49,7 +49,7 @@
     },
     "variable": {
       "type": "PATTERN",
-      "value": "\\$[a-zA_Z0-9-_]+"
+      "value": "\\$[A-Za-z0-9-_]*[A-Za-z-_][A-Za-z0-9-_]*"
     },
     "import": {
       "type": "SEQ",
@@ -369,21 +369,8 @@
       ]
     },
     "capture": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "variable"
-        },
-        {
-          "type": "STRING",
-          "value": "."
-        },
-        {
-          "type": "SYMBOL",
-          "name": "number"
-        }
-      ]
+      "type": "PATTERN",
+      "value": "\\$[0-9]+"
     },
     "color": {
       "type": "CHOICE",

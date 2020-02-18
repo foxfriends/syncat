@@ -18,7 +18,13 @@ impl Rule {
 
     pub(crate) fn styles<'a>(&self, query: &'a Query<'a>, variables: &BTreeMap<String, Value>) -> Option<crate::Style> {
         let matches = self.matches(query)?;
-        None
+        let mut style = crate::Style::default();
+        for Style { name, value } in &self.styles {
+            if let Some(value) = value.resolve(variables, &matches) {
+                style.insert(name.as_str(), value);
+            }
+        }
+        Some(style)
     }
 }
 

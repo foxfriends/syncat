@@ -11,21 +11,21 @@ pub enum Value {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct Style(BTreeMap<String, Value>);
+pub struct Style<'s>(BTreeMap<&'s str, Value>);
 
-impl Style {
-    fn merge(mut self, other: Self) -> Self {
-        for (key, value) in other.0 {
-            if !self.0.contains_key(&key) {
-                self.0.insert(key, value);
-            }
-        }
-        self
+impl<'s> Style<'s> {
+    pub(crate) fn insert(&mut self, key: &'s str, value: Value) {
+        self.0.insert(key, value);
+    }
+    
+    fn merge(mut self, mut other: Self) -> Self {
+        other.0.append(&mut self.0);
+        other
     }
 }
 
-impl FromIterator<Style> for Style {
-    fn from_iter<I: IntoIterator<Item = Style>>(iter: I) -> Self {
+impl<'s> FromIterator<Style<'s>> for Style<'s> {
+    fn from_iter<I: IntoIterator<Item = Style<'s>>>(iter: I) -> Self {
         iter.into_iter()
             .fold(Style::default(), Style::merge)
     }
