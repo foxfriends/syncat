@@ -1,6 +1,7 @@
 use std::convert::TryFrom;
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
+#[cfg(feature = "ansi_term")]
 use ansi_term::Color as ANSIColor;
 use crate::ast::Color;
 
@@ -63,6 +64,7 @@ impl TryFrom<Value> for Color {
     }
 }
 
+#[cfg(feature = "ansi_term")]
 impl TryFrom<Value> for ANSIColor {
     type Error = FromValueError;
     fn try_from(value: Value) -> Result<Self, Self::Error> {

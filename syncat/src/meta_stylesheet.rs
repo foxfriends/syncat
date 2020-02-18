@@ -62,7 +62,7 @@ impl TryFrom<Style<'_>> for MetaItem<String> {
     type Error = FromValueError;
     fn try_from(style: Style) -> Result<Self, Self::Error> {
         Ok(Self {
-            content: style.get("content").cloned().map_or(Ok(String::default()), String::try_from)?,
+            content: style.try_get("content")?.unwrap_or_default(),
             style: style.try_into()?,
         })
     }
