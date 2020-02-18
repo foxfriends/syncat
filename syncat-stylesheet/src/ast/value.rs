@@ -35,7 +35,7 @@ impl Value {
 impl FromSource for Value {
     fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
         children!(tree, "value");
-        extras!(tree);
+        extras!(tree, "value");
         let value = match tree.node().kind() {
             "color" => Value::Color(Color::from_source(tree, source)?),
             "number" => Value::Number(text!(tree, source, "number")?.parse()?),

@@ -34,7 +34,7 @@ impl FromSource for Rule {
         children!(tree, "selectors");
         let mut selectors = vec![];
         while {
-            if !tree.node().is_extra() {
+            if !tree.node().is_extra() && tree.node().is_named() {
                 selectors.push(Selector::from_source(tree, source)?);
             }
             tree.goto_next_sibling()

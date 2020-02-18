@@ -10,7 +10,7 @@ pub(crate) struct Style {
 impl FromSource for Style {
     fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
         children!(tree, "style");
-        extras!(tree);
+        extras!(tree, "style");
         let name = text!(tree, source, "name")?.to_string();
         tree.goto_next_sibling();
         let value = Value::from_source(tree, source)?;

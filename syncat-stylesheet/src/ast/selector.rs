@@ -36,7 +36,7 @@ impl FromSource for Selector {
         children!(tree, "selector");
         let mut nodes = vec![];
         while {
-            if !tree.node().is_extra() {
+            if tree.node().is_named() && !tree.node().is_extra() {
                 match tree.node().kind() {
                     "node" => nodes.push(Node::from_source(tree, source)?),
                     "node_modifier" => nodes.last_mut().unwrap().modifier = NodeModifier::from_source(tree, source)?,

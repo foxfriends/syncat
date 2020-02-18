@@ -15,7 +15,7 @@ pub(crate) enum NodeKind {
 impl FromSource for NodeKind {
     fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
         children!(tree, "node");
-        extras!(tree);
+        extras!(tree, "node");
         let kind = match tree.node().kind() {
             "any" => NodeKind::Any,
             "kind" => {
@@ -36,13 +36,13 @@ impl FromSource for NodeKind {
             }
             "group" => {
                 children!(tree, "group");
-                extras!(tree);
+                extras!(tree, "group");
                 let name = if tree.node().kind() == "group_name" {
                     children!(tree, "group_name");
                     let name = text!(tree, source, "name")?.to_string();
                     tree.goto_parent();
                     tree.goto_next_sibling();
-                    extras!(tree);
+                    extras!(tree, "group(2)");
                     Some(name)
                 } else {
                     None
