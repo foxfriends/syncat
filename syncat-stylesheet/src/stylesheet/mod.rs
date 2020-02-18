@@ -7,7 +7,7 @@ mod matches;
 mod query;
 pub use query::Query;
 pub(crate) use query::QuerySlice;
-pub(crate) use matches::{Matches, Match};
+pub(crate) use matches::Matches;
 
 #[derive(Clone, Debug, Default)]
 pub struct Stylesheet {

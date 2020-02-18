@@ -1,8 +1,23 @@
 use std::collections::BTreeMap;
+use regex::Captures;
 
-pub(crate) enum Match<'a> {
-    Source(&'a str),
-    Regex(regex::Matches<'a, 'a>),
+#[derive(Default, Debug)]
+pub(crate) struct Matches<'k, 's> {
+    matches: BTreeMap<&'k str, &'s str>,
+    captures: Vec<Captures<'s>>,
 }
 
-pub(crate) type Matches<'a> = BTreeMap<String, Match<'a>>;
+impl<'k, 's> Matches<'k, 's> {
+    pub(crate) fn insert(&mut self, key: &'k str, value: &'s str) {
+        self.matches.insert(key, value);
+    }
+
+    pub(crate) fn push(&mut self, captures: Captures<'s>) {
+        self.captures.push(captures);
+    }
+
+    pub(crate) fn merge(&mut self, mut other: Self) {
+        self.matches.append(&mut other.matches);
+        self.captures.append(&mut other.captures);
+    }
+}

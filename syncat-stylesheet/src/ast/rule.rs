@@ -10,7 +10,7 @@ pub(crate) struct Rule {
 }
 
 impl Rule {
-    fn matches<'a>(&self, query: &'a Query<'a>) -> Option<Matches<'a>> {
+    fn matches<'k, 's, 'a: 's>(&'k self, query: &'a Query<'s>) -> Option<Matches<'k, 's>> {
         self.selectors
             .iter()
             .find_map(|selector| selector.matches(query))

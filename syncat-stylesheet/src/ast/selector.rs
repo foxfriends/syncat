@@ -8,19 +8,20 @@ pub(crate) struct Selector {
 }
 
 impl Selector {
-    pub(crate) fn matches<'a>(&self, query: &'a Query<'a>) -> Option<Matches<'a>> {
-        Self::matches2(&self.nodes[..], &QuerySlice::new(query))
+    pub(crate) fn matches<'k, 's, 'a: 's>(&'k self, query: &'a Query<'s>) -> Option<Matches<'k, 's>> {
+        if self.nodes.is_empty() {
+            return Some(Matches::default());
+        }
+        Self::matches2(&self.nodes[..], &QuerySlice::new(query, self.nodes.last().unwrap().modifier))
     }
 
-    fn matches2<'a>(nodes: &[Node], query: &QuerySlice<'a>) -> Option<Matches<'a>> {
+    fn matches2<'k, 's, 'a: 's>(nodes: &'k [Node], query: &QuerySlice<'a, 's>) -> Option<Matches<'k, 's>> {
         if nodes.is_empty() {
             return Some(Matches::default());
         }
         let (subquery, new_matches) = query.find(nodes.last().unwrap())?;
         if let Some(mut matches) = Self::matches2(&nodes[..nodes.len() - 1], &subquery) {
-            for (key, value) in new_matches {
-                matches.insert(key, value);
-            }
+            matches.merge(new_matches);
             Some(matches)
         } else if nodes.last().unwrap().can_try_again() {
             Self::matches2(nodes, &subquery)
