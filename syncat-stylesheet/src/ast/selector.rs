@@ -1,5 +1,5 @@
 use tree_sitter::TreeCursor;
-use super::{helper::*, Node};
+use super::{helper::*, Node, NodeModifier};
 use crate::{Query, QuerySlice, Matches};
 
 #[derive(Clone, Debug)]
@@ -37,7 +37,11 @@ impl FromSource for Selector {
         let mut nodes = vec![];
         while {
             if !tree.node().is_extra() {
-                nodes.push(Node::from_source(tree, source)?);
+                match tree.node().kind() {
+                    "node" => nodes.push(Node::from_source(tree, source)?),
+                    "node_modifier" => nodes.last_mut().unwrap().modifier = NodeModifier::from_source(tree, source)?,
+                    name => return Err(crate::Error::invalid("node/node_modifier", name)),
+                }
             }
             tree.goto_next_sibling()
         } {}

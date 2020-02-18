@@ -42,11 +42,13 @@ impl FromSource for NodeKind {
                     let name = text!(tree, source, "name")?.to_string();
                     tree.goto_parent();
                     tree.goto_next_sibling();
+                    extras!(tree);
                     Some(name)
                 } else {
                     None
                 };
                 let selector = Selector::from_source(tree, source)?;
+                tree.goto_parent();
                 NodeKind::Group(name, selector)
             }
             name => return Err(crate::Error::invalid("node_kind", name)),

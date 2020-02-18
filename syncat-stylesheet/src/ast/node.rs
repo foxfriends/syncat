@@ -21,12 +21,6 @@ impl Node {
 impl FromSource for Node {
     fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
         let kind = NodeKind::from_source(tree, source)?;
-        while tree.goto_next_sibling() && tree.node().is_extra() {}
-        let modifier = if tree.node().kind() == "node_modifier" {
-            NodeModifier::from_source(tree, source)?
-        } else {
-            NodeModifier::default()
-        };
-        Ok(Node { kind, modifier })
+        Ok(Node { kind, modifier: NodeModifier::default() })
     }
 }
