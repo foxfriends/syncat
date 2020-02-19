@@ -27,10 +27,12 @@ module.exports = grammar({
             $.direct,
             $.sibling,
             $.direct_sibling,
+            $.also,
         ),
         direct: $ => '>',
         direct_sibling: $ => '+',
         sibling: $ => '~',
+        also: $ => '&',
 
         node: $ => choice(
             $.group,

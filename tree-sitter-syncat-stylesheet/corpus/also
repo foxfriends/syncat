@@ -1,0 +1,12 @@
+=============
+Also modifier
+=============
+
+node child & "text" {}
+
+---
+
+(stylesheet
+  (rule
+    (selectors (selector (node (kind (name))) (node (kind (name))) (node_modifier (also)) (node (token (string)))))
+    (styles)))
