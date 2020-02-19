@@ -166,6 +166,10 @@
         {
           "type": "SYMBOL",
           "name": "direct_sibling"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "also"
         }
       ]
     },
@@ -180,6 +184,10 @@
     "sibling": {
       "type": "STRING",
       "value": "~"
+    },
+    "also": {
+      "type": "STRING",
+      "value": "&"
     },
     "node": {
       "type": "CHOICE",
