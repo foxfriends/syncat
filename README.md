@@ -14,30 +14,26 @@ to install from source.
 
 ```bash
 git clone https://github.com/foxfriends/syncat
-cd syncat/syncat
-cargo install --path .
+cd syncat
+cargo install --path syncat
 ```
 
 You will then also want to set up the stylesheets (otherwise nothing will be highlighted). Feel
 free to modify these themes, and make new ones that are more to your taste. Pull requests with
-new themes are greatly appreciated!
+new themes are greatly appreciated! The full documentation on themes is available [here][syncat-themes].
 
 ```bash
 mkdir ~/.config/syncat
 cd ~/.config/syncat
 git clone https://github.com/foxfriends/syncat-themes style
-cd style
-# the theme files are loaded from the 'active' directory, so link your favourite theme here
-ln -s onedark active
-
-# alternatively, you can set the syncat_active_style environment variable to the name of a style
-env syncat_active_style=onelight syncat main.rs
 ```
+
+### Language Support
 
 By default syncat will be installed with all languages enabled. As each language's parser is
 statically linked to the resulting executable, this can get quite large and take a very long time.
-You can override this by passing a comma separated list of languages to enable via the
-`syncat_languages` environment variable. For example:
+You can override this by passing a comma separated list of languages to support at compile time via 
+the `syncat_languages` environment variable. For example:
 
 ```bash
 # only enable Rust
@@ -47,8 +43,8 @@ syncat_languages=rust cargo install --path .
 syncat_languages=rust,javascript cargo install --path .
 ```
 
-If in future you would like to add new languages, just reinstall with your updated language list
-(cargo will ask for the `--force` flag).
+If in future you would like to add new languages, you will have to reinstall with different language 
+list.
 
 These are the languages you can pick from:
 *   `agda`
@@ -108,7 +104,7 @@ The supported configurations are:
 ### Language Map
 
 The language map is a simple TOML file named `languages.toml`, located in the root of the configuration
-folder as listed above. The keys of this file denote the extension to support, and the value is the
+folder listed above. The keys of this file denote the extension to support, and the value is the
 language that files with that extension should be parsed as.
 
 For example, to have `.svelte` files parsed as HTML, you would include this entry:
@@ -122,14 +118,15 @@ svelte = "html"
 In order for Syncat to know what colours to set, you must provide a stylesheet for each language. A
 number of pre-made themes are provided in the [syncat-themes][] repository.
 
-To select a theme, you should copy or link the theme folder to the correct configuration folder for
-your operating system.
+Syncat will look for the `.syncat` file corresponding to the language of your source code in the
+following directories:
 
-*   Linux: `$HOME/.config/syncat/theme/active`
-*   Mac: `$HOME/Library/Preferences/com.cameldridge.syncat/theme/active`
+*   Linux: `$HOME/.config/syncat/style/active`
+*   Mac: `$HOME/Library/Preferences/com.cameldridge.syncat/style/active`
 *   Windows: Not officially supported
 
-For more information on creating themes, see the [syncat-themes][] documentation.
+For more information on how the provided themes are implemented, and on creating your own themes, 
+see the [syncat-themes][] documentation.
 
 ## Usage
 
