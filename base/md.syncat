@@ -1,0 +1,39 @@
+import "../colours.syncat";
+
+link_label { color: $name; }
+link_destination { color: $meta; }
+
+atx_heading {
+    bold: true;
+}
+
+atx_heading_marker {
+    color: $name;
+}
+
+heading_content text {
+    color: $name;
+}
+
+fenced_code_block (info_string (<language> text)) + code_fence_content {
+    language: $language;
+}
+
+fenced_code_block { 
+    color: $meta;
+}
+
+list_marker {
+    color: $name;
+    dim: true;
+}
+
+code_span {
+    color: $string;
+}
+
+link_text { color: $string; }
+link { color: $keyword; }
+
+emphasis { italic: true; }
+strong_emphasis { bold: true; }
