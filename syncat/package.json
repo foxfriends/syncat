@@ -49,7 +49,7 @@
     "tree-sitter-ruby": "^0.15.3",
     "tree-sitter-rust": "^0.15.2",
     "tree-sitter-scala": "*",
-    "tree-sitter-syncat-stylesheet": "^2.1.0",
+    "tree-sitter-syncat-stylesheet": "^2.1.1",
     "tree-sitter-systemrdl": "^0.4.2",
     "tree-sitter-test": "*",
     "tree-sitter-toml": "^0.2.0",

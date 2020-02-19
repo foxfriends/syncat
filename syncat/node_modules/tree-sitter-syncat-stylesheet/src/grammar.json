@@ -485,7 +485,7 @@
     },
     "regex": {
       "type": "PATTERN",
-      "value": "\\/([^\\/\\\\]|\\\\.)+\\/i?"
+      "value": "\\/([^\\/\\\\]|\\\\.)+\\/[isuUmx]*"
     },
     "string": {
       "type": "PATTERN",
