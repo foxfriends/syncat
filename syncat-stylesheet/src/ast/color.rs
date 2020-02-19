@@ -45,7 +45,11 @@ impl FromStr for Color {
             "brcyan" => Self::BrCyan,
             "brwhite" => Self::BrWhite,
             "brblack" => Self::BrBlack,
-            other if other.starts_with('#') => Color::Hex(u32::from_be_bytes(FromHex::from_hex(&other[1..])?)),
+            other if other.starts_with('#') => {
+                let bytes = <[u8;3]>::from_hex(&other[1..])?;
+                let bytes_4 = [0, bytes[0], bytes[1], bytes[2]];
+                Color::Hex(u32::from_be_bytes(bytes_4))
+            }
             _ => return Err(crate::Error::color_format()),
         };
         Ok(color)
