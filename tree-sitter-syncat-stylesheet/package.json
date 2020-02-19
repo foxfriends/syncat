@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-syncat-stylesheet",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Parser for Syncat stylesheets",
   "main": "index.js",
   "scripts": {
