@@ -31,7 +31,8 @@ impl Stylesheet {
     }
 
     fn merge(mut self, mut other: Self) -> Self {
-        self.variables.append(&mut other.variables);
+        other.variables.append(&mut self.variables);
+        self.variables = other.variables;
         self.rules.append(&mut other.rules);
         self
     }
