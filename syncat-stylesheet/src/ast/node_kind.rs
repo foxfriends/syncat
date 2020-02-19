@@ -1,5 +1,5 @@
 use enquote::unquote;
-use regex::Regex;
+use regex::{Regex, RegexBuilder};
 use tree_sitter::TreeCursor;
 use super::{helper::*, Selector};
 
@@ -10,6 +10,49 @@ pub(crate) enum NodeKind {
     Token(String),
     TokenPattern(Regex),
     Group(Option<String>, Selector),
+}
+
+fn unquote_regex(string: &str) -> Result<Regex, regex::Error> {
+    if !string.starts_with("/") {
+        return Err(regex::Error::Syntax(String::from("Regular expression literal missing leading slash")));
+    }
+    let mut escape = false;
+    let mut regex = String::new();
+    let mut chars = string.chars().skip(1);
+    let mut closed = true;
+    for ch in &mut chars {
+        if escape && ch == '/' {
+            regex.push('/');
+            escape = false;
+        } else if escape {
+            regex.push('\\');
+            regex.push(ch);
+            escape = false;
+        } else if ch == '\\' {
+            escape = true;
+        } else if ch == '/' {
+            closed = true;
+            break;
+        } else {
+            regex.push(ch);
+        }
+    }
+    if !closed {
+        return Err(regex::Error::Syntax(String::from("Regular expression literal missing trailing slash")));
+    }
+    let mut builder = RegexBuilder::new(&regex);
+    for ch in chars {
+        match ch {
+            'i' => builder.case_insensitive(true),
+            'm' => builder.multi_line(true),
+            's' => builder.dot_matches_new_line(true),
+            'U' => builder.swap_greed(true),
+            'x' => builder.ignore_whitespace(true),
+            'u' => builder.unicode(true),
+            other => return Err(regex::Error::Syntax(format!("Unsupported regular expression flag {}", other))),
+        };
+    }
+    builder.build()
 }
 
 impl FromSource for NodeKind {
@@ -28,7 +71,7 @@ impl FromSource for NodeKind {
                 children!(tree, "token");
                 let node = match tree.node().kind() {
                     "string" => NodeKind::Token(unquote(text!(tree, source, "string")?)?),
-                    "regex" => NodeKind::TokenPattern(Regex::new(text!(tree, source, "regex")?)?),
+                    "regex" => NodeKind::TokenPattern(unquote_regex(text!(tree, source, "regex")?)?),
                     name => return Err(crate::Error::invalid("node_kind(token)", name)),
                 };
                 tree.goto_parent();
