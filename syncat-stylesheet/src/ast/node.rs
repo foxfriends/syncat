@@ -14,6 +14,7 @@ impl Node {
             NodeModifier::DirectChild => false,
             NodeModifier::Sibling => true,
             NodeModifier::DirectSibling => false,
+            NodeModifier::Also => false,
         }
     }
 }

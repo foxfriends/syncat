@@ -103,6 +103,7 @@ impl<'a> IndexMut<&[usize]> for Query<'a> {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct QuerySlice<'s, 'a: 's> {
     query: &'a Query<'s>,
     indices: Vec<usize>,
@@ -114,6 +115,7 @@ impl<'a, 's> QuerySlice<'s, 'a> {
         match modifier {
             NodeModifier::Child | NodeModifier::DirectChild => indices.push(0),
             NodeModifier::Sibling | NodeModifier::DirectSibling => *indices.last_mut().unwrap() += 1,
+            NodeModifier::Also => {},
         }
         Self { query, indices }
     }
@@ -124,6 +126,7 @@ impl<'a, 's> QuerySlice<'s, 'a> {
             NodeModifier::DirectChild => self.find_direct_child(&node.kind).ok(),
             NodeModifier::Sibling => self.find_sibling(&node.kind),
             NodeModifier::DirectSibling => self.find_direct_sibling(&node.kind).ok(),
+            NodeModifier::Also => self.find_here(&node.kind).ok(),
         }
     }
 
@@ -142,10 +145,16 @@ impl<'a, 's> QuerySlice<'s, 'a> {
         let mut indices = self.indices.clone();
         let last = indices.last_mut().unwrap();
         *last = last.checked_sub(1)?;
-        Some(Self {
-            query: self.query,
-            indices,
-        })
+        Some(Self { query: self.query, indices })
+    }
+
+    fn find_here<'k>(&self, node: &'k NodeKind) -> Result<(Self, Matches<'k, 's>), Option<Self>> {
+        let query = &self.query[&self.indices];
+        if let Some(matches) = query.matches(node) {
+            Ok((self.clone(), matches))
+        } else {
+            Err(Some(self.clone()))
+        }
     }
 
     fn find_child<'k>(&self, node: &'k NodeKind) -> Option<(Self, Matches<'k, 's>)> {

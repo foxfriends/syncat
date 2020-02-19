@@ -7,6 +7,7 @@ pub(crate) enum NodeModifier {
     DirectChild,
     DirectSibling,
     Sibling,
+    Also,
 }
 
 impl Default for NodeModifier {
@@ -20,6 +21,7 @@ impl FromSource for NodeModifier {
             "direct" => Self::DirectChild,
             "direct_sibling" => Self::DirectSibling,
             "sibling" => Self::Sibling,
+            "also" => Self::Also,
             name => return Err(crate::Error::invalid("node_modifier", name)),
         };
         tree.goto_parent();
