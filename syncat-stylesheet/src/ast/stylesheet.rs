@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use std::str::FromStr;
 use tree_sitter::TreeCursor;
 use super::{helper::*, Import, Declaration, Rule};
 
@@ -14,6 +15,14 @@ impl Stylesheet {
     pub(crate) fn from_file(path: impl AsRef<Path>) -> crate::Result<Self> {
         let source = fs::read_to_string(path.as_ref())
             .map_err(|e| crate::Error::missing_module(e, path.as_ref()))?;
+        Self::from_str(&source)
+    }
+}
+
+impl FromStr for Stylesheet {
+    type Err = crate::Error;
+
+    fn from_str(source: &str) -> Result<Self, Self::Err> {
         let tree = crate::parser::parse(&source).unwrap();
         let mut cursor = tree.walk();
         Self::from_source(&mut cursor, source.as_ref())

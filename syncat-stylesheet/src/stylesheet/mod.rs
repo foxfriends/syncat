@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use std::path::Path;
+use std::str::FromStr;
 use crate::ast::{Stylesheet as Ast, Value, Rule};
 use crate::Style;
 
@@ -13,6 +14,20 @@ pub(crate) use matches::Matches;
 pub struct Stylesheet {
     variables: BTreeMap<String, Value>,
     rules: Vec<Rule>,
+}
+
+impl FromStr for Stylesheet {
+    type Err = crate::Error;
+
+    /// Parses a Stylesheet from a string. Since no initial file path is provided,
+    /// imports cannot be resolved so they are just ignored completely.
+    fn from_str(source: &str) -> Result<Self, Self::Err> {
+        let ast = Ast::from_str(source)?;
+        Ok(Self {
+            variables: ast.variables.into_iter().collect(),
+            rules: ast.rules,
+        })
+    }
 }
 
 impl Stylesheet {
