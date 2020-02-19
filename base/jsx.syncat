@@ -11,15 +11,15 @@ jsx_self_closing_element > ">" {
   color: $operator;
 }
 
-jsx_opening_element > identifier /^[a-z]/,
-jsx_closing_element > identifier /^[a-z]/,
-jsx_self_closing_element > identifier /^[a-z]/ {
+jsx_opening_element > identifier & /^[a-z]/,
+jsx_closing_element > identifier & /^[a-z]/,
+jsx_self_closing_element > identifier & /^[a-z]/ {
   color: $name;
 }
 
-jsx_opening_element > identifier /^[A-Z]/,
-jsx_closing_element > identifier /^[A-Z]/,
-jsx_self_closing_element > identifier /^[A-Z]/ {
+jsx_opening_element > identifier & /^[A-Z]/,
+jsx_closing_element > identifier & /^[A-Z]/,
+jsx_self_closing_element > identifier & /^[A-Z]/ {
   color: $type;
 }
 

@@ -16,11 +16,11 @@ export_clause > "{", export_clause > "}",
   color: $keyword;
 }
 
-identifier /^[A-Z]/,
-shorthand_property_identifier /^[A-Z]/,
-property_identifier /^[A-Z]/,
-export_specifier /^[A-Z]/,
-call_expression /^[A-Z]/,
+identifier & /^[A-Z]/,
+shorthand_property_identifier & /^[A-Z]/,
+property_identifier & /^[A-Z]/,
+export_specifier & /^[A-Z]/,
+call_expression & /^[A-Z]/,
 new_expression > identifier {
   color: $type;
 }
@@ -50,7 +50,7 @@ call_expression > member_expression > property_identifier {
 
 array > "[",
 array > "]",
-identifier /^[A-Z_]+$/,
+identifier & /^[A-Z_]+$/,
 null, number, boolean  {
   color: $value;
 }

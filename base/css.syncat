@@ -21,8 +21,8 @@ plain_value {
   color: $value;
 }
 
-property_name /^\-\-/,
-call_expression (function_name "var") + arguments plain_value /^\-\-/ {
+property_name & /^\-\-/,
+call_expression (function_name "var") + arguments plain_value & /^\-\-/ {
   color: $variable;
 }
 

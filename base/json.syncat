@@ -5,9 +5,9 @@ pair string {
 }
 
 value > string,
-pair [> ":"] > string {|
+pair > ":" + string {
   color: $string;
-|}
+}
 
 number {
   color: $value;

@@ -31,17 +31,17 @@ method_call > identifier {
   color: $builtin;
 }
 
-subshell.,
-string. {
+subshell >,
+string > {
   color: $string;
 }
 
 symbol,
-pair [> symbol] > ":" {
+pair > (symbol) + ":" {
   color: $meta;
 }
 
-constant /^[A-Z][a-zA-Z_]*$/ {
+constant & /^[A-Z][a-zA-Z_]*$/ {
   color: $type;
 }
 
@@ -53,7 +53,7 @@ nil {
   color: $value;
 }
 
-constant /^[A-Z_]+$/ {
+constant & /^[A-Z_]+$/ {
   color: $constant;
 }
 

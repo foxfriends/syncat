@@ -51,7 +51,7 @@ null, true, false {
   color: $value;
 }
 
-identifier /^[A-Z0-9_]+$/ {
+identifier & /^[A-Z0-9_]+$/ {
   color: $constant;
 }
 

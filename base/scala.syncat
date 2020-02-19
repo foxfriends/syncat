@@ -6,7 +6,7 @@ object_definition > identifier,
 class_definition > identifier,
 type_identifier,
 instance_expression > call_expression > identifier,
-field_expression > identifier /^[A-Z].*/,
+field_expression > identifier & /^[A-Z].*/,
 type_parameters > identifier,
 {
   color: $type;
@@ -36,9 +36,9 @@ infix_expression "to",
 
 function_definition > identifier,
 call_expression > identifier,
-call_expression > field_expression [identifier] identifier,
+call_expression > field_expression identifier + identifier,
 infix_expression > identifier,
-field_expression [identifier] identifier /^to[A-Z].*/,
+field_expression identifier + identifier & /^to[A-Z].*/,
 {
   color: $function;
 }

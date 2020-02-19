@@ -21,7 +21,7 @@ count_quantifier > ",",
 start_assertion,
 end_assertion,
 character_class > "[",
-character_class [> "["] > "^",
+character_class > "[" + "^",
 character_class > "]",
 disjunction > "|",
 class_range > "-" {

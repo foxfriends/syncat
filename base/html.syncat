@@ -29,8 +29,8 @@ comment {
   italic: true;
 }
 
-element (start_tag (tag_name "code") ~ attribute (attribute_name "language") + attribute_value /.*/) + text {
-  language: $0;
+element (start_tag (tag_name & "code") ~ attribute (attribute_name & "language") + (<language-name> attribute_value)) + text {
+  language: $language-name;
 }
 
 style_element raw_text {

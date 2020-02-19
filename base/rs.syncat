@@ -1,3 +1,5 @@
+import "../colours.syncat";
+
 // Keywords
 
 "let", "const", "static", "mut", "ref", "move", "dyn",
@@ -28,10 +30,10 @@ use_wildcard "*" {
   color: $keyword;
 }
 
-use_wildcard identifier,
-scoped_use_list identifier,
-scoped_identifier identifier {
-  color: $function;
+use_wildcard > identifier,
+scoped_use_list > identifier,
+scoped_identifier > identifier & /^[a-z]/ {
+  color: $module;
 }
 
 // Operators
@@ -51,6 +53,9 @@ index_expression > "]", {
 
 // Types
 
+scoped_type_identifier > identifier & /^[A-Z]/,
+scoped_identifier > identifier & /^[A-Z]/,
+use_list > identifier & /^[A-Z]/,
 type_identifier,
 primitive_type {
   color: $type;
@@ -73,13 +78,21 @@ string_literal {
   dim: false;
 }
 
-enum_variant > identifier {
+enum_variant > identifier,
+identifier & /^[A-Z_][A-Z0-9_]*$/, {
+  color: $constant;
+}
+
+// Patterns
+
+match_pattern > identifier {
   color: $constant;
 }
 
 // Function declaration
 
-function_item > identifier {
+function_item > identifier,
+function_signature_item > identifier {
   color: $function;
 }
 
@@ -169,4 +182,3 @@ line_comment, block_comment {
 "self" {
   color: $variable;
 }
-

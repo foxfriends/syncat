@@ -10,7 +10,7 @@ number, boolean { color: $value; }
 string { color: $string; }
 regex { language: regex; }
 
-">", "!", "+", "~", "import" { color: $keyword; }
+"&", ">", "!", "+", "~", "import" { color: $keyword; }
 
 comment {
   color: $comment;

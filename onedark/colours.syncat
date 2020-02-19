@@ -1,6 +1,7 @@
 $comment: brwhite;
 
 $variable: red;
+$module: red;
 $field: $variable;
 $name: $variable;
 

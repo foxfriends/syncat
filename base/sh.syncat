@@ -60,7 +60,7 @@ comment {
   italic: true;
 }
 
-command (command_name) ~ word /^-/ {
+command (command_name) ~ word & /^-/ {
   color: $constant;
 }
 

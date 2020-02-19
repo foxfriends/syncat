@@ -80,7 +80,7 @@ break_statement > identifier {
   color: $builtin;
 }
 
-identifier /^[A-Z_]+$/,
+identifier & /^[A-Z_]+$/,
 null_literal,
 boolean_literal,
 floating_point_literal,
