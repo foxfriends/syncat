@@ -31,15 +31,17 @@ impl FromStr for Stylesheet {
 
 impl FromSource for Stylesheet {
     fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
-        children!(tree, "stylesheet");
         let mut stylesheet = Self::default();
+        if !children!(tree, "stylesheet") {
+            return Ok(stylesheet);
+        }
         while {
             if !tree.node().is_extra() {
                 match tree.node().kind() {
                     "import" => stylesheet.imports.push(Import::from_source(tree, source)?),
                     "declaration" => stylesheet.variables.push(Declaration::from_source(tree, source)?),
                     "rule" => stylesheet.rules.push(Rule::from_source(tree, source)?),
-                    name => return Err(crate::Error::invalid("stylesheet", name)),
+                    name => return Err(crate::Error::invalid("stylesheet_item", name)),
                 }
             }
             tree.goto_next_sibling()
