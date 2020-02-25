@@ -1,8 +1,3 @@
-paper {
-  background-color: white;
-  color: black;
-}
-
 shadow {
   background-color: brblack;
 }
@@ -75,6 +70,14 @@ footnote-def, footnote-ref {
   dim: true;
 }
 
+codeblock txt,
+codeblock txt "prefix",
+codeblock txt "suffix",
+codeblock txt "lang-tag", {
+  background-color: #9ba2af;
+  color: black;
+}
+
 codeblock *,
 codeblock * "prefix",
 codeblock * "suffix", {
@@ -87,10 +90,7 @@ codeblock * "lang-tag" {
   dim: true;
 }
 
-codeblock txt,
-codeblock txt "prefix",
-codeblock txt "suffix",
-codeblock txt "lang-tag", {
-  background-color: #9ba2af;
+paper {
+  background-color: white;
   color: black;
 }
