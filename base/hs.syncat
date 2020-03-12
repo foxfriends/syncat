@@ -1,33 +1,34 @@
 import "../colours.syncat";
 
-"module", "import", "hiding", "qualified", "as", "where", "let", "in", "newtype", "data", "deriving", "class", "instance",
-"case", "of", "otherwise", "do",
+"module", "import", "hiding", "qualified", "as", "where", 
+"let", "in", "type", "newtype", "data", "deriving", "class", "instance",
+"case", "of", "otherwise", "do", "if", "then", "else"
 {
     color: $keyword;
 }
 
-variable_symbol, wildcard, "->", "=", annotation, "<-",
+"return", "pure", "fmap", "print", "putStrLn", "show", "read", "getLine", "getChar", "putChar" {
+    color: $builtin;
+}
+
+variable_symbol, wildcard, "->", "=", "=>", annotation, "<-", lambda_head "\\",
 {
     color: $operator;
 }
+
+// TODO: we need a way to denote *not*
 
 module_identifier {
     color: $name;
     italic: true;
 }
 
-variable_identifier { color: $function; }
-
-constructor_pattern > variable_identifier,
-bind_pattern > variable_identifier,
-function_declaration > variable_identifier {
-    color: $name;
+type_signature > variable_identifier {
+    color: $function;
 }
 
-bind_pattern > * + variable_identifier { color: $function; }
-
-type_variable_identifier { color: $meta; }
-type_class_identifier { color: $constant; }
+type_variable_identifier { color: $variable; }
+type_class_identifier { color: $type; }
 
 type_constructor_identifier,
 constructor_identifier,
