@@ -66,6 +66,7 @@ impl<'s> Query<'s> {
                 matches.insert(name, self.text);
                 Some(matches)
             }
+            NodeKind::Not(node) => if self.matches(node).is_some() { None } else { Some(Matches::default()) },
         }
     }
 

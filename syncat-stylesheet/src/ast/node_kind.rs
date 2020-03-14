@@ -10,6 +10,7 @@ pub(crate) enum NodeKind {
     Token(String),
     TokenPattern(Regex),
     Group(Option<String>, Selector),
+    Not(Box<Self>),
 }
 
 fn unquote_regex(string: &str) -> Result<Regex, regex::Error> {
@@ -59,19 +60,27 @@ impl FromSource for NodeKind {
     fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
         children!(tree, "node");
         extras!(tree, "node");
+        let kind = Self::node_inner(tree, source)?;
+        tree.goto_parent();
+        Ok(kind)
+    }
+}
+
+impl NodeKind {
+    fn node_inner(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
         let kind = match tree.node().kind() {
-            "any" => NodeKind::Any,
+            "any" => Self::Any,
             "kind" => {
                 children!(tree, "kind");
                 let name = text!(tree, source, "name")?.to_string();
                 tree.goto_parent();
-                NodeKind::Kind(name)
+                Self::Kind(name)
             },
             "token" => {
                 children!(tree, "token");
                 let node = match tree.node().kind() {
-                    "string" => NodeKind::Token(unquote(text!(tree, source, "string")?)?),
-                    "regex" => NodeKind::TokenPattern(unquote_regex(text!(tree, source, "regex")?)?),
+                    "string" => Self::Token(unquote(text!(tree, source, "string")?)?),
+                    "regex" => Self::TokenPattern(unquote_regex(text!(tree, source, "regex")?)?),
                     name => return Err(crate::Error::invalid("node_kind(token)", name)),
                 };
                 tree.goto_parent();
@@ -92,11 +101,17 @@ impl FromSource for NodeKind {
                 };
                 let selector = Selector::from_source(tree, source)?;
                 tree.goto_parent();
-                NodeKind::Group(name, selector)
+                Self::Group(name, selector)
+            }
+            "not" => {
+                children!(tree, "not");
+                extras!(tree, "not");
+                let kind = Self::node_inner(tree, source)?;
+                tree.goto_parent();
+                Self::Not(Box::new(kind))
             }
             name => return Err(crate::Error::invalid("node_kind", name)),
         };
-        tree.goto_parent();
         Ok(kind)
     }
 }
