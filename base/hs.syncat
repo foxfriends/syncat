@@ -16,13 +16,13 @@ variable_symbol, wildcard, "->", "=", "=>", annotation, "<-", lambda_head "\\",
     color: $operator;
 }
 
-// TODO: we need a way to denote *not*
-
 module_identifier {
     color: $name;
     italic: true;
 }
 
+function_declaration > !* + variable_identifier,
+function_application > !* + variable_identifier,
 type_signature > variable_identifier {
     color: $function;
 }
