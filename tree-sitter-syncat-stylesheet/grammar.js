@@ -35,11 +35,16 @@ module.exports = grammar({
         also: $ => '&',
 
         node: $ => choice(
+            $.not,
+            $._positive_node,
+        ),
+        _positive_node: $ => choice(
             $.group,
             $.kind,
             $.token,
             $.any,
         ),
+        not: $ => seq('!', $._positive_node),
         group: $ => seq('(', optional($.group_name), $.selector, ')'),
         group_name: $ => seq('<', $.name, '>'),
         kind: $ => $.name,

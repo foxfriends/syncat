@@ -1,0 +1,12 @@
+=============
+Negative Node
+=============
+
+node ! child {}
+
+---
+
+(stylesheet
+  (rule
+    (selectors (selector (node (kind (name))) (node (not (kind (name))))))
+    (styles)))
