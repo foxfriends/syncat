@@ -194,6 +194,19 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "not"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_positive_node"
+        }
+      ]
+    },
+    "_positive_node": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
           "name": "group"
         },
         {
@@ -207,6 +220,19 @@
         {
           "type": "SYMBOL",
           "name": "any"
+        }
+      ]
+    },
+    "not": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "!"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_positive_node"
         }
       ]
     },
