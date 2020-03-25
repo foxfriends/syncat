@@ -1,6 +1,7 @@
 use crate::dirs::{active_color, config, libraries};
 use libloading::{Library, Symbol};
 use std::borrow::Borrow;
+use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fs;
 use syncat_stylesheet::Stylesheet;
@@ -49,10 +50,15 @@ pub struct Lang {
     pub library: String,
     pub name: String,
     pub extensions: Vec<String>,
+    #[serde(skip)]
+    lib: RefCell<Option<Library>>,
 }
 
 impl Lang {
-    pub fn parser(&self) -> Result<Language, Box<dyn std::error::Error>> {
+    fn load(&self) -> Result<(), Box<dyn std::error::Error>> {
+        if self.lib.borrow().is_some() {
+            return Ok(());
+        }
         let lib_dir = libraries().join(&self.library);
         let lib_name = fs::read_dir(&lib_dir)?
             .filter_map(|entry| entry.ok())
@@ -65,9 +71,16 @@ impl Lang {
                     .is_some()
             })
             .expect("Language is not installed correctly.");
-        let lib = Library::new(lib_dir.join(lib_name))?;
-        println!("tree_sitter_{}", self.name);
+        let library = Library::new(lib_dir.join(lib_name))?;
+        *self.lib.borrow_mut() = Some(library);
+        Ok(())
+    }
+
+    pub fn parser(&self) -> Result<Language, Box<dyn std::error::Error>> {
+        self.load()?;
         unsafe {
+            let borrow = self.lib.borrow();
+            let lib = borrow.as_ref().unwrap();
             let get_parser: Symbol<unsafe extern "C" fn() -> Language> =
                 lib.get(format!("tree_sitter_{}", self.name).as_bytes())?;
             Ok(get_parser())
