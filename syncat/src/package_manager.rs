@@ -1,44 +1,89 @@
 use crate::{
     dirs::{active_color, libraries},
-    language::LangMap,
+    language::{Lang, LangMap},
     Subcommand,
 };
 use cc::Build;
 use std::fs;
 use std::process::Command;
+use tempdir::TempDir;
 
 include!(concat!(env!("OUT_DIR"), "/targets.rs"));
 
-macro_rules! try_continue {
-    ($arg:expr) => {
-        match $arg {
-            Ok(value) => value,
-            Err(err) => {
-                eprintln!("Failed to install: {}", err);
-                continue;
-            }
-        }
-    };
-}
-
-macro_rules! try_continue_cmd {
-    ($arg:expr) => {
-        match $arg {
-            Ok(status) if status.success() => {}
-            Ok(status) => {
-                if let Some(code) = status.code() {
-                    eprintln!("Failed to install: non-zero exit code {}", code);
-                } else {
-                    eprintln!("Failed to install: process terminated");
-                }
-                continue;
-            }
-            Err(err) => {
-                eprintln!("Failed to install: {}", err);
-                continue;
-            }
-        }
-    };
+fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
+    let temp_dir = TempDir::new("syncat")?;
+    println!("Installing {}...", name);
+    let directory = libraries().join(&lang.library);
+    if directory.exists() {
+        Command::new("git")
+            .arg("pull")
+            .current_dir(&directory)
+            .status()?;
+    } else {
+        Command::new("git")
+            .arg("clone")
+            .arg(&lang.source)
+            .arg("--recurse") // doubt it's needed, but why not?
+            .current_dir(libraries())
+            .status()?;
+    }
+    let srcdir = directory.join("src");
+    let src_files = fs::read_dir(&srcdir)?
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|path| path.file_stem().unwrap() != "binding") // skip the nodejs binding
+        .filter(|path| {
+            path.extension()
+                // only include C/C++ source files
+                .filter(|ext| *ext == "c" || *ext == "cc" || *ext == "cpp")
+                .is_some()
+        });
+    let mut cpp = false;
+    for file in src_files {
+        Build::new()
+            .include(&srcdir)
+            .shared_flag(true)
+            .pic(true)
+            .warnings(false)
+            .cpp(if file.extension().unwrap() == "c" {
+                false
+            } else {
+                cpp = true;
+                true
+            })
+            .file(&file)
+            // we must manually configure CC because we don't have the scraped ENV variables
+            .host(HOST) // these got scraped during the build phase and saved for later.
+            .target(TARGET)
+            .opt_level(3) // improve the speed of the program
+            .out_dir(temp_dir.path())
+            .compile("syncat");
+    }
+    let compiler = Build::new()
+        .include(&srcdir)
+        .cpp(cpp)
+        .shared_flag(true)
+        .warnings(false)
+        .host(HOST)
+        .target(TARGET)
+        .opt_level(3)
+        .get_compiler();
+    if compiler.is_like_gnu() {
+        compiler
+            .to_command()
+            .arg("-o")
+            .arg(directory.join("libsyncat.so"))
+            .args(
+                fs::read_dir(temp_dir.path())?
+                    .filter_map(|entry| entry.ok())
+                    .map(|entry| entry.path())
+                    .filter(|path| path.extension().filter(|ext| *ext == "o").is_some()),
+            )
+            .status()?;
+    } else {
+        panic!("This C/C++ compiler is not yet supported");
+    }
+    Ok(())
 }
 
 pub(crate) fn main(opts: &Subcommand) -> Result<(), Box<dyn std::error::Error>> {
@@ -48,88 +93,31 @@ pub(crate) fn main(opts: &Subcommand) -> Result<(), Box<dyn std::error::Error>> 
     }
 
     match opts {
-        &Subcommand::Install { recommended } => {
-            if recommended {
+        Subcommand::Install {
+            recommended,
+            languages,
+        } => {
+            if *recommended {
                 println!("TODO: implement the recommended list");
             }
-            for (name, lang) in &lang_map {
-                println!("Installing {}...", name);
-                let directory = libraries().join(&lang.library);
-                if directory.exists() {
-                    try_continue_cmd!(Command::new("git")
-                        .arg("pull")
-                        .current_dir(&directory)
-                        .status());
-                } else {
-                    try_continue_cmd!(Command::new("git")
-                        .arg("clone")
-                        .arg(&lang.source)
-                        .arg("--recurse") // doubt it's needed, but why not?
-                        .current_dir(libraries())
-                        .status());
-                }
-                let srcdir = directory.join("src");
-                let mut build = Build::new();
-                build
-                    .include(&srcdir)
-                    .shared_flag(true)
-                    .pic(true)
-                    .warnings(false)
-                    .files(
-                        try_continue!(fs::read_dir(&srcdir))
-                            .filter_map(|entry| entry.ok())
-                            .map(|entry| entry.path())
-                            .filter(|path| path.file_stem().unwrap() != "binding") // skip the nodejs binding
-                            .filter(|path| {
-                                path.extension()
-                                    // only include C/C++ source files
-                                    .filter(|ext| *ext == "c" || *ext == "cc")
-                                    .is_some()
-                            }),
-                    )
-                    // we must manually configure CC because we don't have the scraped ENV variables
-                    .host(HOST) // these got scraped during the build phase and saved for later.
-                    .target(TARGET)
-                    .opt_level(3) // improve the speed of the program
-                    .out_dir(&directory)
-                    .compile("syncat");
-                let generated_file = try_continue!(fs::read_dir(&directory))
-                    .filter_map(|entry| entry.ok())
-                    .map(|entry| entry.path())
-                    .filter(|path| path.file_stem().is_some())
-                    .find(|path| {
-                        path.file_stem()
-                            .unwrap()
-                            .to_str()
-                            .filter(|s| s.contains("syncat"))
-                            .is_some()
-                    });
-                let generated_file = match generated_file {
-                    Some(file) => file,
-                    None => {
-                        eprintln!("Failed to install: compilation was not successful");
-                        continue;
+            if languages.is_empty() {
+                for (name, lang) in &lang_map {
+                    if let Err(error) = install(name, lang) {
+                        eprintln!("Failed to install {}: {}", name, error);
                     }
-                };
-                fs::remove_file(generated_file).ok(); // we don't need the .a file
-                let compiler = build.get_compiler();
-                if compiler.is_like_gnu() {
-                    try_continue_cmd!(compiler
-                        .to_command()
-                        .arg("-o")
-                        .arg(directory.join("libsyncat.so"))
-                        .args(
-                            try_continue!(fs::read_dir(&srcdir))
-                                .filter_map(|entry| entry.ok())
-                                .map(|entry| entry.path())
-                                .filter(|path| path
-                                    .extension()
-                                    .filter(|ext| *ext == "o")
-                                    .is_some()),
-                        )
-                        .status());
-                } else {
-                    panic!("This C/C++ compiler is not yet supported");
+                }
+            } else {
+                for language in languages {
+                    match lang_map.get(language) {
+                        None => {
+                            println!("No language named {} is listed in languages.toml", language);
+                        }
+                        Some(lang) => {
+                            if let Err(error) = install(language, lang) {
+                                eprintln!("Failed to install {}: {}", language, error);
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -78,6 +78,9 @@ enum Subcommand {
         /// If you already have a `languages.toml` file, this will add records to it.
         #[structopt(short, long)]
         recommended: bool,
+        /// If you provide a list of languages, only only those languages will be installed now. They must
+        /// be listed in the `languages.toml` file first.
+        languages: Vec<String>,
     },
     /// Remove an installed language.
     Remove {
