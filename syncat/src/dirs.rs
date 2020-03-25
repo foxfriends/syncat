@@ -12,3 +12,7 @@ pub fn config() -> PathBuf {
 pub fn active_color() -> PathBuf {
     config().join("style").join("active")
 }
+
+pub fn libraries() -> PathBuf {
+    config().join("languages")
+}
