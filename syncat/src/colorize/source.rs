@@ -1,13 +1,15 @@
+use crate::Lang;
+use ansi_term::Style;
 use std::convert::TryInto;
 use std::fmt::{self, Formatter};
-use ansi_term::Style;
-use tree_sitter::{Tree, TreeCursor, Parser};
-use syncat_stylesheet::{Stylesheet, Query};
-use crate::Lang;
+use syncat_stylesheet::{Query, Stylesheet};
+use tree_sitter::{Parser, Tree, TreeCursor};
 
 fn write_token(f: &mut Formatter, token: &str, style: Style) -> fmt::Result {
     let mut line_count = token.lines().count();
-    if !token.ends_with('\n') { line_count -= 1; }
+    if !token.ends_with('\n') {
+        line_count = line_count.saturating_sub(1);
+    }
     for (index, line) in token.lines().enumerate() {
         write!(f, "{}", style.paint(line))?;
         if index != line_count {
@@ -17,7 +19,14 @@ fn write_token(f: &mut Formatter, token: &str, style: Style) -> fmt::Result {
     Ok(())
 }
 
-fn write_node<'s>(f: &mut Formatter, query: &mut Query<'s>, index: &mut Vec<usize>, tree: &mut TreeCursor, source: &'s str, stylesheet: &Stylesheet) -> fmt::Result {
+fn write_node<'s>(
+    f: &mut Formatter,
+    query: &mut Query<'s>,
+    index: &mut Vec<usize>,
+    tree: &mut TreeCursor,
+    source: &'s str,
+    stylesheet: &Stylesheet,
+) -> fmt::Result {
     let style = stylesheet.style(query).unwrap_or_default();
     let language = style.try_get::<Lang>("language").map_err(|_| fmt::Error)?;
     let style: Style = style.try_into().map_err(|_| fmt::Error)?;
@@ -30,7 +39,12 @@ fn write_node<'s>(f: &mut Formatter, query: &mut Query<'s>, index: &mut Vec<usiz
         parser.set_language(language.parser()).unwrap();
         let token = tree.node().utf8_text(source.as_ref()).unwrap();
         let subtree = parser.parse(&token, None).unwrap();
-        write(f, &token, &subtree, &language.style().map_err(|_| fmt::Error)?)?;
+        write(
+            f,
+            &token,
+            &subtree,
+            &language.style().map_err(|_| fmt::Error)?,
+        )?;
     } else if tree.node().child_count() == 0 {
         // leaf node
         let token = tree.node().utf8_text(source.as_ref()).unwrap();
@@ -54,7 +68,9 @@ fn write_node<'s>(f: &mut Formatter, query: &mut Query<'s>, index: &mut Vec<usiz
             write_node(f, query, index, tree, source, stylesheet)?;
             index.pop();
             tree.goto_next_sibling()
-        } { i += 1; }
+        } {
+            i += 1;
+        }
         if previous_end_byte != end_byte {
             let token = &source[previous_end_byte..end_byte];
             write_token(f, token, style)?;
@@ -65,7 +81,12 @@ fn write_node<'s>(f: &mut Formatter, query: &mut Query<'s>, index: &mut Vec<usiz
     Ok(())
 }
 
-pub(super) fn write(f: &mut Formatter, source: &str, tree: &Tree, stylesheet: &Stylesheet) -> fmt::Result {
+pub(super) fn write(
+    f: &mut Formatter,
+    source: &str,
+    tree: &Tree,
+    stylesheet: &Stylesheet,
+) -> fmt::Result {
     let mut tree = tree.walk();
     let mut query = Query::from((&tree.node(), source));
     write_node(f, &mut query, &mut vec![], &mut tree, source, stylesheet)
