@@ -1,5 +1,6 @@
 [Tree-sitter]: https://github.com/tree-sitter/tree-sitter
 [syncat-themes]: https://github.com/foxfriends/syncat-themes
+[languages.toml]: https://github.com/foxfriends/config/blob/syncat/languages.toml
 [crates.io]: https://crates.io
 
 # Syncat
@@ -63,7 +64,9 @@ Syncat to use. Fortunately, the downloading and compiling can be handled by Sync
 specify what to download.
 
 The language map is a simple TOML file named `languages.toml`, located in the root of the
-configuration folder. Each entry in this file describes one language, and is a table of 4
+configuration folder. A good start might be to try [mine][languages.toml].
+
+Each entry in this file describes one language, and is a table of 4
 or 5 keys. The example entry below would install a highlighter for Syncat stylesheets.
 
 ```toml
@@ -104,10 +107,6 @@ syncat -l js src/package.json
 
 # Installs (or updates) all languages listed in the `languages.toml` file
 syncat install
-
-# Adds all the recommended languages to your `languages.toml` file and then installs
-# the whole file
-syncat install --recommended
 
 # Installs only a specific entry in the `languages.toml` file
 syncat install rust

@@ -97,13 +97,7 @@ pub(crate) fn main(opts: &Subcommand) -> Result<(), Box<dyn std::error::Error>> 
     }
 
     match opts {
-        Subcommand::Install {
-            recommended,
-            languages,
-        } => {
-            if *recommended {
-                println!("TODO: implement the recommended list");
-            }
+        Subcommand::Install { languages } => {
             if languages.is_empty() {
                 for (name, lang) in &lang_map {
                     if let Err(error) = install(name, lang) {

@@ -74,10 +74,6 @@ enum Subcommand {
     /// will be updated, if updates are available. This process may take a long time, depending on
     /// how many languages are being installed.
     Install {
-        /// Install all the recommended languages, and generate the `languages.toml` file.
-        /// If you already have a `languages.toml` file, this will add records to it.
-        #[structopt(short, long)]
-        recommended: bool,
         /// If you provide a list of languages, only only those languages will be installed now. They must
         /// be listed in the `languages.toml` file first.
         languages: Vec<String>,
