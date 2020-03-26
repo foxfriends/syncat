@@ -8,7 +8,7 @@ use tree_sitter::{Parser, Tree, TreeCursor};
 fn write_token(f: &mut Formatter, token: &str, style: Style) -> fmt::Result {
     let mut line_count = token.lines().count();
     if !token.ends_with('\n') {
-        line_count -= 1;
+        line_count = line_count.saturating_sub(1);
     }
     for (index, line) in token.lines().enumerate() {
         write!(f, "{}", style.paint(line))?;
