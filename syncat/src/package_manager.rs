@@ -13,7 +13,7 @@ include!(concat!(env!("OUT_DIR"), "/targets.rs"));
 fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
     let temp_dir = TempDir::new("syncat")?;
     println!("Installing {}...", name);
-    let directory = libraries().join(&lang.library);
+    let mut directory = libraries().join(&lang.library);
     if directory.exists() {
         Command::new("git")
             .arg("pull")
@@ -26,6 +26,9 @@ fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
             .arg("--recurse") // doubt it's needed, but why not?
             .current_dir(libraries())
             .status()?;
+    }
+    if let Some(ref path) = lang.path {
+        directory = directory.join(path);
     }
     let srcdir = directory.join("src");
     let src_files = fs::read_dir(&srcdir)?
