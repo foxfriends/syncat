@@ -24,6 +24,7 @@ fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
             .arg("clone")
             .arg(&lang.source)
             .arg("--recurse") // doubt it's needed, but why not?
+            .arg(&lang.library) // make sure we put it in the directory named as expected
             .current_dir(libraries())
             .status()?;
     }
