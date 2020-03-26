@@ -9,124 +9,86 @@ Syntax aware cat utility. Provides syntax highlighting to files printed on the c
 
 ## Installation
 
-Unfortunately, Syncat's compiled binary is too large to be published on [crates.io], so you have
-to install from source.
+Syncat can be installed from [crates.io][]:
 
 ```bash
-git clone https://github.com/foxfriends/syncat
-cd syncat
-cargo install --path syncat
+cargo install syncat
 ```
 
-You will then also want to set up the stylesheets (otherwise nothing will be highlighted). Feel
-free to modify these themes, and make new ones that are more to your taste. Pull requests with
-new themes are greatly appreciated! The full documentation on themes is available [here][syncat-themes].
-
-```bash
-mkdir ~/.config/syncat
-cd ~/.config/syncat
-git clone https://github.com/foxfriends/syncat-themes style
-```
-
-### Language Support
-
-By default syncat will be installed with all languages enabled. As each language's parser is
-statically linked to the resulting executable, this can get quite large and take a very long time.
-You can override this by passing a comma separated list of languages to support at compile time via 
-the `syncat_languages` environment variable. For example:
-
-```bash
-# only enable Rust
-syncat_languages=rust cargo install --path .
-
-# enable Rust and JavaScript
-syncat_languages=rust,javascript cargo install --path .
-```
-
-If in future you would like to add new languages, you will have to reinstall with different language 
-list.
-
-These are the languages you can pick from:
-*   `agda`
-*   `bash`
-*   `c`
-*   `clojure`
-*   `cpp`
-*   `c-sharp`
-*   `css`
-*   `elm`
-*   `embedded-template`
-*   `eno`
-*   `go`
-*   `haskell`
-*   `html`
-*   `java`
-*   `javascript`
-*   `jsdoc`
-*   `json`
-*   `julia`
-*   `latex`
-*   `lua`
-*   `markdown`
-*   `ocaml`
-*   `php`
-*   `python`
-*   `regex`
-*   `ruby`
-*   `rust`
-*   `scala`
-*   `systemrdl`
-*   `syncat-stylesheet`
-*   `test`
-*   `toml`
-*   `typescript`
-*   `tsx`
-*   `verilog`
-*   `yaml`
-
-And here is that list as a string you can paste:
-
-```
-agda,bash,c,clojure,cpp,c-sharp,css,elm,embedded-template,eno,go,haskell,html,java,javascript,jsdoc,json,julia,latex,lua,markdown,ocaml,php,python,regex,ruby,rust,scala,syncat-stylesheet,systemrdl,test,toml,typescript,tsx,verilog,yaml
-```
+Before you use Syncat, it must be configured.
 
 ## Configuration
 
-Syncat looks for configuration in the default configuration locations for your operating system:
+Syncat only works once you have set up the *stylesheets* and *languages*.
+The quickest way to get started is to copy my personal configurations (with the advantage that you keep up
+to date with my changes), but this is, of course, a somewhat personal choice so you may well wish to diverge.
+I provide you with this option anyway:
+
+```bash
+# For Linux:
+cd ~/.config
+git clone https://github.com/foxfriends/config.git -b syncat syncat --recursive
+
+# For Mac:
+cd ~/Library/Preferences/
+git clone https://github.com/foxfriends/config.git -b syncat com.cameldridge.syncat --recursive
+```
+
+To configure on your own, start by creating the appropriate configuration directory, depending on
+your operating system, and then continuing to the following sections. The appropriate directories
+are:
 *   Linux: `$HOME/.config/syncat/`
 *   Mac: `$HOME/Library/Preferences/com.cameldridge.syncat/`
 *   Windows: Not officially supported
 
-The supported configurations are:
-*   Language Map; and
-*   Stylesheets
-
-### Language Map
-
-The language map is a simple TOML file named `languages.toml`, located in the root of the configuration
-folder listed above. The keys of this file denote the extension to support, and the value is the
-language that files with that extension should be parsed as.
-
-For example, to have `.svelte` files parsed as HTML, you would include this entry:
-
-```toml
-svelte = "html"
-```
-
 ### Stylesheets
 
-In order for Syncat to know what colours to set, you must provide a stylesheet for each language. A
-number of pre-made themes are provided in the [syncat-themes][] repository.
+The official stylesheets (admittedly somewhat incomplete) are available [here][syncat-themes].
 
-Syncat will look for the `.syncat` file corresponding to the language of your source code in the
-following directories:
+Stylesheets are placed in the configuration directory, under a subdirectory `style`. You can
+get the official themes as below, or just create this directory yourself.
 
-*   Linux: `$HOME/.config/syncat/style/active`
-*   Mac: `$HOME/Library/Preferences/com.cameldridge.syncat/style/active`
-*   Windows: Not officially supported
+```bash
+cd ~/.config/syncat # or `cd ~/Library/Preferences/com.cameldridge.syncat` for Mac users
+git clone https://github.com/foxfriends/syncat-themes style
+```
 
-For more information on how the provided themes are implemented, and on creating your own themes, 
-see the [syncat-themes][] documentation.
+For full documentation on how these stylesheet customizations work, see the README in
+the [syncat-themes][] repository.
+
+### Languages
+
+As Syncat uses Tree-sitter for parsing, you must download and compile Tree-sitter parsers for
+Syncat to use. Fortunately, the downloading and compiling can be handled by Syncat, given you
+specify what to download.
+
+The language map is a simple TOML file named `languages.toml`, located in the root of the
+configuration folder. Each entry in this file describes one language, and is a table of 4
+or 5 keys. The example entry below would install a highlighter for Syncat stylesheets.
+
+```toml
+[syncat-stylesheet] # The name here is arbitrary
+# The URL of the Git repository where the language is defined
+source = "https://github.com/foxfriends/syncat"
+# Optional: The path within the repository to the tree-sitter package.
+# Leave this out if the language is defined in the root of the repository.
+path = "tree-sitter-syncat-stylesheet"
+# The name of the directory to clone the `source` repository into. Typically
+# this is the same name as the source repository, but you must specify it anyway.
+library = "syncat"
+# The name of this language. This value should be the same as the value listed
+# in the `grammar.js` file from the repository.
+#
+# This name will also be the name of the stylesheet file used when highlighting
+# this language.
+name = "syncat_stylesheet"
+# A list of file extensions which should be parsed using this language.
+extensions = ["syncat"]
+```
+
+Once you have filled this file to your liking, the command `syncat install` will install all
+of those languages. Running `syncat install` again later will update all languages, and install
+any new ones.
 
 ## Usage
 
@@ -134,9 +96,27 @@ see the [syncat-themes][] documentation.
 # Colours this file based on the extension
 syncat src/main.rs
 
-# Uses the bash expansion, colouring each file by its own extension
+# Uses the shell expansion, colouring each file by its own extension
 syncat src/*.rs
 
 # Colours the file using a specific language
 syncat -l js src/package.json
+
+# Installs (or updates) all languages listed in the `languages.toml` file
+syncat install
+
+# Adds all the recommended languages to your `languages.toml` file and then installs
+# the whole file
+syncat install --recommended
+
+# Installs only a specific entry in the `languages.toml` file
+syncat install rust
+
+# Uninstalls a language. A few points to note:
+# *   The language must still be listed in the `languages.toml` file.
+# *   This does not remove the file from `languages.toml`, only deletes its installation.
+syncat remove rust
+
+# Show information about all languages listed in `languages.toml`
+syncat list
 ```
