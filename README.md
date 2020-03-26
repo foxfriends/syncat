@@ -57,48 +57,9 @@ A `.syncat` stylesheet looks, feels, and works very similarly to a CSS file.
 Syncat files can, of course, be highlighted by using Syncat, which can be useful for debugging.
 There is also a highlighter defined for the `Kakoune` text editor [here][syncat.kak].
 
-These files correspond to one language each, identified by the file name. The supported file names
-are:
-
-*   Agda: `agda.syncat`
-*   C: `c.syncat`
-*   C++: `cpp.syncat`
-*   C#: `cs.syncat`
-*   Rust: `rs.syncat`
-*   Ruby: `rb.syncat`
-*   EJS/ERB: `template.syncat`
-*   TypeScript: `ts.syncat`
-*   JavaScript: `js.syncat`
-*   JSON: `json.syncat`
-*   Elm: `elm.syncat`
-*   Bash: `sh.syncat`
-*   Python: `py.syncat`
-*   Go: `go.syncat`
-*   PHP: `php.syncat`
-*   OCaml: `ml.syncat`
-*   HTML: `html.syncat`
-*   CSS: `css.syncat`
-*   Markdown: `md.syncat`
-*   TeX: `tex.syncat`
-*   Java: `java.syncat`
-*   Scala: `scala.syncat`
-*   Clojure: `clj.syncat`
-*   Haskell: `hs.syncat`
-*   Regex: `regex.syncat`
-*   Syncat: `syncat.syncat`
-*   Lua: `lua.syncat`
-*   OCaml: `ml.syncat`
-*   Eno: `eno.syncat`
-*   TOML: `toml.syncat`
-*   YAML: `yaml.syncat`
-*   Syncat Stylesheet: `syncat.syncat`
-*   Tree sitter corpus tests: `corpus.syncat`
-*   SystemRDL: `systemrdl.syncat`
-*   Verilog: `verilog.syncat`
-
-The languages supported are limited by the languages available as [Tree-sitter][] grammars.
-If a language you would like to use is not supported by Syncat, consider building a new grammar
-and adding support for it.
+These files correspond to one language each, identified by the file name. These names are based
+on the `name` entry in the `languages.toml` file of your Syncat configuration. See the [Syncat][]
+documentation for more info on the `languages.toml` file.
 
 ## Syntax
 
