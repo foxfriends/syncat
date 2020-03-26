@@ -20,7 +20,11 @@ operating system:
 *   Windows: Not officially supported
 
 In particular, to install these stylesheets, clone this repository to the `syncat/style` directory.
-The `active` directory with the themes has been created already.
+
+```
+cd ~/.config/syncat
+git clone https://github.com/foxfriends/syncat-themes style
+```
 
 ## Selecting a theme
 
@@ -28,9 +32,10 @@ The themes in this repository implemented in two parts. In the `base` directory 
 filetype stylesheets, each of which requires the file `../colours.syncat` to exist, defining the
 colours which are used. These `colours.syncat` files are defined in each of the other directories,
 listing the relevant colours definitions for that theme, so one must be symlinked to the right
-location for the themes to work, for example:
+location for the themes to work, for example, if you like `onedark`:
 
 ```bash
+ln -s ./base ./active
 ln -s ./onedark/colours.syncat ./colours.syncat
 ```
 
