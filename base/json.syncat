@@ -1,11 +1,11 @@
 import "../colours.syncat";
 
-pair string {
+pair > !* + string {
   color: $field;
 }
 
 value > string,
-pair > ":" + string {
+pair ":" + string {
   color: $string;
 }
 
