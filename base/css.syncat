@@ -43,3 +43,11 @@ comment {
   color: $comment;
   italic: true;
 }
+
+media_statement "@media" {
+  color: $keyword;
+}
+
+feature_name {
+  color: $function;
+}
