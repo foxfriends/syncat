@@ -44,15 +44,15 @@ fn write_node<'s>(
         if tree.node().is_named() {
             write!(
                 f,
-                "({} \"{}\")",
+                "({} {})",
                 style.paint(tree.node().kind()),
-                style.paint(tree.node().utf8_text(source.as_ref()).unwrap()),
+                style.paint(format!("{:?}", tree.node().utf8_text(source.as_ref()).unwrap())),
             )?;
         } else {
             write!(
                 f,
-                "(\"{}\")",
-                style.paint(tree.node().utf8_text(source.as_ref()).unwrap())
+                "({})",
+                style.paint(format!("{:?}", tree.node().utf8_text(source.as_ref()).unwrap())),
             )?;
         }
     } else {
