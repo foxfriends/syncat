@@ -32,6 +32,17 @@ fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
         directory = directory.join(path);
     }
     let srcdir = directory.join("src");
+    if !srcdir.exists() {
+        println!("src directory does not exist... attempting to generate it");
+        Command::new("npm")
+            .arg("install")
+            .current_dir(&directory)
+            .status()?;
+        Command::new("./node_modules/.bin/tree-sitter")
+            .arg("generate")
+            .current_dir(&directory)
+            .status()?;
+    }
     let src_files = fs::read_dir(&srcdir)?
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
