@@ -16,12 +16,14 @@ Syncat aims to provide similar features to the standard `cat` and the similar [B
 2.  Show line endings (`-e`)
 3.  Line numbering (`-n`)
 4.  Multiple levels of framing (`-f` or `-ff`)
-4.  File concatenation
-5.  Parses any file type accurately using Tree-sitter
-6.  Customizable syntax colouring using stylesheets
+5.  File concatenation
+6.  Parses any file type accurately using Tree-sitter
+7.  Customizable syntax colouring using stylesheets
 
 In particular, the advantage of Syncat over the other options is that the parsing is done using 
-Tree-sitter instead of with regular expressions.
+[Tree-sitter][] instead of with regular expressions, which makes it
+* very fast;
+* robust enough to provide useful results even in the presence of syntax errors.
 
 Syncat does not support automatic paging, but you can just use `less -r` to handle that.
 
