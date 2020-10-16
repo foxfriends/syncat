@@ -2,11 +2,28 @@
 [syncat-themes]: https://github.com/foxfriends/syncat-themes
 [languages.toml]: https://github.com/foxfriends/config/blob/syncat/languages.toml
 [crates.io]: https://crates.io
+[Bat]: https://github.com/sharkdp/bat
 
 # Syncat
 
 Syntax aware cat utility. Provides syntax highlighting to files printed on the command line using
 [Tree-sitter][] to parse the files, and ANSI escape codes to colour them.
+
+## Features
+
+Syncat aims to provide similar features to the standard `cat` and the similar [Bat][] tool:
+1.  Git integration (`-g`)
+2.  Show line endings (`-e`)
+3.  Line numbering (`-n`)
+4.  Multiple levels of framing (`-f` or `-ff`)
+4.  File concatenation
+5.  Parses any file type accurately using Tree-sitter
+6.  Customizable syntax colouring using stylesheets
+
+In particular, the advantage of Syncat over the other options is that the parsing is done using 
+Tree-sitter instead of with regular expressions.
+
+Syncat does not support automatic paging, but you can just use `less -r` to handle that.
 
 ## Installation
 
