@@ -2,7 +2,7 @@
   "name": "tree-sitter-syncat-stylesheet",
   "version": "2.2.0",
   "description": "Parser for Syncat stylesheets",
-  "main": "index.js",
+  "main": "bindings/node",
   "scripts": {
     "start": "tree-sitter generate",
     "test": "tree-sitter test"
@@ -15,7 +15,7 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "tree-sitter-cli": "^0.14.7"
+    "tree-sitter-cli": "^0.20.0"
   },
   "dependencies": {
     "nan": "^2.14.0"
