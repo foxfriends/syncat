@@ -11,7 +11,7 @@ import "../colours.syncat";
     color: $builtin;
 }
 
-variable_symbol, wildcard, "->", "=", "=>", annotation, "<-", lambda_head "\\",
+variable_symbol, wildcard, "->", "=", "=>", annotation, "<-", lambda_head "\\", "::"
 {
     color: $operator;
 }
@@ -23,7 +23,8 @@ module_identifier {
 
 function_declaration > !* + variable_identifier,
 function_application > !* + variable_identifier,
-type_signature > variable_identifier {
+type_signature > variable_identifier,
+signature > variable, {
     color: $function;
 }
 
@@ -32,6 +33,7 @@ type_class_identifier { color: $type; }
 
 type_constructor_identifier,
 constructor_identifier,
+type,
 {
     color: $type;
 }
@@ -39,4 +41,7 @@ constructor_identifier,
 unit_constructor, list_expression > "[", list_expression > "]" { color: $keyword; }
 string { color: $string; }
 integer, float, char { color: $value; }
-comment { color: $comment; }
+comment { 
+    color: $comment; 
+    italic: true;
+}
