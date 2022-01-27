@@ -25,10 +25,6 @@ new_expression > identifier {
   color: $type;
 }
 
-member_expression > property_identifier {
-  color: $field;
-}
-
 "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "|=", "&=", "^=", "**=", "++", "--",
 "+", "-", "*", "/", "**", "%", "^", "|", "&", "~", "<<", ">>",
 "===", "!==", "==", "!=", "<=", ">=", "<", ">",
@@ -41,11 +37,16 @@ subscript_expression > "]",
 }
 
 function > identifier,
+function_declaration > identifier,
 generator_function > identifier,
 method_definition > property_identifier,
 call_expression > identifier,
 call_expression > member_expression > property_identifier {
   color: $function;
+}
+
+member_expression > property_identifier {
+  color: $field;
 }
 
 array > "[",
