@@ -32,7 +32,7 @@ new_expression > identifier {
 "...",
 subscript_expression > "[",
 subscript_expression > "]",
-"typeof", "instanceof", "new" {
+"typeof", "instanceof", "new", "void" {
   color: $operator;
 }
 
@@ -52,7 +52,7 @@ member_expression > property_identifier {
 array > "[",
 array > "]",
 identifier & /^[A-Z_]+$/,
-null, number, boolean  {
+null, number, boolean, undefined {
   color: $value;
 }
 
