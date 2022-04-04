@@ -4,7 +4,7 @@
 
 # Syncat Themes
 
-Stylesheets and themes for [Syncat][] syntax aware cat tool. See the Syncat documentation for more
+Stylesheets and themes for [Syncat][], the syntax aware cat tool. See the Syncat documentation for more
 information on how to install and use Syncat.
 
 Note that depending on the settings and features of your terminal program, certain features may not
@@ -90,7 +90,7 @@ considered lower priority to the ones defined in the parent file.
 ### Selectors
 
 Selectors are the most complex part of the stylesheet. They correspond to paths into the syntax
-tree, similar to a selector works in HTML. You can view the syntax tree by passing the `--dev`
+tree, similar to how a selector works in HTML/CSS. You can view the syntax tree by passing the `--dev`
 option when running syncat.
 
 Here's an example syntax tree for a trivial piece of code. You can see that they very quickly get
