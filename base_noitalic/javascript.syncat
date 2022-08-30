@@ -62,7 +62,7 @@ object > pair > property_identifier {
   color: $field;
 }
 
-template_string.,
+template_string >,
 string {
   color: $string;
 }

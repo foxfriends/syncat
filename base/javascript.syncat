@@ -52,7 +52,7 @@ member_expression > property_identifier {
 array > "[",
 array > "]",
 identifier & /^[A-Z_]+$/,
-null, number, boolean, undefined {
+null, number, boolean, undefined, true, false {
   color: $value;
 }
 
