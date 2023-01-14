@@ -1,4 +1,4 @@
-<<<<<<< Updated upstream
+import "../colours.syncat";
 
 import_statement > dotted_name,
 import_from_statement > "from" + dotted_name {
