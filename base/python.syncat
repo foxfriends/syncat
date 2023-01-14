@@ -156,3 +156,7 @@ string > interpolation > "}",
 string > {
     color: $string;
 }
+
+type identifier {
+    color: $type;
+}
