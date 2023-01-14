@@ -9,6 +9,7 @@ import "../colours.syncat";
 /^with$/i,
 /^as$/i,
 /^in$/i,
+/^is$/i,
 /^and$/i,
 /^or$/i,
 /^on$/i,
@@ -37,6 +38,10 @@ import "../colours.syncat";
 /^join$/i,
 /^except$/i,
 /^recursive$/i,
+/^insert$/i,
+/^into$/i,
+/^returning$/i,
+/^values$/i,
 select_statement >,
 create_view_statement >,
 {
