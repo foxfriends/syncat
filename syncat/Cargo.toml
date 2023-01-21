@@ -14,7 +14,7 @@ categories = ["command-line-utilities"]
 [dependencies]
 ansi_term = "0.12.1"
 directories = "2.0.2"
-git2 = "0.13.0"
+git2 = "0.16.1"
 hex = "0.4.2"
 lazy_static = "1.4.0"
 regex = "1.5.5"
