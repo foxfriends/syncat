@@ -54,6 +54,7 @@ type {
 
 comment {
     color: $comment;
+    italic: true;
 }
 
 function_call > identifier {
