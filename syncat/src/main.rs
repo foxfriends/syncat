@@ -2,7 +2,7 @@ use std::fs;
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 
-use tree_sitter::Parser;
+use clap::{ArgAction, Parser};
 
 mod colorize;
 mod dirs;
@@ -20,55 +20,55 @@ use meta_stylesheet::MetaStylesheet;
 use colorize::Colorizer;
 
 /// Syntax aware cat utility.
-#[derive(structopt::StructOpt, Debug)]
-#[structopt(name = "syncat")]
-#[structopt(rename_all = "kebab-case")]
+#[derive(Parser, Debug)]
+#[clap(name = "syncat")]
+#[clap(rename_all = "kebab-case")]
 pub struct Opts {
     /// Level of framing around each file. Repeat for bigger frame
-    #[structopt(short, long, parse(from_occurrences))]
-    frame: usize,
+    #[arg(short, long, action=ArgAction::Count)]
+    frame: u8,
 
     /// Use Git to show recent changes
-    #[structopt(short, long)]
+    #[arg(short, long)]
     git: bool,
 
     /// Squeeze consecutive blank lines into one
-    #[structopt(short, long)]
+    #[arg(short, long)]
     squeeze: bool,
 
     /// Show line endings
-    #[structopt(short = "e", long = "endings")]
+    #[arg(short = 'e', long = "endings")]
     show_line_endings: bool,
 
     /// Number non-empty input lines (overrides -n)
-    #[structopt(short = "b", long)]
+    #[arg(short = 'b', long)]
     numbered_nonblank: bool,
 
     /// Number all input lines
-    #[structopt(short, long)]
+    #[arg(short, long)]
     numbered: bool,
 
     /// Prints a parsed s-expression, for debugging and theme creation
-    #[structopt(long)]
+    #[arg(long)]
     dev: bool,
 
     /// The language to use to parse the files
-    #[structopt(short, long)]
+    #[arg(short, long)]
     language: Option<String>,
 
     /// Soft-wrap lines at a fixed width
-    #[structopt(short, long)]
+    #[arg(short, long)]
     wrap: Option<usize>,
 
     /// Files to parse and print
-    #[structopt(name = "FILE", parse(from_os_str))]
+    #[arg(name = "FILE")]
     files: Vec<PathBuf>,
 
-    #[structopt(subcommand)]
+    #[command(subcommand)]
     command: Option<Subcommand>,
 }
 
-#[derive(structopt::StructOpt, Debug)]
+#[derive(Parser, Debug)]
 enum Subcommand {
     /// Installs all languages listed in the `languages.toml` file. Previously installed packages
     /// will be updated, if updates are available. This process may take a long time, depending on
@@ -102,7 +102,7 @@ fn transform(
         .and_then(|language| lang_map.get(language));
 
     let source = if let Some(language) = language {
-        let mut parser = Parser::new();
+        let mut parser = tree_sitter::Parser::new();
         parser.set_language(language.parser()?).unwrap();
         let tree = parser.parse(&source, None).unwrap();
         let colorizer = Colorizer {
@@ -184,8 +184,8 @@ fn print<'a>(
     Ok(())
 }
 
-#[paw::main]
-fn main(opts: Opts) -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let opts = Opts::parse();
     match &opts.command {
         Some(subcommand) => package_manager::main(subcommand),
         None if opts.files.is_empty() && opts.language.is_none() => {
