@@ -1,4 +1,5 @@
-use crate::dirs::{active_color, config, libraries};
+use crate::config;
+use crate::dirs::{active_color, libraries};
 use libloading::{Library, Symbol};
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -15,7 +16,7 @@ pub struct LangMap(BTreeMap<String, Lang>);
 
 impl LangMap {
     pub fn open() -> Result<Self, Box<dyn std::error::Error>> {
-        match fs::read_to_string(config().join("languages.toml")) {
+        match config::read_to_string("languages.toml") {
             Ok(string) => Ok(toml::from_str(&string)?),
             Err(..) => Ok(LangMap::default()),
         }

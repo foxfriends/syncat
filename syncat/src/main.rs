@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use clap::{ArgAction, Parser};
 
 mod colorize;
+mod config;
 mod dirs;
 mod error;
 mod filter;
@@ -16,8 +17,6 @@ mod package_manager;
 use language::LangMap;
 use line::Line;
 use meta_stylesheet::MetaStylesheet;
-
-const DEFAULT_CONFIG: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/config.tar"));
 
 use colorize::Colorizer;
 
