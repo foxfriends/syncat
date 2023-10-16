@@ -1,9 +1,8 @@
-use std::path::Path;
-use std::io;
-use std::fmt::{self, Display, Formatter};
-use std::str::{Utf8Error, ParseBoolError};
-use std::num::ParseIntError;
 use hex::FromHexError;
+use std::fmt::{self, Display, Formatter};
+use std::num::ParseIntError;
+use std::path::Path;
+use std::str::{ParseBoolError, Utf8Error};
 
 #[derive(Debug)]
 pub enum ErrorKind {
@@ -23,12 +22,15 @@ impl Error {
     pub(super) fn invalid(source: &str, reason: &str) -> Self {
         Self {
             kind: ErrorKind::Invalid,
-            message: format!("attempted to interpret an invalid parse tree ({}, {})", source, reason),
+            message: format!(
+                "attempted to interpret an invalid parse tree ({}, {})",
+                source, reason
+            ),
             source: None,
         }
     }
 
-    pub(super) fn missing_module(error: io::Error, path: &Path) -> Self {
+    pub(super) fn missing_module(error: impl std::error::Error + 'static, path: &Path) -> Self {
         Self {
             kind: ErrorKind::Module,
             message: format!("could not locate module \"{}\"", path.display()),

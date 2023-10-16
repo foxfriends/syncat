@@ -1,16 +1,17 @@
 use tree_sitter::Language;
 
-mod parser;
-mod error;
 mod ast;
+mod error;
+mod parser;
+pub mod resolver;
 mod style;
 mod stylesheet;
 
-pub use error::{Error, Result};
-pub use stylesheet::{Query, Stylesheet};
-pub use style::{Style, Value, FromValueError};
 pub use ast::Color;
-use stylesheet::{QuerySlice, Matches};
+pub use error::{Error, Result};
+pub use style::{FromValueError, Style, Value};
+use stylesheet::{Matches, QuerySlice};
+pub use stylesheet::{Query, Stylesheet};
 
 extern "C" {
     fn tree_sitter_syncat_stylesheet() -> Language;
