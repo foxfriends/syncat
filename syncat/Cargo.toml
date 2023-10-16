@@ -11,6 +11,11 @@ name = "syncat"
 version = "3.3.0"
 categories = ["command-line-utilities"]
 
+[features]
+default = []
+vendored-openssl = ["git2/vendored-openssl"]
+vendored-libgit2 = ["git2/vendored-libgit2"]
+
 [dependencies]
 ansi_term = "0.12.1"
 directories = "2.0.2"
