@@ -17,6 +17,8 @@ use language::LangMap;
 use line::Line;
 use meta_stylesheet::MetaStylesheet;
 
+const DEFAULT_CONFIG: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/config.tar"));
+
 use colorize::Colorizer;
 
 /// Syntax aware cat utility.
