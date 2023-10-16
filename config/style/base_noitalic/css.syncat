@@ -1,0 +1,52 @@
+import "../colours.syncat";
+
+"@import",
+"@keyframes" {
+  color: $keyword;
+}
+
+function_name {
+  color: $builtin;
+}
+
+import_statement plain_value,
+string_value {
+  color: $string;
+}
+
+color_value,
+float_value,
+integer_value,
+plain_value {
+  color: $value;
+}
+
+property_name & /^\-\-/,
+call_expression (function_name "var") + arguments plain_value & /^\-\-/ {
+  color: $variable;
+}
+
+pseudo_class_selector > ":",
+pseudo_class_selector > class_name {
+  color: $keyword;
+}
+
+property_name {
+  color: $function;
+}
+
+tag_name { color: $name; }
+class_selector { color: $type; }
+id_selector { color: $function; }
+
+comment {
+  color: $comment;
+}
+
+media_statement "@media" {
+  color: $keyword;
+}
+
+feature_name {
+  color: $function;
+}

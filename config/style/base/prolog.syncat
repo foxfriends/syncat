@@ -1,0 +1,26 @@
+import "../colours.syncat";
+
+comment {
+  color: $comment;
+  italic: true;
+}
+
+number {
+  color: $constant;
+}
+
+term > atom {
+  color: $function;
+}
+
+values > atom {
+  color: $type;
+}
+
+":-", "is", "=", "\\=", "<", "<=", ">", ">=", "-", "+", "*", "/", "_" {
+  color: $keyword;
+}
+
+var {
+  color: $name;
+}

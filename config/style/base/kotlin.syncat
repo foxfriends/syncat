@@ -1,0 +1,136 @@
+import "../colours.syncat";
+
+type_identifier,
+call_expression > simple_identifier & /^[A-Z].*/,
+{
+    color: $type;
+}
+
+"+", "-", "*", "/", "%",
+"=",  "+=", "-=", "*=", "/=", "%=",
+"++", "--",
+"&&", "||", "!",
+"==", "!=", "===", "!==",
+"<", ">", "<=", ">=",
+"[", "]",
+"!!", "?.", "?:",
+"::",
+"..",
+":",
+"_",
+"->",
+nullable_type,
+lambda_literal > "{",
+lambda_literal > "}",
+{
+  color: $operator;
+}
+
+function_declaration > simple_identifier,
+call_expression > simple_identifier,
+call_expression > navigation_expression > navigation_suffix > simple_identifier,
+{
+  color: $function;
+}
+
+"as",
+"as?",
+"break",
+"class",
+"continue",
+"do",
+"else",
+"for",
+"fun",
+"if",
+"in",
+"!in",
+"interface",
+"is",
+"!is",
+"object",
+"package",
+"return",
+"super",
+"throw",
+"try",
+"typealias",
+"typeof",
+"val",
+"var",
+"when",
+"while",
+// soft
+"by",
+"catch",
+"constructor",
+"delegate",
+"dynamic",
+"finally",
+"get",
+"import",
+"init",
+"set",
+"where",
+// modifier
+"abstract",
+"actual",
+"annotation",
+"companion",
+"const",
+"crossinline",
+"data",
+"enum",
+"expect",
+"external",
+"final",
+"infix",
+"inline",
+"inner",
+"internal",
+"lateinit",
+"noinline",
+"open",
+"operator",
+"out",
+"override",
+"private",
+"protected",
+"public",
+"reified",
+"sealed",
+"suspend",
+"tailrec",
+"vararg",
+{
+  color: $keyword;
+}
+
+annotation {
+  color: $meta;
+}
+
+comment {
+  color: $comment;
+  italic: true;
+}
+
+integer_literal,
+boolean_literal,
+real_literal,
+"null",
+{
+  color: $constant;
+}
+
+line_string_literal
+{
+  color: $string;
+}
+
+class_parameter > "val" ~ simple_identifier,
+class_parameter > "var" ~ simple_identifier,
+"it", "this", "field",
+{
+  color: $name;
+}

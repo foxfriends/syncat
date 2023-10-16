@@ -1,0 +1,61 @@
+import "../colours.syncat";
+
+operation_type,
+fragment_definition "fragment",
+interface_type_definition "interface",
+object_type_definition "type",
+union_type_definition "union",
+type_condition "on",
+implements_interfaces "implements",
+"=", "|", "!", "...", {
+  color: $keyword;
+}
+
+type_condition > named_type,
+interface_type_definition > name,
+object_type_definition > name,
+union_type_definition > name { 
+  color: $type;
+}
+
+operation_definition > name,
+field > name {
+  color: $function;
+}
+
+variable {
+  color: $variable;
+}
+
+int_value, float_value, boolean_value {
+  color: $constant;
+}
+
+string_value {
+  color: $string;
+}
+
+object_field > name {
+  color: $variable;
+}
+
+named_type name & "Int",
+named_type name & "String",
+named_type name & "Boolean",
+named_type name & "Float",
+named_type name & "ID" {
+  color: $builtin;
+}
+
+named_type name {
+  color: $type;
+}
+
+fragment_name {
+  color: $type;
+}
+
+comment {
+  color: $comment;
+  italic: true;
+}

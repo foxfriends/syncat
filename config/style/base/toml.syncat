@@ -1,0 +1,26 @@
+import "../colours.syncat";
+
+array > "[",
+array > "]" {
+    color: $value;
+}
+
+boolean, float, integer {
+    color: $value;
+}
+
+local_date, local_date_time, offset_date_time {
+    color: $builtin;
+}
+
+key {
+    color: $name;
+}
+
+string {
+    color: $string;
+}
+
+comment {
+    color: $comment;
+}

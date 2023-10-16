@@ -1,0 +1,73 @@
+import "../colours.syncat";
+
+/^set$/i,
+/^to$/i,
+/^select$/i,
+/^exists$/i,
+/^from$/i,
+/^where$/i,
+/^with$/i,
+/^as$/i,
+/^in$/i,
+/^is$/i,
+/^and$/i,
+/^or$/i,
+/^on$/i,
+/^union$/i,
+/^all$/i,
+/^default$/i,
+/^null$/i,
+/^create$/i,
+/^view$/i,
+/^table$/i,
+/^if$/i,
+/^not$/i,
+/^truncate$/i,
+/^group$/i,
+/^by$/i,
+/^having$/i,
+/^order$/i,
+/^asc$/i,
+/^desc$/i,
+/^inner$/i,
+/^outer$/i,
+/^left$/i,
+/^right$/i,
+/^cross$/i,
+/^lateral$/i,
+/^join$/i,
+/^except$/i,
+/^recursive$/i,
+/^insert$/i,
+/^into$/i,
+/^returning$/i,
+/^values$/i,
+select_statement >,
+create_view_statement >,
+{
+    color: $keyword;
+}
+
+type {
+    color: $type;
+}
+
+comment {
+    color: $comment;
+    italic: true;
+}
+
+function_call > identifier {
+    color: $function;
+}
+
+number { color: $value; }
+string { color: $string; }
+identifier { color: $variable; }
+
+pg_command { color: $builtin; }
+asterisk_expression { color: $operator; }
+
+"<>", "+", "*", "-", "/", "=", "<=", "<", ">=", ">" {
+    color: $operator;
+}

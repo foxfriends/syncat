@@ -1,0 +1,96 @@
+shadow {
+  background-color: brblack;
+}
+
+li "prefix",
+blockquote "prefix" {
+  color: brblack;
+  dim: true;
+}
+
+rule {
+  color: black;
+}
+
+strong {
+  bold: true;
+}
+
+emphasis {
+  italic: true;
+}
+
+strikethrough {
+  strikethrough: true;
+}
+
+link {
+  underline: true;
+}
+
+caption {
+  underline: true;
+}
+
+h1 {
+  bold: true;
+}
+
+h2 {
+  bold: true;
+}
+
+h3 {
+  bold: true;
+  underline: true;
+}
+
+h4 {
+  bold: true;
+  underline: true;
+  dim: true;
+}
+
+h5 {
+  underline: true;
+}
+
+h6 {
+  underline: true;
+  dim: true;
+}
+
+code {
+  background-color: #9ba2af;
+  color: black;
+}
+
+footnote-def, footnote-ref {
+  color: brblack;
+  dim: true;
+}
+
+codeblock txt,
+codeblock txt "prefix",
+codeblock txt "suffix",
+codeblock txt "lang-tag", {
+  background-color: #9ba2af;
+  color: black;
+}
+
+codeblock *,
+codeblock * "prefix",
+codeblock * "suffix", {
+  background-color: black;
+  color: white;
+}
+
+codeblock * "lang-tag" {
+  color: white;
+  dim: true;
+}
+
+paper {
+  background-color: white;
+  color: black;
+}

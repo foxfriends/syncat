@@ -1,0 +1,31 @@
+import "./javascript.syncat";
+
+function_signature > identifier,
+{
+  color: $function;
+}
+
+type_annotation > ":",
+function_type > formal_parameters > "(",
+function_type > formal_parameters > ")",
+{
+  color: $operator;
+}
+
+function_type > formal_parameters identifier {
+  color: $name;
+}
+
+type_identifier,
+predefined_type {
+  color: $type;
+}
+
+"enum", "type" {
+  color: $keyword;
+}
+
+enum_body > property_identifier,
+enum_body > enum_assignment > property_identifier {
+  color: $value;
+}

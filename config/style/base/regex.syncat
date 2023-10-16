@@ -1,0 +1,57 @@
+import "../colours.syncat";
+
+pattern_character {
+  color: $string;
+}
+
+boundary_assertion,
+non_boundary_assertion,
+control_escape,
+control_letter_escape,
+identity_escape {
+  color: $builtin;
+}
+
+optional,
+zero_or_more,
+one_or_more,
+count_quantifier > "{",
+count_quantifier > "}",
+count_quantifier > ",",
+start_assertion,
+end_assertion,
+character_class > "[",
+character_class > "[" + "^",
+character_class > "]",
+disjunction > "|",
+class_range > "-" {
+  color: $keyword;
+}
+
+lookahead_assertion > "(?",
+lookahead_assertion > "=",
+lookahead_assertion > "!",
+lookahead_assertion > "<=",
+lookahead_assertion > "<!",
+lookahead_assertion > ")",
+non_capturing_group > "(?:",
+non_capturing_group > ")",
+anonymous_capturing_group > "(",
+anonymous_capturing_group > ")",
+named_capturing_group > "(?<",
+named_capturing_group > ">",
+named_capturing_group > ")" {
+  color: $function;
+}
+
+backreference_escape,
+group_name {
+  color: $name;
+}
+
+any_character,
+character_class_escape,
+decimal_digits,
+class_character {
+  color: $value;
+}
