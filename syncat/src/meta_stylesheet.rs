@@ -1,7 +1,7 @@
-use ansi_term::{ANSIGenericString, Style as ANSIStyle, Colour};
-use syncat_stylesheet::{Style, Value, Stylesheet, FromValueError};
-use std::convert::{TryFrom, TryInto};
 use crate::dirs::active_color;
+use ansi_term::{ANSIGenericString, Colour, Style as ANSIStyle};
+use std::convert::{TryFrom, TryInto};
+use syncat_stylesheet::{FromValueError, Style, Stylesheet, Value};
 
 pub struct Margin {
     left: &'static str,
@@ -95,7 +95,10 @@ impl TryFrom<Style<'_>> for MetaItem<Margin> {
 
 impl<T> MetaItem<T> {
     pub fn default(content: T) -> Self {
-        MetaItem { content, style: ANSIStyle::default() }
+        MetaItem {
+            content,
+            style: ANSIStyle::default(),
+        }
     }
 
     fn set_style(mut self, style: ANSIStyle) -> Self {
@@ -116,7 +119,7 @@ macro_rules! component {
         pub fn $name(&self) -> ANSIGenericString<str> {
             self.style.paint(self.content.$name)
         }
-    }
+    };
 }
 
 impl MetaItem<Margin> {
@@ -151,10 +154,14 @@ impl Default for MetaStylesheet {
         MetaStylesheet {
             line_ending: MetaItem::default("$".to_string()),
             line_number: MetaItem::default(()),
-            vcs_addition: MetaItem::default("+".to_string()).set_style(ANSIStyle::new().fg(Colour::Green)),
-            vcs_modification: MetaItem::default("~".to_string()).set_style(ANSIStyle::new().fg(Colour::Yellow)),
-            vcs_deletion_above: MetaItem::default("-".to_string()).set_style(ANSIStyle::new().fg(Colour::Red)),
-            vcs_deletion_below: MetaItem::default("_".to_string()).set_style(ANSIStyle::new().fg(Colour::Red)),
+            vcs_addition: MetaItem::default("+".to_string())
+                .set_style(ANSIStyle::new().fg(Colour::Green)),
+            vcs_modification: MetaItem::default("~".to_string())
+                .set_style(ANSIStyle::new().fg(Colour::Yellow)),
+            vcs_deletion_above: MetaItem::default("-".to_string())
+                .set_style(ANSIStyle::new().fg(Colour::Red)),
+            vcs_deletion_below: MetaItem::default("_".to_string())
+                .set_style(ANSIStyle::new().fg(Colour::Red)),
             margin: MetaItem::default(Margin::ASCII),
             title: MetaItem::default(()).set_style(ANSIStyle::new().bold()),
         }

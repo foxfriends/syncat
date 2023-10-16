@@ -1,9 +1,9 @@
-use std::path::Path;
+use crate::line::{Line, LineChange};
+use crate::Opts;
+use git2::{DiffOptions, IntoCString, Repository};
 use std::collections::HashMap;
 use std::fs;
-use git2::{DiffOptions, IntoCString, Repository};
-use crate::Opts;
-use crate::line::{Line, LineChange};
+use std::path::Path;
 
 /// This code is pretty much taken straight from [Bat](https://github.com/sharkdp/bat/blob/master/src/diff.rs)
 fn do_git_transform(source: &[Line], repo: Repository, path: &Path) -> Option<Vec<Line>> {
@@ -65,30 +65,31 @@ fn do_git_transform(source: &[Line], repo: Repository, path: &Path) -> Option<Ve
         None,
     );
 
-    Some(source
-        .iter()
-        .enumerate()
-        .map(move |(i, line)| line.clone().with_status(line_changes.remove(&(i as u32 + 1)).unwrap_or_default()))
-        .collect())
+    Some(
+        source
+            .iter()
+            .enumerate()
+            .map(move |(i, line)| {
+                line.clone()
+                    .with_status(line_changes.remove(&(i as u32 + 1)).unwrap_or_default())
+            })
+            .collect(),
+    )
 }
 
-pub fn git(
-    &Opts { git, .. }: &Opts, 
-    source: Vec<Line>,
-    filename: Option<&Path>,
-) -> Vec<Line> {
+pub fn git(&Opts { git, .. }: &Opts, source: Vec<Line>, filename: Option<&Path>) -> Vec<Line> {
     let path = match filename {
         Some(path) => path,
         None => return source,
     };
     if git {
         if let Some(repository) = filename.and_then(|path| Repository::discover(path).ok()) {
-            do_git_transform(&source, repository, path)
-                .unwrap_or_else(move || source
+            do_git_transform(&source, repository, path).unwrap_or_else(move || {
+                source
                     .into_iter()
                     .map(|line| line.with_status(LineChange::Unchanged))
                     .collect()
-                )
+            })
         } else {
             source
                 .into_iter()

@@ -46,13 +46,19 @@ fn write_node<'s>(
                 f,
                 "({} {})",
                 style.paint(tree.node().kind()),
-                style.paint(format!("{:?}", tree.node().utf8_text(source.as_ref()).unwrap())),
+                style.paint(format!(
+                    "{:?}",
+                    tree.node().utf8_text(source.as_ref()).unwrap()
+                )),
             )?;
         } else {
             write!(
                 f,
                 "({})",
-                style.paint(format!("{:?}", tree.node().utf8_text(source.as_ref()).unwrap())),
+                style.paint(format!(
+                    "{:?}",
+                    tree.node().utf8_text(source.as_ref()).unwrap()
+                )),
             )?;
         }
     } else {

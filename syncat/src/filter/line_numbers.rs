@@ -1,8 +1,13 @@
-use crate::Opts;
 use crate::line::Line;
+use crate::Opts;
 
 pub fn line_numbers<'a>(
-    &Opts { frame, numbered_nonblank, numbered, .. }: &Opts, 
+    &Opts {
+        frame,
+        numbered_nonblank,
+        numbered,
+        ..
+    }: &Opts,
 ) -> impl 'a + FnMut(Vec<Line>) -> Vec<Line> {
     let mut line_number = 0usize;
     let mut skip_next = false;
@@ -44,5 +49,5 @@ pub fn line_numbers<'a>(
         } else {
             source
         }
-    }
+    };
 }

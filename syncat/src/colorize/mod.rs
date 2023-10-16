@@ -1,10 +1,10 @@
-use std::fmt::{self, Display, Debug, Formatter};
-use tree_sitter::Tree;
-use syncat_stylesheet::Stylesheet;
 use crate::language::LangMap;
+use std::fmt::{self, Debug, Display, Formatter};
+use syncat_stylesheet::Stylesheet;
+use tree_sitter::Tree;
 
-mod source;
 mod sexp;
+mod source;
 
 pub(super) struct Colorizer<'a> {
     pub(super) source: &'a str,

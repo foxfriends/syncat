@@ -63,11 +63,7 @@ impl Line {
         self.source.is_empty()
     }
 
-    pub fn to_string(
-        &self,
-        meta_style: &MetaStylesheet,
-        wrap: Option<usize>,
-    ) -> String {
+    pub fn to_string(&self, meta_style: &MetaStylesheet, wrap: Option<usize>) -> String {
         let (indent, source) = extract_indent(&self.source);
         let mut last_line_length = 0;
         let indent_width = indent.chars().count();
@@ -97,7 +93,11 @@ impl Line {
                 if let Some(number) = self.number {
                     if i == 0 {
                         if let Some(number) = number {
-                            output = format!("{}{}", meta_style.line_number().paint(format!("{: >6}", number)), output);
+                            output = format!(
+                                "{}{}",
+                                meta_style.line_number().paint(format!("{: >6}", number)),
+                                output
+                            );
                         } else {
                             output = format!("      {}", output);
                         }
