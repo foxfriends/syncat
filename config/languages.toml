@@ -1,0 +1,242 @@
+[agda]
+source = "https://github.com/tree-sitter/tree-sitter-agda"
+name = "agda"
+library = "tree-sitter-agda"
+extensions = ["agda"]
+
+[bash]
+source = "https://github.com/tree-sitter/tree-sitter-bash"
+name = "bash"
+library = "tree-sitter-bash"
+extensions = ["sh", "bash"]
+
+[c]
+source = "https://github.com/tree-sitter/tree-sitter-c"
+name = "c"
+library = "tree-sitter-c"
+extensions = ["c", "h"]
+
+[c-sharp]
+source = "https://github.com/tree-sitter/tree-sitter-c-sharp"
+name = "c_sharp"
+library = "tree-sitter-c-sharp"
+extensions = ["cs"]
+
+[clojure]
+source = "https://github.com/oakmac/tree-sitter-clojure"
+name = "clojure"
+library = "tree-sitter-clojure"
+extensions = ["clj"]
+
+[cpp]
+source = "https://github.com/tree-sitter/tree-sitter-cpp"
+name = "cpp"
+library = "tree-sitter-cpp"
+extensions = ["cpp", "cc", "c++", "hpp", "hh", "h++", "C"]
+
+[css]
+source = "https://github.com/tree-sitter/tree-sitter-css"
+name = "css"
+library = "tree-sitter-css"
+extensions = ["css"]
+
+[elm]
+source = "https://github.com/Razzeee/tree-sitter-elm"
+name = "elm"
+library = "tree-sitter-elm"
+extensions = ["elm"]
+
+[embedded-template]
+source = "https://github.com/tree-sitter/tree-sitter-embedded-template"
+name = "embedded_template"
+library = "tree-sitter-embedded-template"
+extensions = ["erb", "ejs"]
+
+[eno]
+source = "https://github.com/eno-lang/tree-sitter-eno"
+name = "eno"
+library = "tree-sitter-eno"
+extensions = ["eno"]
+
+[fluent]
+source = "https://github.com/tree-sitter/tree-sitter-fluent"
+name = "fluent"
+library = "tree-sitter-fluent"
+extensions = ["ftl"]
+
+[go]
+source = "https://github.com/tree-sitter/tree-sitter-go"
+name = "go"
+library = "tree-sitter-go"
+extensions = ["go"]
+
+[haskell]
+source = "https://github.com/tree-sitter/tree-sitter-haskell"
+name = "haskell"
+library = "tree-sitter-haskell"
+extensions = ["hs"]
+
+[html]
+source = "https://github.com/tree-sitter/tree-sitter-html"
+name = "html"
+library = "tree-sitter-html"
+extensions = ["html", "htm", "svelte"]
+
+[java]
+source = "https://github.com/tree-sitter/tree-sitter-java"
+name = "java"
+library = "tree-sitter-java"
+extensions = ["java"]
+
+[javascript]
+source = "https://github.com/tree-sitter/tree-sitter-javascript"
+name = "javascript"
+library = "tree-sitter-javascript"
+extensions = ["js", "jsx", "mjs", "es6"]
+
+[jsdoc]
+source = "https://github.com/tree-sitter/tree-sitter-jsdoc"
+name = "jsdoc"
+library = "tree-sitter-jsdoc"
+extensions = ["jsdoc"]
+
+[json]
+source = "https://github.com/tree-sitter/tree-sitter-json"
+name = "json"
+library = "tree-sitter-json"
+extensions = ["json"]
+
+[julia]
+source = "https://github.com/tree-sitter/tree-sitter-julia"
+name = "julia"
+library = "tree-sitter-julia"
+extensions = ["jl"]
+
+[kotlin]
+source = "https://github.com/fwcd/tree-sitter-kotlin"
+name = "kotlin"
+library = "tree-sitter-kotlin"
+extensions = ["kt"]
+
+[lua]
+source = "https://github.com/Azganoth/tree-sitter-lua"
+name = "lua"
+library = "tree-sitter-lua"
+extensions = ["lua"]
+
+[markdown]
+source = "https://github.com/ikatyang/tree-sitter-markdown"
+name = "markdown"
+library = "tree-sitter-markdown"
+extensions = ["md"]
+
+[ocaml]
+source = "https://github.com/tree-sitter/tree-sitter-ocaml"
+name = "ocaml"
+library = "tree-sitter-ocaml"
+extensions = ["ocaml", "ml", "mli"]
+
+[php]
+source = "https://github.com/tree-sitter/tree-sitter-php"
+name = "php"
+library = "tree-sitter-php"
+extensions = ["php"]
+
+[prolog]
+source = "https://github.com/foxfriends/tree-sitter-prolog"
+name = "prolog"
+library = "tree-sitter-prolog"
+extensions = ["pl"]
+
+[python]
+source = "https://github.com/tree-sitter/tree-sitter-python"
+name = "python"
+library = "tree-sitter-python"
+extensions = ["py"]
+
+[regex]
+source = "https://github.com/tree-sitter/tree-sitter-regex"
+name = "regex"
+library = "tree-sitter-regex"
+extensions = ["regex"]
+
+[ruby]
+source = "https://github.com/tree-sitter/tree-sitter-ruby"
+name = "ruby"
+library = "tree-sitter-ruby"
+extensions = ["rb"]
+
+[rust]
+source = "https://github.com/tree-sitter/tree-sitter-rust"
+name = "rust"
+library = "tree-sitter-rust"
+extensions = ["rs", "rust"]
+
+[scala]
+source = "https://github.com/tree-sitter/tree-sitter-scala"
+name = "scala"
+library = "tree-sitter-scala"
+extensions = ["scala"]
+
+[sql]
+source = "https://github.com/foxfriends/tree-sitter-sql"
+name = "sql"
+library = "tree-sitter-sql"
+extensions = ["sql"]
+
+[swift]
+source = "https://github.com/alex-pinkus/tree-sitter-swift"
+name = "swift"
+library = "tree-sitter-swift"
+extensions = ["swift"]
+
+[syncat-stylesheet]
+source = "https://github.com/foxfriends/syncat"
+path = "tree-sitter-syncat-stylesheet"
+name = "syncat_stylesheet"
+library = "syncat"
+extensions = ["syncat"]
+
+[systemrdl]
+source = "https://github.com/SystemRDL/tree-sitter-systemrdl"
+name = "systemrdl"
+library = "tree-sitter-systemrdl"
+extensions = ["rdl"]
+
+[test]
+source = "https://github.com/Aerijo/tree-sitter-test"
+name = "test"
+library = "tree-sitter-test"
+extensions = ["corpus"]
+
+[toml]
+source = "https://github.com/ikatyang/tree-sitter-toml"
+name = "toml"
+library = "tree-sitter-toml"
+extensions = ["toml"]
+
+[typescript]
+source = "https://github.com/tree-sitter/tree-sitter-typescript"
+path = "typescript"
+name = "typescript"
+library = "tree-sitter-typescript"
+extensions = ["ts"]
+
+[tsx]
+source = "https://github.com/tree-sitter/tree-sitter-typescript"
+path = "tsx"
+name = "tsx"
+library = "tree-sitter-typescript"
+extensions = ["tsx"]
+
+[verilog]
+source = "https://github.com/tree-sitter/tree-sitter-verilog"
+name = "verilog"
+library = "tree-sitter-verilog"
+extensions = ["v"]
+
+[yaml]
+source = "https://github.com/ikatyang/tree-sitter-yaml"
+name = "yaml"
+library = "tree-sitter-yaml"
+extensions = ["yaml", "yml"]
