@@ -129,7 +129,7 @@ fn transform(
             .map(|line| Line::new(line.to_owned()))
             .collect::<Vec<_>>();
 
-        if !source.ends_with("\n") {
+        if !source.ends_with('\n') {
             if let Some(line) = lines.last_mut() {
                 line.no_newline = true;
             }
@@ -226,7 +226,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .extension()
                     .and_then(|s| s.to_str())
                     .map(|s| s.to_owned()),
-                source: fs::read_to_string(&path),
+                source: fs::read_to_string(path),
                 path: Some(path.as_ref()),
             });
             print(&opts, sources, file_count)

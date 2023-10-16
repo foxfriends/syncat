@@ -1,19 +1,14 @@
 use crate::meta_stylesheet::MetaStylesheet;
 use console::{self, AnsiCodeIterator};
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub enum LineChange {
+    #[default]
     Unchanged,
     Added,
     RemovedAbove,
     RemovedBelow,
     Modified,
-}
-
-impl Default for LineChange {
-    fn default() -> Self {
-        LineChange::Unchanged
-    }
 }
 
 #[derive(Clone, Default, Debug)]
@@ -133,7 +128,7 @@ impl Line {
     }
 }
 
-fn extract_indent<'a>(source: &'a str) -> (&'a str, &'a str) {
+fn extract_indent(source: &str) -> (&str, &str) {
     let bytes = source
         .chars()
         .take_while(|ch| ch.is_whitespace())
@@ -147,12 +142,11 @@ fn extract_indent<'a>(source: &'a str) -> (&'a str, &'a str) {
 /// This is good enough for now, but it might be nice to try and break at valid locations in
 /// future.
 fn wrap_ansi_str(s: &str, width: usize) -> String {
-    let mut iter = AnsiCodeIterator::new(s);
     let mut length = 0;
     let mut rv = String::new();
     let mut style: &str = "";
 
-    while let Some(item) = iter.next() {
+    for item in AnsiCodeIterator::new(s) {
         match item {
             (s, false) => {
                 for ch in s.chars() {

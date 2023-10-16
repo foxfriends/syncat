@@ -8,7 +8,7 @@ pub fn read_to_string(file: &str) -> anyhow::Result<String> {
     if config().join(file).exists() {
         Ok(fs::read_to_string(config().join(file))?)
     } else {
-        let mut config_reader = &*DEFAULT_CONFIG;
+        let mut config_reader = DEFAULT_CONFIG;
         for entry in tar::Archive::new(&mut config_reader).entries()? {
             let entry = entry?;
             if entry.path()?.as_ref() == Path::new(file) {

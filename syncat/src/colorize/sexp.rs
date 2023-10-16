@@ -29,11 +29,11 @@ fn write_node<'s>(
             .set_language(language.parser().map_err(|_| fmt::Error)?)
             .unwrap();
         let token = tree.node().utf8_text(source.as_ref()).unwrap();
-        let subtree = parser.parse(&token, None).unwrap();
+        let subtree = parser.parse(token, None).unwrap();
         write!(f, "({} [", style.paint(tree.node().kind()))?;
         write(
             f,
-            &token,
+            token,
             &subtree,
             &language.style().map_err(|_| fmt::Error)?,
             lang_map,

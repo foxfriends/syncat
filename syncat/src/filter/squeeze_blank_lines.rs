@@ -1,6 +1,5 @@
 use crate::line::Line;
 use crate::Opts;
-use std::convert::identity;
 
 pub fn squeeze_blank_lines(&Opts { squeeze, .. }: &Opts, source: Vec<Line>) -> Vec<Line> {
     if squeeze {
@@ -16,7 +15,7 @@ pub fn squeeze_blank_lines(&Opts { squeeze, .. }: &Opts, source: Vec<Line>) -> V
                     Some(Some(line))
                 }
             })
-            .filter_map(identity)
+            .flatten()
             .collect()
     } else {
         source

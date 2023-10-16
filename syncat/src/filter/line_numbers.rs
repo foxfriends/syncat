@@ -11,7 +11,7 @@ pub fn line_numbers<'a>(
 ) -> impl 'a + FnMut(Vec<Line>) -> Vec<Line> {
     let mut line_number = 0usize;
     let mut skip_next = false;
-    return move |source| {
+    move |source| {
         if numbered_nonblank {
             source
                 .into_iter()
@@ -49,5 +49,5 @@ pub fn line_numbers<'a>(
         } else {
             source
         }
-    };
+    }
 }
