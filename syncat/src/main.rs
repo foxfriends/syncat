@@ -155,34 +155,32 @@ fn print<'a>(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let meta_style = MetaStylesheet::from_file()?;
     let mut line_numbers = filter::line_numbers(opts);
-    sources.into_iter().enumerate().for_each(
-        move |(
-            index,
-            Source {
-                language,
-                source,
-                path,
-            },
-        )| {
-            let lines = source
-                .map_err(|error| Box::new(error) as Box<dyn std::error::Error>)
-                .and_then(|source| transform(opts, language.as_ref(), source, path));
-            match lines {
-                Ok(lines) => {
-                    let lines = line_numbers(lines);
-                    let lines =
-                        filter::frame_header((index, count), opts, lines, path, &meta_style);
-                    for line in &lines {
-                        print!("{}", line.to_string(&meta_style, opts.wrap));
-                    }
-                    let _ = filter::frame_footer((index, count), opts, lines, path, &meta_style);
-                }
-                Err(error) => {
-                    eprint!("syncat: {}", error);
-                }
-            }
+    for (
+        index,
+        Source {
+            language,
+            source,
+            path,
         },
-    );
+    ) in sources.into_iter().enumerate()
+    {
+        let lines = source
+            .map_err(|error| Box::new(error) as Box<dyn std::error::Error>)
+            .and_then(|source| transform(opts, language.as_ref(), source, path));
+        match lines {
+            Ok(lines) => {
+                let lines = line_numbers(lines);
+                let lines = filter::frame_header((index, count), opts, lines, path, &meta_style);
+                for line in &lines {
+                    print!("{}", line.to_string(&meta_style, opts.wrap));
+                }
+                let _ = filter::frame_footer((index, count), opts, lines, path, &meta_style);
+            }
+            Err(error) => {
+                eprint!("syncat: {}", error);
+            }
+        }
+    }
     Ok(())
 }
 
