@@ -190,49 +190,47 @@ fn print<'a>(
 fn main(opts: Opts) -> Result<(), Box<dyn std::error::Error>> {
     match &opts.command {
         Some(subcommand) => package_manager::main(subcommand),
-        None => {
-            if opts.files.is_empty() {
-                let mut stdin = io::stdin();
-                if opts.language.is_some() {
-                    // If a language is specified, read in the whole file and then attempt to print that
-                    // at once using the specified language.
-                    let mut source = String::new();
-                    stdin.read_to_string(&mut source)?;
-                    print(
-                        &opts,
-                        std::iter::once(Source {
-                            language: None,
-                            source: Ok(source),
-                            path: None,
-                        }),
-                        1,
-                    )
-                } else {
-                    // Mimic the behaviour of standard cat, printing lines as they come.
-                    // These lines cannot be syntax highlighted, as we do not know what the language is.
-                    loop {
-                        let mut line = String::new();
-                        if stdin.read_line(&mut line)? == 0 {
-                            return Ok(());
-                        }
-                        print!("{}", line);
-                    }
+        None if opts.files.is_empty() && opts.language.is_none() => {
+            // Mimic the behaviour of standard cat, printing lines as they come.
+            // These lines cannot be syntax highlighted, as we do not know what the language is.
+            loop {
+                let mut line = String::new();
+                if io::stdin().read_line(&mut line)? == 0 {
+                    return Ok(());
                 }
-            } else {
-                // Attempt to style each of the supplied files, detecting languages based on extension
-                // while respecting the override provided.
-                // TODO: Add detection for hashbang/vim modeline/etc.
-                let file_count = opts.files.len();
-                let sources = opts.files.iter().map(|path| Source {
-                    language: path
-                        .extension()
-                        .and_then(|s| s.to_str())
-                        .map(|s| s.to_string()),
-                    source: fs::read_to_string(&path),
-                    path: Some(path.as_ref()),
-                });
-                print(&opts, sources, file_count)
+                print!("{}", line);
             }
+        }
+        None if opts.files.is_empty() => {
+            // If a language is specified, read in the whole file and then attempt to print that
+            // at once using the specified language.
+            let mut stdin = io::stdin();
+            let mut source = String::new();
+            stdin.read_to_string(&mut source)?;
+            print(
+                &opts,
+                std::iter::once(Source {
+                    language: None,
+                    source: Ok(source),
+                    path: None,
+                }),
+                1,
+            )
+        }
+        None => {
+            // Attempt to style each of the supplied files, detecting languages based on extension
+            // while respecting the override provided.
+            // TODO: Add detection for hashbang/vim modeline/etc.
+            let file_count = opts.files.len();
+            let sources = opts.files.iter().map(|path| Source {
+                language: path
+                    .extension()
+                    .and_then(|s| s.to_str())
+                    .map(|s| s.to_owned()),
+                source: fs::read_to_string(&path),
+                path: Some(path.as_ref()),
+            });
+            print(&opts, sources, file_count)
         }
     }
 }
