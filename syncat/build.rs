@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut ar = tar::Builder::new(&mut output);
 
     let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
-    let config_dir = Path::new(&manifest_dir).join("../config");
+    let config_dir = Path::new(&manifest_dir).join("config");
 
     println!(
         "cargo:rerun-if-changed={}",
