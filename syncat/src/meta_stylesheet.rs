@@ -1,7 +1,7 @@
-use crate::dirs::active_color;
+use crate::config;
 use ansi_term::{ANSIGenericString, Colour, Style as ANSIStyle};
 use std::convert::{TryFrom, TryInto};
-use syncat_stylesheet::{FromValueError, Style, Stylesheet, Value};
+use syncat_stylesheet::{FromValueError, Style, Value};
 
 pub struct Margin {
     left: &'static str,
@@ -171,9 +171,7 @@ impl Default for MetaStylesheet {
 impl MetaStylesheet {
     pub fn from_file() -> Result<MetaStylesheet, Box<dyn std::error::Error>> {
         let mut meta_stylesheet = MetaStylesheet::default();
-        let style_file = active_color().join(".syncat");
-        if style_file.exists() {
-            let stylesheet = Stylesheet::from_file(style_file)?;
+        if let Some(stylesheet) = config::load_stylesheet(".syncat")? {
             if let Some(style) = stylesheet.style(&"line_ending".into()) {
                 meta_stylesheet.line_ending = style.try_into()?;
             }

@@ -1,11 +1,11 @@
-use crate::config;
-use crate::dirs::{active_color, libraries};
+use crate::config::{self, ConfigError};
+use crate::dirs::libraries;
 use libloading::{Library, Symbol};
 use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use syncat_stylesheet::Stylesheet;
 use tree_sitter::Language;
 
@@ -106,12 +106,8 @@ impl Lang {
         }
     }
 
-    pub fn style(&self) -> syncat_stylesheet::Result<Stylesheet> {
-        let style_file = active_color().join(&self.name).with_extension("syncat");
-        if style_file.exists() {
-            Ok(Stylesheet::from_file(style_file)?)
-        } else {
-            Ok(Stylesheet::default())
-        }
+    pub fn style(&self) -> Result<Stylesheet, ConfigError> {
+        config::load_stylesheet(Path::new(&self.name).with_extension("syncat"))
+            .map(|opt| opt.unwrap_or_default())
     }
 }

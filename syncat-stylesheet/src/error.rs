@@ -13,7 +13,7 @@ pub enum ErrorKind {
 
 #[derive(Debug)]
 pub struct Error {
-    kind: ErrorKind,
+    pub kind: ErrorKind,
     message: String,
     source: Option<Box<dyn std::error::Error>>,
 }

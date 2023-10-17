@@ -26,7 +26,7 @@ regex = "1.5.5"
 terminal_size = "0.1.10"
 tree-sitter = "0.20.7"
 console = "0.10.0"
-syncat-stylesheet = { version = "2.3.0", features = ["ansi_term"] }
+syncat-stylesheet = { path = "../syncat-stylesheet/", features = ["ansi_term"] } # { version = "2.3.0", features = ["ansi_term"] }
 toml = "0.5.6"
 libloading = "0.5.2"
 cc = "1.0.50"
