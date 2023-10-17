@@ -47,9 +47,8 @@ Do so by copying the [`syncat/config`][] folder and modifying them. You may also
 in instead copying my personal configuration of Syncat, which can be found in the [syncat-themes][]
 repository.
 
-To configure on your own, start by creating the appropriate configuration directory, depending on
-your operating system, and then continuing to the following sections. The appropriate directories
-are:
+In either case, copy (or create new) those files in the appropriate configuration directory, depending on
+your operating system, and then continuing to the following sections. The appropriate directories are:
 *   Linux: `$HOME/.config/syncat/`
 *   Mac: `$HOME/Library/Preferences/com.cameldridge.syncat/`
 *   Windows: Not officially supported
