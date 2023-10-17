@@ -25,7 +25,7 @@ impl FromStr for Stylesheet {
     type Err = crate::Error;
 
     fn from_str(source: &str) -> Result<Self, Self::Err> {
-        let tree = crate::parser::parse(&source).unwrap();
+        let tree = crate::parser::parse(source).unwrap();
         let mut cursor = tree.walk();
         Self::from_source(&mut cursor, source.as_ref())
     }

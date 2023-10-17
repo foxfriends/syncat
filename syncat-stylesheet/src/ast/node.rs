@@ -22,6 +22,9 @@ impl Node {
 impl FromSource for Node {
     fn from_source(tree: &mut TreeCursor, source: &[u8]) -> crate::Result<Self> {
         let kind = NodeKind::from_source(tree, source)?;
-        Ok(Node { kind, modifier: NodeModifier::default() })
+        Ok(Node {
+            kind,
+            modifier: NodeModifier::default(),
+        })
     }
 }

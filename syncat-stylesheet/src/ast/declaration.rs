@@ -1,7 +1,7 @@
+use super::{helper::*, Value, Variable};
 use std::collections::BTreeMap;
 use std::iter::FromIterator;
 use tree_sitter::TreeCursor;
-use super::{helper::*, Value, Variable};
 
 #[derive(Clone, Debug)]
 pub(crate) struct Declaration {
@@ -18,19 +18,18 @@ impl FromSource for Declaration {
         let value = Value::from_source(tree, source)?;
 
         tree.goto_parent();
-        Ok(Declaration {
-            variable,
-            value,
-        })
+        Ok(Declaration { variable, value })
     }
 }
 
 impl FromIterator<Declaration> for BTreeMap<String, Value> {
     fn from_iter<I: IntoIterator<Item = Declaration>>(iter: I) -> Self {
-        iter.into_iter()
-            .fold(Self::default(), |mut map, Declaration { variable, value }| {
+        iter.into_iter().fold(
+            Self::default(),
+            |mut map, Declaration { variable, value }| {
                 map.insert(variable.name().to_owned(), value);
                 map
-            })
+            },
+        )
     }
 }

@@ -69,8 +69,6 @@ impl Stylesheet {
         self.rules
             .iter()
             .filter_map(|rule| rule.styles(query, &self.variables))
-            .fold(None, |a, b| {
-                Some(a.unwrap_or_else(|| Style::default()).merge(b))
-            })
+            .fold(None, |a, b| Some(a.unwrap_or_default().merge(b)))
     }
 }

@@ -1,4 +1,5 @@
-#[macro_use] mod helper;
+#[macro_use]
+mod helper;
 mod color;
 mod declaration;
 mod import;

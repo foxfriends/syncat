@@ -1,9 +1,9 @@
+use crate::ast::Color;
+#[cfg(feature = "ansi_term")]
+use ansi_term::Color as ANSIColor;
 use std::convert::TryFrom;
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
-#[cfg(feature = "ansi_term")]
-use ansi_term::Color as ANSIColor;
-use crate::ast::Color;
 
 #[derive(Clone, Debug)]
 pub enum Value {
@@ -29,7 +29,11 @@ impl Error for FromValueError {}
 
 impl Display for FromValueError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "failed conversion from stylesheet value {:?} to type {}", self.value, self.target)
+        write!(
+            f,
+            "failed conversion from stylesheet value {:?} to type {}",
+            self.value, self.target
+        )
     }
 }
 
@@ -94,7 +98,11 @@ impl TryFrom<Value> for ANSIColor {
             Value::Color(Color::BrPurple) => Ok(ANSIColor::Fixed(13)),
             Value::Color(Color::BrCyan) => Ok(ANSIColor::Fixed(14)),
             Value::Color(Color::BrWhite) => Ok(ANSIColor::Fixed(15)),
-            Value::Color(Color::Hex(value)) => Ok(ANSIColor::RGB(((value >> 16) & 0xFF) as u8, ((value >> 8) & 0xFF) as u8, (value & 0xFF) as u8)),
+            Value::Color(Color::Hex(value)) => Ok(ANSIColor::RGB(
+                ((value >> 16) & 0xFF) as u8,
+                ((value >> 8) & 0xFF) as u8,
+                (value & 0xFF) as u8,
+            )),
             _ => Err(FromValueError::new(value, "ansi_term::Colour")),
         }
     }

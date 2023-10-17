@@ -1,5 +1,5 @@
-use std::collections::BTreeMap;
 use regex::Captures;
+use std::collections::BTreeMap;
 
 #[derive(Default, Debug)]
 pub(crate) struct Matches<'k, 's> {
@@ -9,7 +9,7 @@ pub(crate) struct Matches<'k, 's> {
 
 impl<'k, 's> Matches<'k, 's> {
     pub(crate) fn get(&self, key: &str) -> Option<&str> {
-        self.matches.get(key).map(|s| *s)
+        self.matches.get(key).copied()
     }
 
     pub(crate) fn capture(&self, index: usize) -> Option<&str> {
@@ -20,7 +20,7 @@ impl<'k, 's> Matches<'k, 's> {
             .flatten()
             .map(|m| m.as_str())
     }
-    
+
     pub(crate) fn insert(&mut self, key: &'k str, value: &'s str) {
         self.matches.insert(key, value);
     }

@@ -1,5 +1,6 @@
+#[cfg(feature = "ansi_term")]
+use ansi_term::Style as ANSIStyle;
 use std::collections::BTreeMap;
-#[cfg(feature = "ansi_term")] use ansi_term::Style as ANSIStyle;
 use std::convert::TryFrom;
 
 mod value;
@@ -14,14 +15,15 @@ impl<'s> Style<'s> {
     }
 
     pub fn try_get<T: TryFrom<Value>>(&self, key: &str) -> Result<Option<T>, T::Error> {
-        self.0.get(key)
+        self.0
+            .get(key)
             .map_or(Ok(None), |value| Ok(Some(T::try_from(value.clone())?)))
     }
 
     pub(crate) fn insert(&mut self, key: &'s str, value: Value) {
         self.0.insert(key, value);
     }
-    
+
     pub(crate) fn merge(mut self, mut other: Self) -> Self {
         other.0.append(&mut self.0);
         other

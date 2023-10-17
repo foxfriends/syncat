@@ -1,7 +1,7 @@
-use std::str::FromStr;
-use hex::FromHex;
-use tree_sitter::TreeCursor;
 use super::helper::*;
+use hex::FromHex;
+use std::str::FromStr;
+use tree_sitter::TreeCursor;
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum Color {
@@ -46,7 +46,7 @@ impl FromStr for Color {
             "brwhite" => Self::BrWhite,
             "brblack" => Self::BrBlack,
             other if other.starts_with('#') => {
-                let bytes = <[u8;3]>::from_hex(&other[1..])?;
+                let bytes = <[u8; 3]>::from_hex(&other[1..])?;
                 let bytes_4 = [0, bytes[0], bytes[1], bytes[2]];
                 Color::Hex(u32::from_be_bytes(bytes_4))
             }

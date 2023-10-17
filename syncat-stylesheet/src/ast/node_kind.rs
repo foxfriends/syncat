@@ -1,7 +1,7 @@
+use super::{helper::*, Selector};
 use enquote::unquote;
 use regex::{Regex, RegexBuilder};
 use tree_sitter::TreeCursor;
-use super::{helper::*, Selector};
 
 #[derive(Clone, Debug)]
 pub(crate) enum NodeKind {
@@ -14,8 +14,10 @@ pub(crate) enum NodeKind {
 }
 
 fn unquote_regex(string: &str) -> Result<Regex, regex::Error> {
-    if !string.starts_with("/") {
-        return Err(regex::Error::Syntax(String::from("Regular expression literal missing leading slash")));
+    if !string.starts_with('/') {
+        return Err(regex::Error::Syntax(String::from(
+            "Regular expression literal missing leading slash",
+        )));
     }
     let mut escape = false;
     let mut regex = String::new();
@@ -39,7 +41,9 @@ fn unquote_regex(string: &str) -> Result<Regex, regex::Error> {
         }
     }
     if !closed {
-        return Err(regex::Error::Syntax(String::from("Regular expression literal missing trailing slash")));
+        return Err(regex::Error::Syntax(String::from(
+            "Regular expression literal missing trailing slash",
+        )));
     }
     let mut builder = RegexBuilder::new(&regex);
     for ch in chars {
@@ -50,7 +54,12 @@ fn unquote_regex(string: &str) -> Result<Regex, regex::Error> {
             'U' => builder.swap_greed(true),
             'x' => builder.ignore_whitespace(true),
             'u' => builder.unicode(true),
-            other => return Err(regex::Error::Syntax(format!("Unsupported regular expression flag {}", other))),
+            other => {
+                return Err(regex::Error::Syntax(format!(
+                    "Unsupported regular expression flag {}",
+                    other
+                )))
+            }
         };
     }
     builder.build()
@@ -75,7 +84,7 @@ impl NodeKind {
                 let name = text!(tree, source, "name")?.to_string();
                 tree.goto_parent();
                 Self::Kind(name)
-            },
+            }
             "token" => {
                 children!(tree, "token");
                 let node = match tree.node().kind() {

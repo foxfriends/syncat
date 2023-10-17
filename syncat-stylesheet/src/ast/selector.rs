@@ -1,6 +1,6 @@
-use tree_sitter::TreeCursor;
 use super::{helper::*, Node, NodeModifier};
-use crate::{Query, QuerySlice, Matches};
+use crate::{Matches, Query, QuerySlice};
+use tree_sitter::TreeCursor;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Selector {
@@ -8,14 +8,23 @@ pub(crate) struct Selector {
 }
 
 impl Selector {
-    pub(crate) fn matches<'k, 's, 'a: 's>(&'k self, query: &'a Query<'s>) -> Option<Matches<'k, 's>> {
+    pub(crate) fn matches<'k, 's, 'a: 's>(
+        &'k self,
+        query: &'a Query<'s>,
+    ) -> Option<Matches<'k, 's>> {
         if self.nodes.is_empty() {
             return Some(Matches::default());
         }
-        Self::matches2(&self.nodes[..], &QuerySlice::new(query, self.nodes.last().unwrap().modifier))
+        Self::matches2(
+            &self.nodes[..],
+            &QuerySlice::new(query, self.nodes.last().unwrap().modifier),
+        )
     }
 
-    fn matches2<'k, 's, 'a: 's>(nodes: &'k [Node], query: &QuerySlice<'a, 's>) -> Option<Matches<'k, 's>> {
+    fn matches2<'k, 's, 'a: 's>(
+        nodes: &'k [Node],
+        query: &QuerySlice<'a, 's>,
+    ) -> Option<Matches<'k, 's>> {
         if nodes.is_empty() {
             return Some(Matches::default());
         }
@@ -39,7 +48,10 @@ impl FromSource for Selector {
             if tree.node().is_named() && !tree.node().is_extra() {
                 match tree.node().kind() {
                     "node" => nodes.push(Node::from_source(tree, source)?),
-                    "node_modifier" => nodes.last_mut().unwrap().modifier = NodeModifier::from_source(tree, source)?,
+                    "node_modifier" => {
+                        nodes.last_mut().unwrap().modifier =
+                            NodeModifier::from_source(tree, source)?
+                    }
                     name => return Err(crate::Error::invalid("node/node_modifier", name)),
                 }
             }

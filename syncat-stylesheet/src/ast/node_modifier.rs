@@ -11,7 +11,9 @@ pub(crate) enum NodeModifier {
 }
 
 impl Default for NodeModifier {
-    fn default() -> Self { Self::Child }
+    fn default() -> Self {
+        Self::Child
+    }
 }
 
 impl FromSource for NodeModifier {
