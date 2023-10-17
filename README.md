@@ -36,8 +36,6 @@ Syncat can be installed from [crates.io][]:
 cargo install syncat
 ```
 
-Before you use Syncat, it must be configured.
-
 ## Configuration
 
 By default, Syncat comes bundled with the configuration files as seen in [`syncat/config`][],
