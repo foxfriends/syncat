@@ -1,0 +1,31 @@
+$comment: brwhite;
+
+$variable: red;
+$module: red;
+$field: $variable;
+$name: $variable;
+
+$function: blue;
+
+$builtin: cyan;
+$meta: cyan;
+
+$keyword: purple;
+$operator: $keyword;
+
+$string: green;
+$interpolation: red;
+
+$value: bryellow;
+$constant: bryellow;
+$integer: $value;
+$boolean: $value;
+$float: $value;
+
+$type: yellow;
+$text: white;
+$addition: green;
+$modification: yellow;
+$deletion: red;
+
+$error: brred;

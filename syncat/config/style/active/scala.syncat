@@ -1,0 +1,61 @@
+import "../colours.syncat";
+
+package_identifier,
+import_declaration identifier,
+object_definition > identifier,
+class_definition > identifier,
+type_identifier,
+instance_expression > call_expression > identifier,
+field_expression > identifier & /^[A-Z].*/,
+type_parameters > identifier,
+{
+  color: $type;
+}
+
+package_clause "package",
+import_declaration "import",
+object_definition "object",
+class_definition "case",
+class_definition "class",
+wildcard,
+function_definition "def",
+function_definition "=",
+val_definition "val",
+class_parameter "val",
+var_definition "var",
+class_parameter "var",
+operator_identifier,
+instance_expression "new",
+"=>",
+call_expression "for",
+infix_expression "until",
+infix_expression "to",
+{
+  color: $keyword;
+}
+
+function_definition > identifier,
+call_expression > identifier,
+call_expression > field_expression identifier + identifier,
+infix_expression > identifier,
+field_expression identifier + identifier & /^to[A-Z].*/,
+{
+  color: $function;
+}
+
+number {
+  color: $value;
+}
+
+string_transform_expression > identifier,
+string {
+  color: $string;
+}
+
+string interpolation {
+  color: $interpolation;
+}
+
+comment {
+  color: $comment;
+}
