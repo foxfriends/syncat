@@ -3,6 +3,7 @@
 [languages.toml]: https://github.com/foxfriends/config/blob/syncat/languages.toml
 [crates.io]: https://crates.io
 [Bat]: https://github.com/sharkdp/bat
+[`syncat/config`]: ./syncat/config
 
 # Syncat
 
@@ -20,7 +21,7 @@ Syncat aims to provide similar features to the standard `cat` and the similar [B
 6.  Parses any file type accurately using Tree-sitter
 7.  Customizable syntax colouring using stylesheets
 
-In particular, the advantage of Syncat over the other options is that the parsing is done using 
+In particular, the advantage of Syncat over the other options is that the parsing is done using
 [Tree-sitter][] instead of with regular expressions, which makes it
 * very fast;
 * robust enough to provide useful results even in the presence of syntax errors.
@@ -39,20 +40,14 @@ Before you use Syncat, it must be configured.
 
 ## Configuration
 
-Syncat only works once you have set up the *stylesheets* and *languages*.
-The quickest way to get started is to copy my personal configurations (with the advantage that you keep up
-to date with my changes), but this is, of course, a somewhat personal choice so you may well wish to diverge.
-I provide you with this option anyway:
+By default, Syncat comes bundled with the configuration files as seen in [`syncat/config`][],
+providing an unverified list of tree-sitter grammars, and some quickly cobbled together
+highlighting for a handful of known file types.
 
-```bash
-# For Linux:
-cd ~/.config
-git clone https://github.com/foxfriends/config.git -b syncat syncat --recursive
-
-# For Mac:
-cd ~/Library/Preferences/
-git clone https://github.com/foxfriends/config.git -b syncat com.cameldridge.syncat --recursive
-```
+If this basic configuration does not suffice, you may choose to configure Syncat yourself.
+Do so by copying the [`syncat/config`][] folder and modifying them. You may also be interested
+in instead copying my personal configuration of Syncat, which can be found in the [syncat-themes][]
+repository.
 
 To configure on your own, start by creating the appropriate configuration directory, depending on
 your operating system, and then continuing to the following sections. The appropriate directories
