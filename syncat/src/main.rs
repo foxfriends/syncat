@@ -88,108 +88,143 @@ enum Subcommand {
     List,
 }
 
-fn colorize(opts: &Opts, language: Option<&String>, source: String) -> anyhow::Result<String> {
-    let lang_map = LangMap::open()?;
-
-    let language = opts
-        .language
-        .as_ref()
-        .or(language)
-        .and_then(|language| lang_map.get(language));
-
-    let Some(language) = language else {
-        return Ok(source);
-    };
-
-    let Some(langparser) = language.parser()? else {
-        return Ok(source);
-    };
-    let mut parser = tree_sitter::Parser::new();
-    parser.set_language(langparser)?;
-    let tree = parser.parse(&source, None).unwrap();
-    let colorizer = Colorizer {
-        source: source.as_str(),
-        tree,
-        stylesheet: language.style()?,
-        lang_map: &lang_map,
-    };
-    if opts.dev {
-        Ok(format!("{:?}", colorizer))
-    } else {
-        Ok(format!("{}", colorizer))
-    }
+/// The syncat instance holds globally loaded configuration to prevent loading
+/// it twice.
+struct Syncat {
+    opts: Opts,
+    meta_style: MetaStylesheet,
+    lang_map: LangMap,
 }
 
-fn transform(
-    opts: &Opts,
-    language: Option<&String>,
-    source: String,
-    path: Option<&Path>,
-) -> anyhow::Result<Vec<Line>> {
-    let source = colorize(opts, language, source)?;
-
-    if opts.dev {
-        Ok(vec![Line::new(source)])
-    } else {
-        let mut lines = source
-            .lines()
-            .map(|line| Line::new(line.to_owned()))
-            .collect::<Vec<_>>();
-
-        if !source.ends_with('\n') {
-            if let Some(line) = lines.last_mut() {
-                line.no_newline = true;
-            }
-        }
-
-        let lines = filter::git(opts, lines, path);
-        let lines = filter::squeeze_blank_lines(opts, lines);
-        let lines = filter::line_endings(opts, lines);
-
-        Ok(lines)
+impl Syncat {
+    fn new(opts: Opts) -> anyhow::Result<Self> {
+        let lang_map = LangMap::open()?;
+        let meta_style = MetaStylesheet::from_file()?;
+        Ok(Self {
+            opts,
+            lang_map,
+            meta_style,
+        })
     }
 }
 
 struct Source<'a> {
     language: Option<String>,
-    source: std::io::Result<String>,
+    source: String,
     path: Option<&'a Path>,
 }
 
-fn print<'a>(
-    opts: &Opts,
-    sources: impl IntoIterator<Item = Source<'a>>,
-    count: usize,
-) -> anyhow::Result<()> {
-    let meta_style = MetaStylesheet::from_file()?;
-    let mut line_numbers = filter::line_numbers(opts);
-    for (
-        index,
-        Source {
-            language,
-            source,
-            path,
-        },
-    ) in sources.into_iter().enumerate()
-    {
-        let lines = source
-            .map_err(|err| err.into())
-            .and_then(|source| transform(opts, language.as_ref(), source, path));
-        match lines {
-            Ok(lines) => {
-                let lines = line_numbers(lines);
-                let lines = filter::frame_header((index, count), opts, lines, path, &meta_style);
-                for line in &lines {
-                    print!("{}", line.to_string(&meta_style, opts.wrap));
-                }
-                let _ = filter::frame_footer((index, count), opts, lines, path, &meta_style);
-            }
-            Err(error) => {
-                eprint!("syncat: {}", error);
-            }
+impl Syncat {
+    fn colorize(&self, language: Option<&String>, source: String) -> anyhow::Result<String> {
+        let language = self
+            .opts
+            .language
+            .as_ref()
+            .or(language)
+            .and_then(|language| self.lang_map.get(language));
+        let Some(language) = language else {
+            // Language unknown, so just print
+            return Ok(source);
+        };
+        let Some(langparser) = language.parser()? else {
+            // Language not installed, so also just print
+            return Ok(source);
+        };
+
+        let mut parser = tree_sitter::Parser::new();
+        parser.set_language(langparser)?;
+        let tree = parser.parse(&source, None).unwrap();
+        let colorizer = Colorizer {
+            source: source.as_str(),
+            tree,
+            stylesheet: language.style()?,
+            lang_map: &self.lang_map,
+        };
+        if self.opts.dev {
+            Ok(format!("{:?}", colorizer))
+        } else {
+            Ok(format!("{}", colorizer))
         }
     }
-    Ok(())
+
+    fn transform(
+        &self,
+        language: Option<&String>,
+        source: String,
+        path: Option<&Path>,
+    ) -> anyhow::Result<Vec<Line>> {
+        let source = self.colorize(language, source)?;
+
+        if self.opts.dev {
+            Ok(vec![Line::new(source)])
+        } else {
+            let mut lines = source
+                .lines()
+                .map(|line| Line::new(line.to_owned()))
+                .collect::<Vec<_>>();
+
+            if !source.ends_with('\n') {
+                if let Some(line) = lines.last_mut() {
+                    line.no_newline = true;
+                }
+            }
+
+            let lines = filter::git(&self.opts, lines, path);
+            let lines = filter::squeeze_blank_lines(&self.opts, lines);
+            let lines = filter::line_endings(&self.opts, lines);
+
+            Ok(lines)
+        }
+    }
+
+    fn print<'a>(
+        &self,
+        sources: impl IntoIterator<Item = io::Result<Source<'a>>>,
+        count: usize,
+    ) -> anyhow::Result<()> {
+        let mut line_numbers = filter::line_numbers(&self.opts);
+        for (index, source) in sources.into_iter().enumerate() {
+            let Source {
+                language,
+                source,
+                path,
+            } = match source {
+                Ok(source) => source,
+                Err(error) => {
+                    eprintln!("syncat: {}", error);
+                    continue;
+                }
+            };
+
+            match self.transform(language.as_ref(), source, path) {
+                Ok(lines) => {
+                    let lines = line_numbers(lines);
+                    // NOTE: frame is a bit weird, idk why it needs to move in and return the lines...
+                    let lines = filter::frame_header(
+                        (index, count),
+                        &self.opts,
+                        lines,
+                        path,
+                        &self.meta_style,
+                    );
+                    for line in &lines {
+                        print!("{}", line.to_string(&self.meta_style, self.opts.wrap));
+                    }
+                    let _ = filter::frame_footer(
+                        (index, count),
+                        &self.opts,
+                        lines,
+                        path,
+                        &self.meta_style,
+                    );
+                }
+                Err(error) => {
+                    eprintln!("syncat: {}", error);
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 fn try_main() -> anyhow::Result<()> {
@@ -213,37 +248,42 @@ fn try_main() -> anyhow::Result<()> {
             let mut stdin = io::stdin();
             let mut source = String::new();
             stdin.read_to_string(&mut source)?;
-            print(
-                &opts,
-                std::iter::once(Source {
+            let syncat = Syncat::new(opts)?;
+            syncat.print(
+                std::iter::once(Ok(Source {
                     language: None,
-                    source: Ok(source),
+                    source,
                     path: None,
-                }),
+                })),
                 1,
             )
         }
         None => {
             // Attempt to style each of the supplied files, detecting languages based on extension
             // while respecting the override provided.
+            //
             // TODO: Add detection for hashbang/vim modeline/etc.
             let file_count = opts.files.len();
-            let sources = opts.files.iter().map(|path| Source {
-                language: path
-                    .extension()
-                    .and_then(|s| s.to_str())
-                    .map(|s| s.to_owned()),
-                source: fs::read_to_string(path),
-                path: Some(path.as_ref()),
+            let files = opts.files.clone();
+            let sources = files.iter().map(|path| {
+                Ok(Source {
+                    language: path
+                        .extension()
+                        .and_then(|s| s.to_str())
+                        .map(|s| s.to_owned()),
+                    source: fs::read_to_string(path)?,
+                    path: Some(path.as_ref()),
+                })
             });
-            print(&opts, sources, file_count)
+            let syncat = Syncat::new(opts)?;
+            syncat.print(sources, file_count)
         }
     }
 }
 
 fn main() {
     if let Err(error) = try_main() {
-        eprintln!("{}", error);
+        eprintln!("syncat: {}", error);
         std::process::exit(1);
     }
 }
