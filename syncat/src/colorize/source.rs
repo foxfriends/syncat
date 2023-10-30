@@ -40,20 +40,23 @@ fn write_node<'s>(
 
     if let Some(language) = language {
         // this node should be printed in another language
-        let mut parser = Parser::new();
-        parser
-            .set_language(language.parser().map_err(|_| fmt::Error)?)
-            .unwrap();
-        let token = tree.node().utf8_text(source.as_ref()).unwrap();
-        let subtree = parser.parse(token, None).unwrap();
-        write(
-            f,
-            token,
-            &subtree,
-            &language.style().map_err(|_| fmt::Error)?,
-            lang_map,
-        )?;
-    } else if tree.node().child_count() == 0 {
+        if let Some(langparser) = language.parser().map_err(|_| fmt::Error)? {
+            let mut parser = Parser::new();
+            parser.set_language(langparser).map_err(|_| fmt::Error)?;
+            let token = tree.node().utf8_text(source.as_ref()).unwrap();
+            let subtree = parser.parse(token, None).unwrap();
+            write(
+                f,
+                token,
+                &subtree,
+                &language.style().map_err(|_| fmt::Error)?,
+                lang_map,
+            )?;
+            return Ok(());
+        }
+    }
+
+    if tree.node().child_count() == 0 {
         // leaf node
         let token = tree.node().utf8_text(source.as_ref()).unwrap();
         write_token(f, token, style)?;

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 pub trait Resolver {
-    type Error: std::error::Error + 'static;
+    type Error: std::error::Error + Sync + Send + 'static;
 
     fn read_to_string<P: AsRef<Path>>(&self, path: P) -> Result<String, Self::Error>;
 }

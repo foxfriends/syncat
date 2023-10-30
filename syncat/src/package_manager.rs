@@ -101,7 +101,7 @@ fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub(crate) fn main(opts: &Subcommand) -> Result<(), Box<dyn std::error::Error>> {
+pub(crate) fn main(opts: &Subcommand) -> anyhow::Result<()> {
     let lang_map = LangMap::open()?;
     if !libraries().exists() {
         fs::create_dir_all(libraries())?;

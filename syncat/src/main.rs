@@ -88,12 +88,7 @@ enum Subcommand {
     List,
 }
 
-fn transform(
-    opts: &Opts,
-    language: Option<&String>,
-    source: String,
-    path: Option<&Path>,
-) -> Result<Vec<Line>, Box<dyn std::error::Error>> {
+fn colorize(opts: &Opts, language: Option<&String>, source: String) -> anyhow::Result<String> {
     let lang_map = LangMap::open()?;
 
     let language = opts
@@ -102,24 +97,36 @@ fn transform(
         .or(language)
         .and_then(|language| lang_map.get(language));
 
-    let source = if let Some(language) = language {
-        let mut parser = tree_sitter::Parser::new();
-        parser.set_language(language.parser()?).unwrap();
-        let tree = parser.parse(&source, None).unwrap();
-        let colorizer = Colorizer {
-            source: source.as_str(),
-            tree,
-            stylesheet: language.style()?,
-            lang_map: &lang_map,
-        };
-        if opts.dev {
-            format!("{:?}", colorizer)
-        } else {
-            format!("{}", colorizer)
-        }
-    } else {
-        source
+    let Some(language) = language else {
+        return Ok(source);
     };
+
+    let Some(langparser) = language.parser()? else {
+        return Ok(source);
+    };
+    let mut parser = tree_sitter::Parser::new();
+    parser.set_language(langparser)?;
+    let tree = parser.parse(&source, None).unwrap();
+    let colorizer = Colorizer {
+        source: source.as_str(),
+        tree,
+        stylesheet: language.style()?,
+        lang_map: &lang_map,
+    };
+    if opts.dev {
+        Ok(format!("{:?}", colorizer))
+    } else {
+        Ok(format!("{}", colorizer))
+    }
+}
+
+fn transform(
+    opts: &Opts,
+    language: Option<&String>,
+    source: String,
+    path: Option<&Path>,
+) -> anyhow::Result<Vec<Line>> {
+    let source = colorize(opts, language, source)?;
 
     if opts.dev {
         Ok(vec![Line::new(source)])
@@ -153,7 +160,7 @@ fn print<'a>(
     opts: &Opts,
     sources: impl IntoIterator<Item = Source<'a>>,
     count: usize,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> anyhow::Result<()> {
     let meta_style = MetaStylesheet::from_file()?;
     let mut line_numbers = filter::line_numbers(opts);
     for (
@@ -166,7 +173,7 @@ fn print<'a>(
     ) in sources.into_iter().enumerate()
     {
         let lines = source
-            .map_err(|error| Box::new(error) as Box<dyn std::error::Error>)
+            .map_err(|err| err.into())
             .and_then(|source| transform(opts, language.as_ref(), source, path));
         match lines {
             Ok(lines) => {
@@ -185,7 +192,7 @@ fn print<'a>(
     Ok(())
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn try_main() -> anyhow::Result<()> {
     let opts = Opts::parse();
     match &opts.command {
         Some(subcommand) => package_manager::main(subcommand),
@@ -231,5 +238,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             });
             print(&opts, sources, file_count)
         }
+    }
+}
+
+fn main() {
+    if let Err(error) = try_main() {
+        eprintln!("{}", error);
+        std::process::exit(1);
     }
 }

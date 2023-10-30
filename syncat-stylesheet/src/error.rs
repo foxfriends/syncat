@@ -15,7 +15,7 @@ pub enum ErrorKind {
 pub struct Error {
     pub kind: ErrorKind,
     message: String,
-    source: Option<Box<dyn std::error::Error>>,
+    source: Option<Box<dyn std::error::Error + Send + Sync>>,
 }
 
 impl Error {
@@ -30,7 +30,10 @@ impl Error {
         }
     }
 
-    pub(super) fn missing_module(error: impl std::error::Error + 'static, path: &Path) -> Self {
+    pub(super) fn missing_module(
+        error: impl std::error::Error + Send + Sync + 'static,
+        path: &Path,
+    ) -> Self {
         Self {
             kind: ErrorKind::Module,
             message: format!("could not locate module \"{}\"", path.display()),
@@ -55,7 +58,7 @@ impl Display for Error {
 
 impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        self.source.as_deref()
+        self.source.as_ref().map(|s| &**s as _)
     }
 }
 

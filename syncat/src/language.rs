@@ -15,7 +15,7 @@ use tree_sitter::Language;
 pub struct LangMap(BTreeMap<String, Lang>);
 
 impl LangMap {
-    pub fn open() -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn open() -> anyhow::Result<Self> {
         match config::read_to_string("languages.toml") {
             Ok(string) => Ok(toml::from_str(&string)?),
             Err(..) => Ok(LangMap::default()),
@@ -71,13 +71,16 @@ pub struct Lang {
 }
 
 impl Lang {
-    fn load(&self) -> Result<(), Box<dyn std::error::Error>> {
+    fn load(&self) -> anyhow::Result<bool> {
         if self.lib.borrow().is_some() {
-            return Ok(());
+            return Ok(true);
         }
         let mut lib_dir = libraries().join(&self.library);
         if let Some(ref path) = self.path {
             lib_dir = lib_dir.join(path);
+        }
+        if !lib_dir.exists() {
+            return Ok(false);
         }
         let lib_name = fs::read_dir(&lib_dir)?
             .filter_map(|entry| entry.ok())
@@ -89,20 +92,22 @@ impl Lang {
                     .filter(|path| path.contains("syncat"))
                     .is_some()
             })
-            .expect("Language is not installed correctly.");
+            .ok_or_else(|| anyhow::anyhow!("Language is not installed correctly."))?;
         let library = Library::new(lib_dir.join(lib_name))?;
         *self.lib.borrow_mut() = Some(library);
-        Ok(())
+        Ok(true)
     }
 
-    pub fn parser(&self) -> Result<Language, Box<dyn std::error::Error>> {
-        self.load()?;
+    pub fn parser(&self) -> anyhow::Result<Option<Language>> {
+        if !self.load()? {
+            return Ok(None);
+        }
         unsafe {
             let borrow = self.lib.borrow();
             let lib = borrow.as_ref().unwrap();
             let get_parser: Symbol<unsafe extern "C" fn() -> Language> =
                 lib.get(format!("tree_sitter_{}", self.name).as_bytes())?;
-            Ok(get_parser())
+            Ok(Some(get_parser()))
         }
     }
 

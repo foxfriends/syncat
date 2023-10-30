@@ -169,7 +169,7 @@ impl Default for MetaStylesheet {
 }
 
 impl MetaStylesheet {
-    pub fn from_file() -> Result<MetaStylesheet, Box<dyn std::error::Error>> {
+    pub fn from_file() -> anyhow::Result<MetaStylesheet> {
         let mut meta_stylesheet = MetaStylesheet::default();
         if let Some(stylesheet) = config::load_stylesheet(".syncat")? {
             if let Some(style) = stylesheet.style(&"line_ending".into()) {

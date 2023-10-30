@@ -1,50 +1,13 @@
-use syncat_stylesheet::Stylesheet;
-
 use crate::dirs::{active_color, config};
-use std::fmt::{self, Display};
 use std::path::{Component, Path, PathBuf};
 use std::{fs, io};
+use syncat_stylesheet::Stylesheet;
+
+mod error;
+
+pub use error::ConfigError;
 
 const DEFAULT_CONFIG: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/config.tar"));
-
-#[derive(Debug)]
-pub struct ConfigError {
-    message: &'static str,
-    cause: Option<Box<dyn std::error::Error + 'static>>,
-}
-
-impl Display for ConfigError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.cause {
-            Some(cause) => cause.fmt(f),
-            None => self.message.fmt(f),
-        }
-    }
-}
-
-impl std::error::Error for ConfigError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        self.cause.as_deref()
-    }
-}
-
-impl From<std::io::Error> for ConfigError {
-    fn from(value: std::io::Error) -> Self {
-        Self {
-            message: "IO Error",
-            cause: Some(Box::new(value)),
-        }
-    }
-}
-
-impl From<syncat_stylesheet::Error> for ConfigError {
-    fn from(value: syncat_stylesheet::Error) -> Self {
-        Self {
-            message: "Stylesheet Error",
-            cause: Some(Box::new(value)),
-        }
-    }
-}
 
 fn normalize(path: &Path) -> PathBuf {
     let mut components = vec![];
@@ -73,7 +36,7 @@ fn read_config<P: AsRef<Path>>(file: P) -> Result<String, ConfigError> {
     }
     Err(ConfigError {
         message: "file not found in default configuration",
-        cause: None,
+        source: None,
     })
 }
 

@@ -606,7 +606,7 @@ dependencies = [
  "libloading",
  "regex",
  "serde",
- "syncat-stylesheet 2.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syncat-stylesheet",
  "tar",
  "tempdir",
  "terminal_size",
@@ -617,20 +617,6 @@ dependencies = [
 [[package]]
 name = "syncat-stylesheet"
 version = "2.4.0"
-dependencies = [
- "ansi_term",
- "cc",
- "enquote",
- "hex",
- "regex",
- "tree-sitter",
-]
-
-[[package]]
-name = "syncat-stylesheet"
-version = "2.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11bf743af7498422ea342b3342e7f32a39e8298fcc736731fba0351653a7d08e"
 dependencies = [
  "ansi_term",
  "cc",
