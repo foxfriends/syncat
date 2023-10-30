@@ -7,10 +7,10 @@ mod sexp;
 mod source;
 
 pub(super) struct Colorizer<'a> {
-    pub(super) source: &'a str,
-    pub(super) tree: Tree,
-    pub(super) stylesheet: Stylesheet,
-    pub(super) lang_map: &'a LangMap,
+    pub source: &'a str,
+    pub tree: Tree,
+    pub stylesheet: Stylesheet,
+    pub lang_map: &'a LangMap,
 }
 
 impl Display for Colorizer<'_> {
