@@ -69,6 +69,25 @@ pub fn load_stylesheet<P: AsRef<Path>>(file: P) -> Result<Option<Stylesheet>, Co
     }
 }
 
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
+pub enum Existence {
+    Configured,
+    Builtin,
+    None,
+}
+
+pub fn stylesheet_existence<P: AsRef<Path>>(file: P) -> (PathBuf, Existence) {
+    let target_path = active_color().join(&file);
+    let existence = if target_path.exists() {
+        Existence::Configured
+    } else if config_exists(Path::new("style/active").join(&file)) {
+        Existence::Builtin
+    } else {
+        Existence::None
+    };
+    (target_path, existence)
+}
+
 struct ConstResolver;
 
 impl syncat_stylesheet::resolver::Resolver for ConstResolver {

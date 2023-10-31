@@ -1,8 +1,7 @@
-use crate::{
-    dirs::{active_color, libraries},
-    language::{Lang, LangMap},
-    Subcommand,
-};
+use crate::config::stylesheet_existence;
+use crate::dirs::libraries;
+use crate::language::{Lang, LangMap};
+use crate::Subcommand;
 use cc::Build;
 use std::fs;
 use std::process::Command;
@@ -142,17 +141,20 @@ pub(crate) fn main(opts: &Subcommand) -> anyhow::Result<()> {
         Subcommand::List => {
             for (name, lang) in &lang_map {
                 let directory = libraries().join(&lang.library);
-                let stylesheet = active_color().join(&lang.name);
                 let state = if directory.exists() {
                     "installed"
                 } else {
                     "not installed"
                 };
-                let stylesheet_state = if !stylesheet.exists() {
-                    " (missing)"
-                } else {
-                    ""
+
+                use crate::config::Existence::*;
+                let (stylesheet, existence) = stylesheet_existence(&lang.name);
+                let stylesheet_state = match existence {
+                    Configured => " (found)",
+                    Builtin => " (default)",
+                    None => " (missing)",
                 };
+
                 println!("{} ({}):", name, state);
                 println!("\t   Source repository: {}", &lang.source);
                 println!("\t   Install directory: {}", directory.display());
