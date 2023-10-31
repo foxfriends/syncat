@@ -69,12 +69,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anyhow"
-version = "1.0.75"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
-
-[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -595,7 +589,6 @@ name = "syncat"
 version = "3.4.0"
 dependencies = [
  "ansi_term",
- "anyhow",
  "cc",
  "clap",
  "console",

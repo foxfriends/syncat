@@ -169,9 +169,11 @@ impl Default for MetaStylesheet {
 }
 
 impl MetaStylesheet {
-    pub fn from_file() -> anyhow::Result<MetaStylesheet> {
+    pub(crate) fn from_file() -> crate::Result<MetaStylesheet> {
         let mut meta_stylesheet = MetaStylesheet::default();
-        if let Some(stylesheet) = config::load_stylesheet(".syncat")? {
+        if let Some(stylesheet) = config::load_stylesheet(".syncat")
+            .map_err(|er| crate::Error::new("failed to load meta stylesheet").with_source(er))?
+        {
             if let Some(style) = stylesheet.style(&"line_ending".into()) {
                 meta_stylesheet.line_ending = style.try_into()?;
             }
@@ -230,5 +232,11 @@ impl MetaStylesheet {
 
     pub fn title(&self) -> &ANSIStyle {
         &self.title.style
+    }
+}
+
+impl From<FromValueError> for crate::Error {
+    fn from(value: FromValueError) -> Self {
+        Self::new("failed to parse meta stylesheet value").with_source(value)
     }
 }

@@ -100,10 +100,11 @@ fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub(crate) fn main(opts: &Subcommand) -> anyhow::Result<()> {
+pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
     let lang_map = LangMap::open()?;
     if !libraries().exists() {
-        fs::create_dir_all(libraries())?;
+        // Don't really care about this error, it's a sketchy side effect anyway.
+        fs::create_dir_all(libraries()).ok();
     }
 
     match opts {
@@ -132,7 +133,8 @@ pub(crate) fn main(opts: &Subcommand) -> anyhow::Result<()> {
         Subcommand::Remove { language } => {
             if let Some(lang) = lang_map.get_strict(language) {
                 let directory = libraries().join(&lang.library);
-                fs::remove_dir_all(directory)?;
+                fs::remove_dir_all(directory)
+                    .map_err(|er| crate::Error::new("failed to remove language").with_source(er))?;
                 println!("Language `{}` has been removed", language);
             } else {
                 println!("No language `{}` is installed", language);

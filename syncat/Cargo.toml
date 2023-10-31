@@ -34,7 +34,6 @@ serde = { version = "1.0.105", features = ["derive"] }
 tempdir = "0.3.7"
 clap = { version = "4.4.6", features = ["derive"] }
 tar = "0.4.40"
-anyhow = "1.0.75"
 
 [build-dependencies]
 tar = "0.4.40"

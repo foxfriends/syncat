@@ -1,8 +1,7 @@
+use clap::{ArgAction, Parser};
 use std::fs;
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
-
-use clap::{ArgAction, Parser};
 
 mod colorize;
 mod config;
@@ -15,7 +14,7 @@ mod meta_stylesheet;
 mod package_manager;
 
 use colorize::Colorizer;
-use error::Error;
+use error::{Error, Result};
 use language::LangMap;
 use line::Line;
 use meta_stylesheet::MetaStylesheet;
@@ -103,7 +102,7 @@ struct Syncat {
 }
 
 impl Syncat {
-    fn new(opts: Opts) -> anyhow::Result<Self> {
+    fn new(opts: Opts) -> error::Result<Self> {
         let lang_map = LangMap::open()?;
         let meta_style = MetaStylesheet::from_file()?;
         Ok(Self {
@@ -113,7 +112,7 @@ impl Syncat {
         })
     }
 
-    fn colorize(&self, language: Option<&str>, source: String) -> anyhow::Result<String> {
+    fn colorize(&self, language: Option<&str>, source: String) -> crate::Result<String> {
         let language = self
             .opts
             .language
@@ -147,7 +146,7 @@ impl Syncat {
         language: Option<&str>,
         source: String,
         path: Option<&Path>,
-    ) -> anyhow::Result<Vec<Line>> {
+    ) -> crate::Result<Vec<Line>> {
         let source = self.colorize(language, source)?;
 
         if self.opts.dev {
@@ -175,7 +174,7 @@ impl Syncat {
     fn print<'a>(
         &self,
         sources: impl IntoIterator<Item = error::Result<Source<'a>>> + ExactSizeIterator,
-    ) -> anyhow::Result<()> {
+    ) -> crate::Result<()> {
         let count = sources.len();
         let mut line_numbers = filter::line_numbers(&self.opts);
         for (index, source) in sources.into_iter().enumerate() {
@@ -223,7 +222,7 @@ impl Syncat {
     }
 }
 
-fn try_main() -> anyhow::Result<()> {
+fn try_main() -> error::Result<()> {
     let opts = Opts::parse();
     match &opts.command {
         Some(subcommand) => package_manager::main(subcommand),
@@ -232,7 +231,11 @@ fn try_main() -> anyhow::Result<()> {
             // These lines cannot be syntax highlighted, as we do not know what the language is.
             loop {
                 let mut line = String::new();
-                if io::stdin().read_line(&mut line)? == 0 {
+                if io::stdin()
+                    .read_line(&mut line)
+                    .map_err(|er| crate::Error::new("could not read stdin").with_source(er))?
+                    == 0
+                {
                     return Ok(());
                 }
                 print!("{}", line);
@@ -243,7 +246,9 @@ fn try_main() -> anyhow::Result<()> {
             // at once using the specified language.
             let mut stdin = io::stdin();
             let mut source = String::new();
-            stdin.read_to_string(&mut source)?;
+            stdin
+                .read_to_string(&mut source)
+                .map_err(|er| crate::Error::new("could not read stdin").with_source(er))?;
             let syncat = Syncat::new(opts)?;
             syncat.print(std::iter::once(Ok(Source {
                 language: None,
@@ -279,7 +284,7 @@ fn try_main() -> anyhow::Result<()> {
 
 fn main() {
     if let Err(error) = try_main() {
-        eprintln!("syncat: {}", error);
+        eprintln!("{}", error);
         std::process::exit(1);
     }
 }

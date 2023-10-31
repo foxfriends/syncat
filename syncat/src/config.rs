@@ -3,10 +3,6 @@ use std::path::{Component, Path, PathBuf};
 use std::{fs, io};
 use syncat_stylesheet::Stylesheet;
 
-mod error;
-
-pub use error::ConfigError;
-
 const DEFAULT_CONFIG: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/config.tar"));
 
 fn normalize(path: &Path) -> PathBuf {
@@ -25,19 +21,19 @@ fn normalize(path: &Path) -> PathBuf {
     components.into_iter().collect()
 }
 
-fn read_config<P: AsRef<Path>>(file: P) -> Result<String, ConfigError> {
+fn read_config<P: AsRef<Path>>(file: P) -> crate::Result<String> {
     let normalized = normalize(file.as_ref());
     let mut config_reader = DEFAULT_CONFIG;
-    for entry in tar::Archive::new(&mut config_reader).entries().unwrap() {
-        let entry = entry?;
+    for entry in tar::Archive::new(&mut config_reader)
+        .entries()
+        .unwrap()
+        .map(Result::unwrap)
+    {
         if entry.path().unwrap().as_ref() == normalized {
-            return Ok(io::read_to_string(entry)?);
+            return Ok(io::read_to_string(entry).expect("default config should be valid"));
         }
     }
-    Err(ConfigError {
-        message: "file not found in default configuration",
-        source: None,
-    })
+    Err(crate::Error::new("file not found in default configuration"))
 }
 
 fn config_exists<P: AsRef<Path>>(file: P) -> bool {
@@ -48,24 +44,37 @@ fn config_exists<P: AsRef<Path>>(file: P) -> bool {
         .any(|res| res.unwrap().path().unwrap().as_ref() == file.as_ref())
 }
 
-pub fn read_to_string<P: AsRef<Path>>(file: P) -> Result<String, ConfigError> {
-    if config().join(&file).exists() {
-        Ok(fs::read_to_string(config().join(file))?)
+pub(crate) fn read_to_string<P: AsRef<Path>>(file: P) -> crate::Result<String> {
+    let path = config().join(&file);
+    if path.exists() {
+        Ok(fs::read_to_string(&path).map_err(|er| {
+            crate::Error::new("could not read config file")
+                .with_source(er)
+                .with_path(path)
+        })?)
     } else {
         read_config(file)
     }
 }
 
-pub fn load_stylesheet<P: AsRef<Path>>(file: P) -> Result<Option<Stylesheet>, ConfigError> {
-    if active_color().join(&file).exists() {
-        Ok(Some(Stylesheet::from_file(active_color().join(&file))?))
+pub(crate) fn load_stylesheet<P: AsRef<Path>>(file: P) -> crate::Result<Option<Stylesheet>> {
+    let path = active_color().join(&file);
+    if path.exists() {
+        Ok(Some(Stylesheet::from_file(&path).map_err(|er| {
+            crate::Error::new("could not read stylesheet")
+                .with_source(er)
+                .with_path(path)
+        })?))
     } else if !config_exists(Path::new("style/active").join(&file)) {
         Ok(None)
     } else {
-        Ok(Some(Stylesheet::from_file_with_resolver(
-            Path::new("style/active").join(file),
-            &ConstResolver,
-        )?))
+        Ok(Some(
+            Stylesheet::from_file_with_resolver(
+                Path::new("style/active").join(file),
+                &ConstResolver,
+            )
+            .unwrap(),
+        ))
     }
 }
 
@@ -91,7 +100,7 @@ pub fn stylesheet_existence<P: AsRef<Path>>(file: P) -> (PathBuf, Existence) {
 struct ConstResolver;
 
 impl syncat_stylesheet::resolver::Resolver for ConstResolver {
-    type Error = ConfigError;
+    type Error = crate::Error;
 
     fn read_to_string<P: AsRef<Path>>(&self, path: P) -> Result<String, Self::Error> {
         read_config(path)
