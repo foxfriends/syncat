@@ -6,6 +6,7 @@ pub(crate) struct Error {
     path: Option<PathBuf>,
     message: String,
     source: Option<Box<dyn std::error::Error + Sync + Send>>,
+    hint: Option<String>,
 }
 
 impl Error {
@@ -14,6 +15,7 @@ impl Error {
             path: None,
             message: message.to_string(),
             source: None,
+            hint: None,
         }
     }
 
@@ -27,6 +29,11 @@ impl Error {
 
     pub(crate) fn with_path(mut self, path: impl AsRef<Path>) -> Self {
         self.path = Some(path.as_ref().to_owned());
+        self
+    }
+
+    pub(crate) fn with_hint(mut self, hint: impl Display) -> Self {
+        self.hint = Some(hint.to_string());
         self
     }
 }
@@ -45,7 +52,10 @@ impl Display for Error {
         }
         write!(f, "{}", self.message)?;
         if let Some(source) = &self.source {
-            write!(f, " ({})", source)?;
+            write!(f, " ({source})")?;
+        }
+        if let Some(hint) = &self.hint {
+            write!(f, "\nhelp: {hint}")?;
         }
         Ok(())
     }
