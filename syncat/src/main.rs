@@ -88,6 +88,12 @@ enum Subcommand {
     List,
 }
 
+struct Source<'a> {
+    language: Option<String>,
+    source: String,
+    path: Option<&'a Path>,
+}
+
 /// The syncat instance holds globally loaded configuration to prevent loading
 /// it twice.
 struct Syncat {
@@ -106,20 +112,12 @@ impl Syncat {
             meta_style,
         })
     }
-}
 
-struct Source<'a> {
-    language: Option<String>,
-    source: String,
-    path: Option<&'a Path>,
-}
-
-impl Syncat {
-    fn colorize(&self, language: Option<&String>, source: String) -> anyhow::Result<String> {
+    fn colorize(&self, language: Option<&str>, source: String) -> anyhow::Result<String> {
         let language = self
             .opts
             .language
-            .as_ref()
+            .as_deref()
             .or(language)
             .and_then(|language| self.lang_map.get(language));
         let Some(language) = language else {
@@ -149,7 +147,7 @@ impl Syncat {
 
     fn transform(
         &self,
-        language: Option<&String>,
+        language: Option<&str>,
         source: String,
         path: Option<&Path>,
     ) -> anyhow::Result<Vec<Line>> {
@@ -196,7 +194,7 @@ impl Syncat {
                 }
             };
 
-            match self.transform(language.as_ref(), source, path) {
+            match self.transform(language.as_deref(), source, path) {
                 Ok(lines) => {
                     let lines = line_numbers(lines);
                     // NOTE: frame is a bit weird, idk why it needs to move in and return the lines...
