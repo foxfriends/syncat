@@ -14,11 +14,11 @@ mod line;
 mod meta_stylesheet;
 mod package_manager;
 
+use colorize::Colorizer;
+use error::Error;
 use language::LangMap;
 use line::Line;
 use meta_stylesheet::MetaStylesheet;
-
-use colorize::Colorizer;
 
 /// Syntax aware cat utility.
 #[derive(Parser, Debug)]
@@ -124,13 +124,10 @@ impl Syncat {
             // Language unknown, so just print
             return Ok(source);
         };
-        let Some(langparser) = language.parser()? else {
+        let Some(mut parser) = language.parser()? else {
             // Language not installed, so also just print
             return Ok(source);
         };
-
-        let mut parser = tree_sitter::Parser::new();
-        parser.set_language(langparser)?;
         let tree = parser.parse(&source, None).unwrap();
         let colorizer = Colorizer {
             source: source.as_str(),
@@ -177,9 +174,9 @@ impl Syncat {
 
     fn print<'a>(
         &self,
-        sources: impl IntoIterator<Item = io::Result<Source<'a>>>,
-        count: usize,
+        sources: impl IntoIterator<Item = error::Result<Source<'a>>> + ExactSizeIterator,
     ) -> anyhow::Result<()> {
+        let count = sources.len();
         let mut line_numbers = filter::line_numbers(&self.opts);
         for (index, source) in sources.into_iter().enumerate() {
             let Source {
@@ -189,7 +186,7 @@ impl Syncat {
             } = match source {
                 Ok(source) => source,
                 Err(error) => {
-                    eprintln!("syncat: {}", error);
+                    eprintln!("{error}");
                     continue;
                 }
             };
@@ -216,9 +213,10 @@ impl Syncat {
                         &self.meta_style,
                     );
                 }
-                Err(error) => {
-                    eprintln!("syncat: {}", error);
-                }
+                Err(error) => match path {
+                    Some(path) => eprintln!("syncat: {}: {error}", path.display()),
+                    None => eprintln!("syncat: {error}"),
+                },
             }
         }
         Ok(())
@@ -247,21 +245,17 @@ fn try_main() -> anyhow::Result<()> {
             let mut source = String::new();
             stdin.read_to_string(&mut source)?;
             let syncat = Syncat::new(opts)?;
-            syncat.print(
-                std::iter::once(Ok(Source {
-                    language: None,
-                    source,
-                    path: None,
-                })),
-                1,
-            )
+            syncat.print(std::iter::once(Ok(Source {
+                language: None,
+                source,
+                path: None,
+            })))
         }
         None => {
             // Attempt to style each of the supplied files, detecting languages based on extension
             // while respecting the override provided.
             //
             // TODO: Add detection for hashbang/vim modeline/etc.
-            let file_count = opts.files.len();
             let files = opts.files.clone();
             let sources = files.iter().map(|path| {
                 Ok(Source {
@@ -269,12 +263,16 @@ fn try_main() -> anyhow::Result<()> {
                         .extension()
                         .and_then(|s| s.to_str())
                         .map(|s| s.to_owned()),
-                    source: fs::read_to_string(path)?,
+                    source: fs::read_to_string(path).map_err(|err| {
+                        Error::new("failed to read file")
+                            .with_source(err)
+                            .with_path(path)
+                    })?,
                     path: Some(path.as_ref()),
                 })
             });
             let syncat = Syncat::new(opts)?;
-            syncat.print(sources, file_count)
+            syncat.print(sources)
         }
     }
 }

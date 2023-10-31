@@ -3,7 +3,7 @@ use ansi_term::Style;
 use std::convert::TryInto;
 use std::fmt::{self, Formatter};
 use syncat_stylesheet::{Query, Stylesheet};
-use tree_sitter::{Parser, Tree, TreeCursor};
+use tree_sitter::{Tree, TreeCursor};
 
 fn write_token(f: &mut Formatter, token: &str, style: Style) -> fmt::Result {
     let mut line_count = token.lines().count();
@@ -40,9 +40,7 @@ fn write_node<'s>(
 
     if let Some(language) = language {
         // this node should be printed in another language
-        if let Some(langparser) = language.parser().map_err(|_| fmt::Error)? {
-            let mut parser = Parser::new();
-            parser.set_language(langparser).map_err(|_| fmt::Error)?;
+        if let Some(mut parser) = language.parser().map_err(|_| fmt::Error)? {
             let token = tree.node().utf8_text(source.as_ref()).unwrap();
             let subtree = parser.parse(token, None).unwrap();
             write(

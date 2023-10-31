@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use syncat_stylesheet::Stylesheet;
-use tree_sitter::Language;
+use tree_sitter::{Language, Parser};
 
 /// The list of languages, found in `languages.toml` in the config directory.
 #[derive(serde::Deserialize, Default)]
@@ -98,17 +98,21 @@ impl Lang {
         Ok(true)
     }
 
-    pub fn parser(&self) -> anyhow::Result<Option<Language>> {
+    pub fn parser(&self) -> anyhow::Result<Option<Parser>> {
         if !self.load()? {
             return Ok(None);
         }
-        unsafe {
+        let language = unsafe {
             let borrow = self.lib.borrow();
             let lib = borrow.as_ref().unwrap();
-            let get_parser: Symbol<unsafe extern "C" fn() -> Language> =
+            let get_language: Symbol<unsafe extern "C" fn() -> Language> =
                 lib.get(format!("tree_sitter_{}", self.name).as_bytes())?;
-            Ok(Some(get_parser()))
-        }
+            get_language()
+        };
+
+        let mut parser = Parser::new();
+        parser.set_language(language)?;
+        Ok(Some(parser))
     }
 
     pub fn style(&self) -> Result<Stylesheet, ConfigError> {
