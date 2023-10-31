@@ -9,23 +9,43 @@ use tempdir::TempDir;
 
 include!(concat!(env!("OUT_DIR"), "/targets.rs"));
 
-fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
-    let temp_dir = TempDir::new("syncat")?;
+fn try_command(cmd: &mut Command, msg: &str) -> crate::Result<()> {
+    let success = cmd
+        .status()
+        .map_err(|er| crate::Error::new(msg).with_source(er))?
+        .success();
+    if success {
+        Ok(())
+    } else {
+        Err(crate::Error::new(format!(
+            "{}: subcommand exited with non-zero status code",
+            msg
+        )))
+    }
+}
+
+fn install(name: &str, lang: &Lang) -> crate::Result<()> {
+    let err_msg = format!("failed to install {name}");
+    let temp_dir =
+        TempDir::new("syncat").map_err(|er| crate::Error::new(&err_msg).with_source(er))?;
     println!("Installing {}...", name);
+
     let mut directory = libraries().join(&lang.library);
     if directory.exists() {
-        Command::new("git")
-            .arg("pull")
-            .current_dir(&directory)
-            .status()?;
+        try_command(
+            Command::new("git").arg("pull").current_dir(&directory),
+            &err_msg,
+        )?;
     } else {
-        Command::new("git")
-            .arg("clone")
-            .arg(&lang.source)
-            .arg("--recurse") // doubt it's needed, but why not?
-            .arg(&lang.library) // make sure we put it in the directory named as expected
-            .current_dir(libraries())
-            .status()?;
+        try_command(
+            Command::new("git")
+                .arg("clone")
+                .arg(&lang.source)
+                .arg("--recurse") // doubt it's needed, but why not?
+                .arg(&lang.library) // make sure we put it in the directory named as expected
+                .current_dir(libraries()),
+            &err_msg,
+        )?;
     }
     if let Some(ref path) = lang.path {
         directory = directory.join(path);
@@ -33,16 +53,23 @@ fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
     let srcdir = directory.join("src");
     if !srcdir.exists() {
         println!("src directory does not exist... attempting to generate it");
-        Command::new("npm")
-            .arg("install")
-            .current_dir(&directory)
-            .status()?;
-        Command::new("./node_modules/.bin/tree-sitter")
-            .arg("generate")
-            .current_dir(&directory)
-            .status()?;
+        try_command(
+            Command::new("npm").arg("install").current_dir(&directory),
+            &err_msg,
+        )?;
+        try_command(
+            Command::new("./node_modules/.bin/tree-sitter")
+                .arg("generate")
+                .current_dir(&directory),
+            &err_msg,
+        )?;
     }
-    let src_files = fs::read_dir(&srcdir)?
+    let src_files = fs::read_dir(&srcdir)
+        .map_err(|er| {
+            crate::Error::new("could not read src directory of cloned repository")
+                .with_source(er)
+                .with_path(&srcdir)
+        })?
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
         .filter(|path| path.file_stem().unwrap() != "binding") // skip the nodejs binding
@@ -83,21 +110,30 @@ fn install(name: &str, lang: &Lang) -> Result<(), Box<dyn std::error::Error>> {
         .opt_level(3)
         .get_compiler();
     if compiler.is_like_gnu() {
-        compiler
-            .to_command()
-            .arg("-o")
-            .arg(directory.join("libsyncat.so"))
-            .args(
-                fs::read_dir(temp_dir.path())?
-                    .filter_map(|entry| entry.ok())
-                    .map(|entry| entry.path())
-                    .filter(|path| path.extension().filter(|ext| *ext == "o").is_some()),
-            )
-            .status()?;
+        try_command(
+            compiler
+                .to_command()
+                .arg("-o")
+                .arg(directory.join("libsyncat.so"))
+                .args(
+                    fs::read_dir(temp_dir.path())
+                        .map_err(|er| {
+                            crate::Error::new("temp directory not found")
+                                .with_path(&temp_dir)
+                                .with_source(er)
+                        })?
+                        .filter_map(|entry| entry.ok())
+                        .map(|entry| entry.path())
+                        .filter(|path| path.extension().filter(|ext| *ext == "o").is_some()),
+                ),
+            &err_msg,
+        )?;
+        Ok(())
     } else {
-        panic!("This C/C++ compiler is not yet supported");
+        Err(crate::Error::new(
+            "this C/C++ compiler is not yet supported",
+        ))
     }
-    Ok(())
 }
 
 pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
@@ -112,7 +148,7 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
             if languages.is_empty() {
                 for (name, lang) in &lang_map {
                     if let Err(error) = install(name, lang) {
-                        eprintln!("Failed to install {}: {}", name, error);
+                        eprintln!("{}", error);
                     }
                 }
             } else {
@@ -133,8 +169,11 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
         Subcommand::Remove { language } => {
             if let Some(lang) = lang_map.get_strict(language) {
                 let directory = libraries().join(&lang.library);
-                fs::remove_dir_all(directory)
-                    .map_err(|er| crate::Error::new("failed to remove language").with_source(er))?;
+                fs::remove_dir_all(&directory).map_err(|er| {
+                    crate::Error::new("failed to remove language")
+                        .with_source(er)
+                        .with_path(&directory)
+                })?;
                 println!("Language `{}` has been removed", language);
             } else {
                 println!("No language `{}` is installed", language);

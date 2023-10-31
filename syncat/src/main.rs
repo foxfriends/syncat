@@ -173,7 +173,7 @@ impl Syncat {
 
     fn print<'a>(
         &self,
-        sources: impl IntoIterator<Item = error::Result<Source<'a>>> + ExactSizeIterator,
+        sources: impl IntoIterator<Item = Result<Source<'a>>> + ExactSizeIterator,
     ) -> crate::Result<()> {
         let count = sources.len();
         let mut line_numbers = filter::line_numbers(&self.opts);
