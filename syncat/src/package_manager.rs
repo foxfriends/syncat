@@ -3,8 +3,8 @@ use crate::dirs::libraries;
 use crate::language::{Lang, LangMap};
 use crate::Subcommand;
 use cc::Build;
-use std::fs;
 use std::process::Command;
+use std::{fs, process};
 use tempdir::TempDir;
 
 // HOST and TARGET constants were scraped at compile time and injected here:
@@ -157,9 +157,11 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
 
     match opts {
         Subcommand::Install { languages } => {
+            let mut any_errors = false;
             if languages.is_empty() {
                 for (name, lang) in &lang_map {
                     if let Err(error) = install(name, lang) {
+                        any_errors = true;
                         eprintln!("{}", error);
                     }
                 }
@@ -167,15 +169,23 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
                 for language in languages {
                     match lang_map.get(language) {
                         None => {
-                            println!("No language named {} is listed in languages.toml", language);
+                            any_errors = true;
+                            eprintln!(
+                                "syncat: language named {} is not listed in languages.toml",
+                                language
+                            );
                         }
                         Some(lang) => {
                             if let Err(error) = install(language, lang) {
-                                eprintln!("Failed to install {}: {}", language, error);
+                                any_errors = true;
+                                eprintln!("{}", error);
                             }
                         }
                     }
                 }
+            }
+            if any_errors {
+                std::process::exit(1);
             }
         }
         Subcommand::Remove { language } => {
@@ -186,9 +196,10 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
                         .with_source(er)
                         .with_path(&directory)
                 })?;
-                println!("Language `{}` has been removed", language);
+                eprintln!("Language `{}` has been removed", language);
             } else {
-                println!("No language `{}` is installed", language);
+                eprintln!("No language `{}` is installed", language);
+                std::process::exit(1);
             }
         }
         Subcommand::List => {
