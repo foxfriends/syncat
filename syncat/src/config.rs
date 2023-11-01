@@ -44,6 +44,37 @@ fn config_exists<P: AsRef<Path>>(file: P) -> bool {
         .any(|res| res.unwrap().path().unwrap().as_ref() == file.as_ref())
 }
 
+pub(crate) fn dump_config<P: AsRef<Path>>(file: P) -> crate::Result<()> {
+    let mut config_reader = DEFAULT_CONFIG;
+    for mut entry in tar::Archive::new(&mut config_reader)
+        .entries()
+        .unwrap()
+        .map(|entry| entry.unwrap())
+    {
+        let input_path = entry.path().unwrap();
+        let output_path = file.as_ref().join(input_path);
+        let parent_path = output_path.parent().unwrap();
+        if !parent_path.exists() {
+            fs::create_dir(parent_path).map_err(|er| {
+                crate::Error::new("failed to unpack directory")
+                    .with_source(er)
+                    .with_path(parent_path)
+            })?;
+        }
+        let mut file = fs::File::create(&output_path).map_err(|er| {
+            crate::Error::new("failed to create file")
+                .with_source(er)
+                .with_path(&output_path)
+        })?;
+        io::copy(&mut entry, &mut file).map_err(|er| {
+            crate::Error::new("failed to write file")
+                .with_source(er)
+                .with_path(&output_path)
+        })?;
+    }
+    Ok(())
+}
+
 pub(crate) fn read_to_string<P: AsRef<Path>>(file: P) -> crate::Result<String> {
     let path = config().join(&file);
     if path.exists() {

@@ -70,6 +70,14 @@ pub struct Opts {
 
 #[derive(Parser, Debug)]
 enum Subcommand {
+    /// Initialize the config directory by filling it with the default configuration.
+    ///
+    /// If the config directory already exists, it will not be created. An alternative path
+    /// may be specified.
+    Init {
+        #[arg(short, long)]
+        out: Option<PathBuf>,
+    },
     /// Installs all languages listed in the `languages.toml` file. Previously installed packages
     /// will be updated, if updates are available. This process may take a long time, depending on
     /// how many languages are being installed.

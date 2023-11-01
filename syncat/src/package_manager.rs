@@ -1,5 +1,5 @@
-use crate::config::stylesheet_existence;
-use crate::dirs::libraries;
+use crate::config::{dump_config, stylesheet_existence};
+use crate::dirs::{config, libraries};
 use crate::language::{Lang, LangMap};
 use crate::Subcommand;
 use cc::Build;
@@ -156,6 +156,23 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
     }
 
     match opts {
+        Subcommand::Init { out } => {
+            let out = out.clone().unwrap_or(config());
+            if out.exists() {
+                eprintln!(
+                    "syncat: {}: configuration directory already exists, will not overwrite",
+                    out.display()
+                );
+                std::process::exit(1);
+            }
+            fs::create_dir_all(&out).map_err(|er| {
+                crate::Error::new("failed to create config directory")
+                    .with_source(er)
+                    .with_path(&out)
+                    .with_hint("ensure you have adequate permissions to create the new directory and try again")
+            })?;
+            dump_config(&out)?;
+        }
         Subcommand::Install { languages } => {
             let mut any_errors = false;
             if languages.is_empty() {
