@@ -3,8 +3,8 @@ use crate::dirs::libraries;
 use crate::language::{Lang, LangMap};
 use crate::Subcommand;
 use cc::Build;
+use std::fs;
 use std::process::Command;
-use std::{fs, process};
 use tempdir::TempDir;
 
 // HOST and TARGET constants were scraped at compile time and injected here:
@@ -15,7 +15,7 @@ struct Installer<'a> {
     lang: &'a Lang,
 }
 
-const HELP: &'static str = concat!(
+const HELP: &str = concat!(
     "Managed installation of languages may require a compatible C/C++ compiler, git, or npm. ",
     "If any required dependency could not be found automatically, install it and try again.",
 );
