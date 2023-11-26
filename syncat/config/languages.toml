@@ -190,6 +190,10 @@ name = "swift"
 library = "tree-sitter-swift"
 extensions = ["swift"]
 
+[[swift.prebuild]]
+command = "npm"
+args = ["install"]
+
 [syncat-stylesheet]
 source = "https://github.com/foxfriends/syncat"
 path = "tree-sitter-syncat-stylesheet"

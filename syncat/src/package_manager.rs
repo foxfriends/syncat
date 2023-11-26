@@ -74,6 +74,15 @@ impl Installer<'_> {
                     .current_dir(&directory),
             )?;
         }
+
+        for cmd in &self.lang.prebuild {
+            self.try_command(
+                Command::new(&cmd.command)
+                    .args(&cmd.args)
+                    .current_dir(&directory),
+            )?;
+        }
+
         let src_files = fs::read_dir(&srcdir)
             .map_err(|er| {
                 self.error_msg("could not read src directory of cloned repository")

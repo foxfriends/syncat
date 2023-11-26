@@ -1,6 +1,7 @@
 use crate::config;
 use crate::dirs::libraries;
 use libloading::{Library, Symbol};
+use serde::Deserialize;
 use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -49,7 +50,7 @@ impl<'a> IntoIterator for &'a LangMap {
 }
 
 /// Information about a particular language.
-#[derive(serde::Deserialize)]
+#[derive(Deserialize)]
 pub struct Lang {
     /// The URL of the Git repository with the source for this language.
     pub source: String,
@@ -67,8 +68,20 @@ pub struct Lang {
     /// Files with these extensions, and `language` entries in stylesheets match against
     /// these.
     pub extensions: Vec<String>,
+    /// Additional commands to run before compiling the Tree-Sitter grammar.
+    #[serde(default)]
+    pub prebuild: Vec<Cmd>,
     #[serde(skip)]
     lib: RefCell<Option<Library>>,
+}
+
+#[derive(Deserialize)]
+pub struct Cmd {
+    /// The command to run
+    pub command: String,
+    /// Arguments to pass to the command
+    #[serde(default)]
+    pub args: Vec<String>,
 }
 
 impl Lang {
