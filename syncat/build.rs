@@ -6,12 +6,12 @@ use std::path::Path;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let out_dir = env::var("OUT_DIR")?;
     let out_path = Path::new(&out_dir).join("targets.rs");
-    let mut output = File::create(&out_path)?;
+    let mut output = File::create(out_path)?;
     writeln!(output, "const HOST: &str = {:?};", env::var("HOST")?)?;
     writeln!(output, "const TARGET: &str = {:?};", env::var("TARGET")?)?;
 
     let out_path = Path::new(&out_dir).join("config.tar");
-    let mut output = File::create(&out_path)?;
+    let mut output = File::create(out_path)?;
     let mut ar = tar::Builder::new(&mut output);
 
     let manifest_dir = env::var("CARGO_MANIFEST_DIR")?;
