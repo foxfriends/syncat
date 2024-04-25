@@ -128,7 +128,7 @@ impl Installer<'_> {
             .target(TARGET)
             .opt_level(3)
             .get_compiler();
-        if compiler.is_like_gnu() {
+        if compiler.is_like_gnu() || compiler.is_like_clang() {
             self.try_command(
                 compiler
                     .to_command()
