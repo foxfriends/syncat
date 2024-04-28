@@ -1,3 +1,5 @@
+#![allow(clippy::too_many_arguments)]
+
 use crate::config::Config;
 use crate::language::LangMap;
 use std::fmt::{self, Debug, Display, Formatter};
@@ -21,7 +23,7 @@ impl Display for Colorizer<'_> {
             f,
             self.source,
             &self.tree,
-            &self.config,
+            self.config,
             &self.stylesheet,
             self.lang_map,
         )
@@ -34,7 +36,7 @@ impl Debug for Colorizer<'_> {
             f,
             self.source,
             &self.tree,
-            &self.config,
+            self.config,
             &self.stylesheet,
             self.lang_map,
         )

@@ -36,11 +36,11 @@ impl Config {
     pub fn read<P: AsRef<Path>>(&self, file: P) -> crate::Result<String> {
         let path = self.base_path.join(file.as_ref());
         if path.exists() {
-            return Ok(fs::read_to_string(&path).map_err(|er| {
+            return fs::read_to_string(&path).map_err(|er| {
                 crate::Error::new("could not read config file")
                     .with_source(er)
                     .with_path(path)
-            })?);
+            });
         }
 
         let normalized = normalize(file.as_ref());
