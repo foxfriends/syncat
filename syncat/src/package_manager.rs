@@ -57,14 +57,19 @@ impl Installer<'_> {
                 .join(directory);
         }
         if directory.exists() {
-            self.try_command(Command::new("git").arg("pull").current_dir(&directory))?;
+            self.try_command(
+                Command::new("git")
+                    .arg("pull")
+                    .args(self.lang.pull_args.as_ref().unwrap_or(&vec![]))
+                    .current_dir(&directory),
+            )?;
         } else {
             self.try_command(
                 Command::new("git")
                     .arg("clone")
                     .arg(&self.lang.source)
-                    .arg("--recurse") // doubt it's needed, but why not?
                     .arg(&self.lang.library) // make sure we put it in the directory named as expected
+                    .args(self.lang.clone_args.as_ref().unwrap_or(&vec![]))
                     .current_dir(self.config.libraries()),
             )?;
         }

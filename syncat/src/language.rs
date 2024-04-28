@@ -53,9 +53,16 @@ impl<'a> IntoIterator for &'a LangMap {
 pub struct Lang {
     /// The URL of the Git repository with the source for this language.
     pub source: String,
+    /// Additional arguments to supply to `git clone` when installing this language's repository.
+    pub clone_args: Option<Vec<String>>,
+    /// Additional arguments to supply to `git clone` when updating this language's repository.
+    pub pull_args: Option<Vec<String>>,
     /// The path within the repository to the Tree-Sitter language package.
     pub path: Option<PathBuf>,
     /// The name of the directory that the repository is cloned into.
+    ///
+    /// This may be a path relative to the languages.toml file, or an absolute
+    /// path to any directory.
     pub library: PathBuf,
     /// The name of this language, as will be found in the function within the library.
     /// This can be found by running `nm libsyncat.so`, and is typically the same as the
@@ -88,7 +95,10 @@ impl Lang {
         if self.lib.borrow().is_some() {
             return Ok(true);
         }
-        let mut lib_dir = config.libraries().join(&self.library);
+        let mut lib_dir = self.library.clone();
+        if lib_dir.is_relative() {
+            lib_dir = config.libraries().join(lib_dir);
+        }
         if let Some(ref path) = self.path {
             lib_dir = lib_dir.join(path);
         }
