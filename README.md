@@ -49,7 +49,7 @@ repository.
 
 In either case, copy (or create new) those files in the appropriate configuration directory, depending on
 your operating system, and then continuing to the following sections. The appropriate directories are:
-*   Linux: `$HOME/.config/syncat/`
+*   Linux: `$HOME/.config/syncat/` (more accurately, `$XDG_CONFIG_HOME/syncat`)
 *   Mac: `$HOME/Library/Preferences/com.cameldridge.syncat/`
 *   Windows: Not officially supported
 
@@ -115,6 +115,9 @@ syncat src/*.rs
 
 # Colours the file using a specific language
 syncat -l js src/package.json
+
+# Exports the default configuration into your system's configuration directory
+syncat init
 
 # Installs (or updates) all languages listed in the `languages.toml` file
 syncat install
