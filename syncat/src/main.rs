@@ -1,99 +1,25 @@
-use clap::{ArgAction, Parser};
+use clap::Parser;
 use std::fs;
 use std::io::{self, Read};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 mod colorize;
 mod config;
-mod dirs;
 mod error;
 mod filter;
 mod language;
 mod line;
 mod meta_stylesheet;
+mod opts;
 mod package_manager;
 
 use colorize::Colorizer;
+use config::Config;
 use error::{Error, Result};
 use language::LangMap;
 use line::Line;
 use meta_stylesheet::MetaStylesheet;
-
-/// Syntax aware cat utility.
-#[derive(Parser, Debug)]
-#[clap(name = "syncat")]
-#[clap(rename_all = "kebab-case")]
-pub struct Opts {
-    /// Level of framing around each file. Repeat for bigger frame
-    #[arg(short, long, action=ArgAction::Count)]
-    frame: u8,
-
-    /// Use Git to show recent changes
-    #[arg(short, long)]
-    git: bool,
-
-    /// Squeeze consecutive blank lines into one
-    #[arg(short, long)]
-    squeeze: bool,
-
-    /// Show line endings
-    #[arg(short = 'e', long = "endings")]
-    show_line_endings: bool,
-
-    /// Number non-empty input lines (overrides -n)
-    #[arg(short = 'b', long)]
-    numbered_nonblank: bool,
-
-    /// Number all input lines
-    #[arg(short, long)]
-    numbered: bool,
-
-    /// Prints a parsed s-expression, for debugging and theme creation
-    #[arg(long)]
-    dev: bool,
-
-    /// The language to use to parse the files
-    #[arg(short, long)]
-    language: Option<String>,
-
-    /// Soft-wrap lines at a fixed width
-    #[arg(short, long)]
-    wrap: Option<usize>,
-
-    /// Files to parse and print
-    #[arg(name = "FILE")]
-    files: Vec<PathBuf>,
-
-    #[command(subcommand)]
-    command: Option<Subcommand>,
-}
-
-#[derive(Parser, Debug)]
-enum Subcommand {
-    /// Initialize the config directory by filling it with the default configuration.
-    ///
-    /// If the config directory already exists, it will not be created. An alternative path
-    /// may be specified.
-    Init {
-        #[arg(short, long)]
-        out: Option<PathBuf>,
-    },
-    /// Installs all languages listed in the `languages.toml` file. Previously installed packages
-    /// will be updated, if updates are available. This process may take a long time, depending on
-    /// how many languages are being installed.
-    Install {
-        /// If you provide a list of languages, only only those languages will be installed now. They must
-        /// be listed in the `languages.toml` file first.
-        languages: Vec<String>,
-    },
-    /// Remove an installed language.
-    Remove {
-        /// The name of the language to remove.
-        language: String,
-    },
-    /// List all installed languages.
-    List,
-}
+use opts::Opts;
 
 struct Source<'a> {
     language: Option<String>,
@@ -105,16 +31,19 @@ struct Source<'a> {
 /// it twice.
 struct Syncat {
     opts: Opts,
+    config: Config,
     meta_style: MetaStylesheet,
     lang_map: LangMap,
 }
 
 impl Syncat {
     fn new(opts: Opts) -> error::Result<Self> {
-        let lang_map = LangMap::open()?;
-        let meta_style = MetaStylesheet::from_file()?;
+        let config = opts.config.clone().map(Config::new).unwrap_or_default();
+        let lang_map = LangMap::open(&config)?;
+        let meta_style = MetaStylesheet::from_file(&config)?;
         Ok(Self {
             opts,
+            config,
             lang_map,
             meta_style,
         })
@@ -131,7 +60,7 @@ impl Syncat {
             // Language unknown, so just print
             return Ok(source);
         };
-        let Some(mut parser) = language.parser()? else {
+        let Some(mut parser) = language.parser(&self.config)? else {
             // Language not installed, so also just print
             return Ok(source);
         };
@@ -139,7 +68,8 @@ impl Syncat {
         let colorizer = Colorizer {
             source: source.as_str(),
             tree,
-            stylesheet: language.style()?,
+            config: &self.config,
+            stylesheet: language.style(&self.config)?,
             lang_map: &self.lang_map,
         };
         if self.opts.dev {
@@ -233,7 +163,7 @@ impl Syncat {
 fn try_main() -> error::Result<()> {
     let opts = Opts::parse();
     match &opts.command {
-        Some(subcommand) => package_manager::main(subcommand),
+        Some(subcommand) => package_manager::main(&opts, subcommand),
         None if opts.files.is_empty() && opts.language.is_none() => {
             // Mimic the behaviour of standard cat, printing lines as they come.
             // These lines cannot be syntax highlighted, as we do not know what the language is.

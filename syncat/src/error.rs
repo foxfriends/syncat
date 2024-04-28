@@ -2,7 +2,7 @@ use std::fmt::{self, Display, Formatter};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
-pub(crate) struct Error {
+pub struct Error {
     path: Option<PathBuf>,
     message: String,
     source: Option<Box<dyn std::error::Error + Sync + Send>>,

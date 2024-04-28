@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::language::LangMap;
 use ansi_term::Style;
 use std::convert::TryInto;
@@ -11,6 +12,7 @@ fn write_node<'s>(
     index: &mut Vec<usize>,
     tree: &mut TreeCursor,
     source: &'s str,
+    config: &Config,
     stylesheet: &Stylesheet,
     lang_map: &LangMap,
 ) -> fmt::Result {
@@ -24,7 +26,7 @@ fn write_node<'s>(
 
     if let Some(language) = language {
         // this node should be printed in another language: (kind [subtree])
-        if let Some(mut parser) = language.parser().map_err(|_| fmt::Error)? {
+        if let Some(mut parser) = language.parser(config).map_err(|_| fmt::Error)? {
             let token = tree.node().utf8_text(source.as_ref()).unwrap();
             let subtree = parser.parse(token, None).unwrap();
             write!(f, "({} [", style.paint(tree.node().kind()))?;
@@ -32,7 +34,8 @@ fn write_node<'s>(
                 f,
                 token,
                 &subtree,
-                &language.style().map_err(|_| fmt::Error)?,
+                config,
+                &language.style(config).map_err(|_| fmt::Error)?,
                 lang_map,
             )?;
             write!(f, "])")?;
@@ -70,7 +73,7 @@ fn write_node<'s>(
             write!(f, " ")?;
             query[&index[..]].add_child((&tree.node(), source));
             index.push(i);
-            write_node(f, query, index, tree, source, stylesheet, lang_map)?;
+            write_node(f, query, index, tree, source, config, stylesheet, lang_map)?;
             index.pop();
             tree.goto_next_sibling()
         } {
@@ -87,6 +90,7 @@ pub(super) fn write(
     f: &mut Formatter,
     source: &str,
     tree: &Tree,
+    config: &Config,
     stylesheet: &Stylesheet,
     lang_map: &LangMap,
 ) -> fmt::Result {
@@ -98,6 +102,7 @@ pub(super) fn write(
         &mut vec![],
         &mut tree,
         source,
+        config,
         stylesheet,
         lang_map,
     )

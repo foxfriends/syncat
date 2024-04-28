@@ -1,4 +1,4 @@
-use crate::config;
+use crate::config::Config;
 use ansi_term::{ANSIGenericString, Colour, Style as ANSIStyle};
 use std::convert::{TryFrom, TryInto};
 use syncat_stylesheet::{FromValueError, Style, Value};
@@ -169,9 +169,10 @@ impl Default for MetaStylesheet {
 }
 
 impl MetaStylesheet {
-    pub(crate) fn from_file() -> crate::Result<MetaStylesheet> {
+    pub(crate) fn from_file(config: &Config) -> crate::Result<MetaStylesheet> {
         let mut meta_stylesheet = MetaStylesheet::default();
-        if let Some(stylesheet) = config::load_stylesheet(".syncat")
+        if let Some(stylesheet) = config
+            .load_stylesheet(".syncat")
             .map_err(|er| crate::Error::new("failed to load meta stylesheet").with_source(er))?
         {
             if let Some(style) = stylesheet.style(&"line_ending".into()) {

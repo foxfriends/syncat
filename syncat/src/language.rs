@@ -1,5 +1,4 @@
-use crate::config;
-use crate::dirs::libraries;
+use crate::config::Config;
 use libloading::{Library, Symbol};
 use serde::Deserialize;
 use std::borrow::Borrow;
@@ -16,8 +15,8 @@ use tree_sitter::{Language, Parser};
 pub(crate) struct LangMap(BTreeMap<String, Lang>);
 
 impl LangMap {
-    pub(crate) fn open() -> crate::Result<Self> {
-        match config::read_to_string("languages.toml") {
+    pub(crate) fn open(config: &Config) -> crate::Result<Self> {
+        match config.read("languages.toml") {
             Ok(string) => Ok(toml::from_str(&string)
                 .map_err(|er| crate::Error::new("failed to parse language map").with_source(er))?),
             Err(..) => Ok(LangMap::default()),
@@ -85,11 +84,11 @@ pub struct Cmd {
 }
 
 impl Lang {
-    fn load(&self) -> crate::Result<bool> {
+    fn load(&self, config: &Config) -> crate::Result<bool> {
         if self.lib.borrow().is_some() {
             return Ok(true);
         }
-        let mut lib_dir = libraries().join(&self.library);
+        let mut lib_dir = config.libraries().join(&self.library);
         if let Some(ref path) = self.path {
             lib_dir = lib_dir.join(path);
         }
@@ -112,14 +111,14 @@ impl Lang {
                     .is_some()
             })
             .ok_or_else(|| crate::Error::new("language is not installed correctly."))?;
-        let library = Library::new(lib_dir.join(lib_name))
+        let library = Library::new(lib_name)
             .map_err(|er| crate::Error::new("language could not be loaded").with_source(er))?;
         *self.lib.borrow_mut() = Some(library);
         Ok(true)
     }
 
-    pub(crate) fn parser(&self) -> crate::Result<Option<Parser>> {
-        if !self.load()? {
+    pub(crate) fn parser(&self, config: &Config) -> crate::Result<Option<Parser>> {
+        if !self.load(config)? {
             return Ok(None);
         }
         let language = unsafe {
@@ -144,8 +143,9 @@ impl Lang {
         Ok(Some(parser))
     }
 
-    pub(crate) fn style(&self) -> crate::Result<Stylesheet> {
-        config::load_stylesheet(Path::new(&self.name).with_extension("syncat"))
+    pub(crate) fn style(&self, config: &Config) -> crate::Result<Stylesheet> {
+        config
+            .load_stylesheet(Path::new(&self.name).with_extension("syncat"))
             .map(|opt| opt.unwrap_or_default())
     }
 }

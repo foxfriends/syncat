@@ -1,7 +1,6 @@
-use crate::config::{dump_config, stylesheet_existence};
-use crate::dirs::{config, libraries};
+use crate::config::Config;
 use crate::language::{Lang, LangMap};
-use crate::Subcommand;
+use crate::opts::{Opts, Subcommand};
 use cc::Build;
 use std::fs;
 use std::process::Command;
@@ -11,6 +10,7 @@ use tempdir::TempDir;
 include!(concat!(env!("OUT_DIR"), "/targets.rs"));
 
 struct Installer<'a> {
+    config: &'a Config,
     name: &'a str,
     lang: &'a Lang,
 }
@@ -48,7 +48,14 @@ impl Installer<'_> {
         let temp_dir = TempDir::new("syncat").map_err(|er| self.error().with_source(er))?;
         eprintln!("Installing {}...", &self.name);
 
-        let mut directory = libraries().join(&self.lang.library);
+        let mut directory = self.config.libraries().join(&self.lang.library);
+        if directory.is_relative() {
+            directory = std::env::current_dir()
+                .map_err(|err| {
+                    crate::Error::new(format!("could not access current directory: {err}"))
+                })?
+                .join(directory);
+        }
         if directory.exists() {
             self.try_command(Command::new("git").arg("pull").current_dir(&directory))?;
         } else {
@@ -58,7 +65,7 @@ impl Installer<'_> {
                     .arg(&self.lang.source)
                     .arg("--recurse") // doubt it's needed, but why not?
                     .arg(&self.lang.library) // make sure we put it in the directory named as expected
-                    .current_dir(libraries()),
+                    .current_dir(self.config.libraries()),
             )?;
         }
         if let Some(ref path) = &self.lang.path {
@@ -153,40 +160,40 @@ impl Installer<'_> {
     }
 }
 
-fn install(name: &str, lang: &Lang) -> crate::Result<()> {
-    Installer { name, lang }.install()
+fn install(config: &Config, name: &str, lang: &Lang) -> crate::Result<()> {
+    Installer { config, name, lang }.install()
 }
 
-pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
-    let lang_map = LangMap::open()?;
-    if !libraries().exists() {
-        // Don't really care about this error, it's a sketchy side effect anyway.
-        fs::create_dir_all(libraries()).ok();
-    }
+pub(crate) fn main(opts: &Opts, command: &Subcommand) -> crate::Result<()> {
+    let config = opts.config.clone().map(Config::new).unwrap_or_default();
+    let lang_map = LangMap::open(&config)?;
 
-    match opts {
-        Subcommand::Init { out } => {
-            let out = out.clone().unwrap_or(config());
-            if out.exists() {
+    match command {
+        Subcommand::Init => {
+            if config.base_path.exists() {
                 eprintln!(
                     "syncat: {}: configuration directory already exists, will not overwrite",
-                    out.display()
+                    config.base_path.display()
                 );
                 std::process::exit(1);
             }
-            fs::create_dir_all(&out).map_err(|er| {
+            fs::create_dir_all(&config.base_path).map_err(|er| {
                 crate::Error::new("failed to create config directory")
                     .with_source(er)
-                    .with_path(&out)
+                    .with_path(&config.base_path)
                     .with_hint("ensure you have adequate permissions to create the new directory and try again")
             })?;
-            dump_config(&out)?;
+            config.dump(&config.base_path)?;
         }
         Subcommand::Install { languages } => {
             let mut any_errors = false;
+            if !config.libraries().exists() {
+                // Don't really care about this error, it's a sketchy side effect anyway.
+                fs::create_dir_all(config.libraries()).ok();
+            }
             if languages.is_empty() {
                 for (name, lang) in &lang_map {
-                    if let Err(error) = install(name, lang) {
+                    if let Err(error) = install(&config, name, lang) {
                         any_errors = true;
                         eprintln!("{}", error);
                     }
@@ -202,7 +209,7 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
                             );
                         }
                         Some(lang) => {
-                            if let Err(error) = install(language, lang) {
+                            if let Err(error) = install(&config, language, lang) {
                                 any_errors = true;
                                 eprintln!("{}", error);
                             }
@@ -216,7 +223,7 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
         }
         Subcommand::Remove { language } => {
             if let Some(lang) = lang_map.get_strict(language) {
-                let directory = libraries().join(&lang.library);
+                let directory = config.libraries().join(&lang.library);
                 fs::remove_dir_all(&directory).map_err(|er| {
                     crate::Error::new("failed to remove language")
                         .with_source(er)
@@ -230,7 +237,7 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
         }
         Subcommand::List => {
             for (name, lang) in &lang_map {
-                let directory = libraries().join(&lang.library);
+                let directory = config.libraries().join(&lang.library);
                 let state = if directory.exists() {
                     "installed"
                 } else {
@@ -238,7 +245,7 @@ pub(crate) fn main(opts: &Subcommand) -> crate::Result<()> {
                 };
 
                 use crate::config::Existence::*;
-                let (stylesheet, existence) = stylesheet_existence(&lang.name);
+                let (stylesheet, existence) = config.stylesheet_exists(&lang.name);
                 let stylesheet_state = match existence {
                     Configured => " (found)",
                     Builtin => " (default)",
