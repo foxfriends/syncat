@@ -4,7 +4,7 @@ description = "Parser for Syncat Stylesheets."
 homepage = "https://github.com/foxfriends/syncat"
 repository = "https://github.com/foxfriends/syncat"
 version = "3.5.0"
-authors = ["Cameron Eldridge <cameldridge+git@gmail.com>"]
+authors = ["Cameron Eldridge <cam.eldridge@gmail.com>"]
 license = "MIT"
 edition = "2018"
 
