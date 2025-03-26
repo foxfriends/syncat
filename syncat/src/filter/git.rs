@@ -1,5 +1,5 @@
-use crate::line::{Line, LineChange};
 use crate::Opts;
+use crate::line::{Line, LineChange};
 use git2::{DiffOptions, IntoCString, Repository};
 use std::collections::HashMap;
 use std::fs;

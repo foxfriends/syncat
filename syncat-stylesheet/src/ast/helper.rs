@@ -23,7 +23,7 @@ macro_rules! children {
                 return Err($crate::Error::invalid(
                     concat!("children(", $name, ")"),
                     name,
-                ))
+                ));
             }
         }
     }};

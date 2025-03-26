@@ -1,4 +1,4 @@
-use super::{helper::*, Color, Variable};
+use super::{Color, Variable, helper::*};
 use crate::Matches;
 use enquote::unquote;
 use std::collections::BTreeMap;

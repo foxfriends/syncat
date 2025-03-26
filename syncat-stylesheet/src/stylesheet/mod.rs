@@ -1,6 +1,6 @@
+use crate::Style;
 use crate::ast::{Rule, Stylesheet as Ast, Value};
 use crate::resolver::{FsResolver, Resolver};
-use crate::Style;
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::str::FromStr;

@@ -1,4 +1,4 @@
-use super::{helper::*, NodeKind, NodeModifier};
+use super::{NodeKind, NodeModifier, helper::*};
 use tree_sitter::TreeCursor;
 
 #[derive(Clone, Debug)]

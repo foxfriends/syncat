@@ -3,7 +3,7 @@ use std::path::Path;
 use std::str::FromStr;
 use tree_sitter::TreeCursor;
 
-use super::{helper::*, Declaration, Import, Rule};
+use super::{Declaration, Import, Rule, helper::*};
 
 #[derive(Clone, Debug, Default)]
 pub struct Stylesheet {

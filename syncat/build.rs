@@ -1,5 +1,5 @@
 use std::env;
-use std::fs::{read_dir, File};
+use std::fs::{File, read_dir};
 use std::io::Write;
 use std::path::Path;
 

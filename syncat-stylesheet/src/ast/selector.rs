@@ -1,4 +1,4 @@
-use super::{helper::*, Node, NodeModifier};
+use super::{Node, NodeModifier, helper::*};
 use crate::{Matches, Query, QuerySlice};
 use tree_sitter::TreeCursor;
 

@@ -1,5 +1,5 @@
-use crate::line::Line;
 use crate::Opts;
+use crate::line::Line;
 
 pub fn line_numbers<'a>(
     &Opts {

@@ -1,4 +1,4 @@
-use super::{helper::*, Selector, Style, Value};
+use super::{Selector, Style, Value, helper::*};
 use crate::{Matches, Query};
 use std::collections::BTreeMap;
 use tree_sitter::TreeCursor;

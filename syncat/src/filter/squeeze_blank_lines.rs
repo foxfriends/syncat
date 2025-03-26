@@ -1,5 +1,5 @@
-use crate::line::Line;
 use crate::Opts;
+use crate::line::Line;
 
 pub fn squeeze_blank_lines(&Opts { squeeze, .. }: &Opts, source: Vec<Line>) -> Vec<Line> {
     if squeeze {

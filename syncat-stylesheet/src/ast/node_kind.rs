@@ -1,4 +1,4 @@
-use super::{helper::*, Selector};
+use super::{Selector, helper::*};
 use enquote::unquote;
 use regex::{Regex, RegexBuilder};
 use tree_sitter::TreeCursor;
@@ -58,7 +58,7 @@ fn unquote_regex(string: &str) -> Result<Regex, regex::Error> {
                 return Err(regex::Error::Syntax(format!(
                     "Unsupported regular expression flag {}",
                     other
-                )))
+                )));
             }
         };
     }
