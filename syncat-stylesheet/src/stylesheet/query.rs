@@ -108,7 +108,7 @@ impl<'a> Index<&[usize]> for Query<'a> {
     }
 }
 
-impl<'a> IndexMut<&[usize]> for Query<'a> {
+impl IndexMut<&[usize]> for Query<'_> {
     fn index_mut(&mut self, index: &[usize]) -> &mut Self::Output {
         if index.is_empty() {
             self
