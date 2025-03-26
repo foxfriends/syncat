@@ -13,6 +13,6 @@ pub use style::{FromValueError, Style, Value};
 use stylesheet::{Matches, QuerySlice};
 pub use stylesheet::{Query, Stylesheet};
 
-extern "C" {
+unsafe extern "C" {
     fn tree_sitter_syncat_stylesheet() -> Language;
 }

@@ -6,7 +6,7 @@ repository = "https://github.com/foxfriends/syncat"
 version = "3.5.0"
 authors = ["Cameron Eldridge <cam.eldridge@gmail.com>"]
 license = "MIT"
-edition = "2018"
+edition = "2024"
 
 [build-dependencies]
 cc = "1.0"

@@ -5,7 +5,7 @@ version = "0.0.1"
 keywords = ["incremental", "parsing", "syncat-stylesheet"]
 categories = ["parsing", "text-editors"]
 repository = "https://github.com/tree-sitter/tree-sitter-syncat-stylesheet"
-edition = "2018"
+edition = "2024"
 license = "MIT"
 
 build = "bindings/rust/build.rs"

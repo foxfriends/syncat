@@ -73,7 +73,7 @@ impl Installer<'_> {
                     .current_dir(self.config.libraries()),
             )?;
         }
-        if let Some(ref path) = &self.lang.path {
+        if let Some(path) = &self.lang.path {
             directory = directory.join(path);
         }
         let srcdir = directory.join("src");
