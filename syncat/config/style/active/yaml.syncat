@@ -1,0 +1,25 @@
+import "../colours.syncat";
+
+block_mapping_pair ":",
+block_sequence_item "-",
+block_scalar "|" {
+  color: $operator;
+}
+
+double_quote_scalar,
+single_quote_scalar,
+string_scalar,
+block_scalar {
+  color: $string;
+}
+
+null_scalar,
+integer_scalar,
+float_scalar,
+boolean_scalar {
+  color: $value;
+}
+
+comment {
+  color: $comment;
+}
