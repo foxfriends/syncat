@@ -1,0 +1,49 @@
+import "../colours.syncat";
+
+block > identifier {
+  color: $keyword;
+}
+
+attribute > identifier {
+  color: $meta;
+}
+
+comment {
+  color: $comment;
+  italic: true;
+}
+
+variable_expr > identifier & "var",
+variable_expr > identifier & "local",
+variable_expr > identifier & "module",
+variable_expr > identifier & "data",
+variable_expr > identifier & "path",
+{
+  color: $name;
+}
+
+function_call > identifier {
+  color: $function;
+}
+
+attribute > "=" {
+  color: $operator;
+}
+
+null_lit,
+bool_lit,
+numeric_lit {
+  color: $value;
+}
+
+template_interpolation_start,
+template_interpolation_end {
+  color: $interpolation;
+}
+
+quoted_template_start,
+quoted_template_end,
+template_literal,
+string_lit {
+  color: $string;
+}
