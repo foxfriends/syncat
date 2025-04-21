@@ -148,7 +148,7 @@ impl Lang {
 
         let mut parser = Parser::new();
         parser
-            .set_language(language)
+            .set_language(&language)
             .map_err(|er| crate::Error::new("tree sitter").with_source(er))?;
         Ok(Some(parser))
     }

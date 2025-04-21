@@ -76,6 +76,12 @@ name = "haskell"
 library = "tree-sitter-haskell"
 extensions = ["hs"]
 
+[hcl]
+source = "https://github.com/tree-sitter-grammars/tree-sitter-hcl"
+name = "hcl"
+library = "tree-sitter-hcl"
+extensions = ["hcl", "tf"]
+
 [html]
 source = "https://github.com/tree-sitter/tree-sitter-html"
 name = "html"
