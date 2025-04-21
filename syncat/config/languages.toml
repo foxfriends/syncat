@@ -246,7 +246,7 @@ library = "tree-sitter-verilog"
 extensions = ["v"]
 
 [yaml]
-source = "https://github.com/ikatyang/tree-sitter-yaml"
+source = "https://github.com/tree-sitter-grammars/tree-sitter-yaml"
 name = "yaml"
 library = "tree-sitter-yaml"
 extensions = ["yaml", "yml"]
