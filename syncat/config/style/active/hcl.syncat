@@ -10,7 +10,6 @@ attribute > identifier {
 
 comment {
   color: $comment;
-  italic: true;
 }
 
 variable_expr > identifier & "var",

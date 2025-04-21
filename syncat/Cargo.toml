@@ -8,7 +8,7 @@ homepage = "https://github.com/foxfriends/syncat"
 authors = ["Cameron Eldridge <cam.eldridge@gmail.com>"]
 edition = "2024"
 name = "syncat"
-version = "3.8.1"
+version = "3.8.2"
 categories = ["command-line-utilities"]
 
 [features]
