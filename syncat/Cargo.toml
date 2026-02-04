@@ -19,7 +19,7 @@ vendored-libgit2 = ["git2/vendored-libgit2"]
 [dependencies]
 ansi_term = "0.12.1"
 directories = "2.0.2"
-git2 = "0.16.1"
+git2 = "0.20.4"
 hex = "0.4.2"
 lazy_static = "1.4.0"
 regex = "1.5.5"
